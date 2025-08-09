@@ -12,7 +12,8 @@ gem 'rails', '~> 8.0', '>= 8.0.2'
 gem "sprockets-rails"
 
 # Use postgresql as the database for Active Record
-gem "pg", "~> 1.1"
+# gem "pg", "~> 1.1"
+gem 'pg', '~> 1.4'
 
 # Use the Puma web server [https://github.com/puma/puma]
 # gem "puma", "~> 5.0"
@@ -73,3 +74,11 @@ group :test do
   gem "selenium-webdriver"
   gem "webdrivers"
 end
+
+gem "inertia_rails", "~> 3.10"
+
+gem "vite_rails", "~> 3.0"
+
+gem "tailwindcss-ruby", "~> 4.1"
+
+gem "tailwindcss-rails", "~> 4.3"

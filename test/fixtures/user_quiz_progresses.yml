@@ -1,0 +1,17 @@
+# Read about fixtures at https://api.rubyonrails.org/classes/ActiveRecord/FixtureSet.html
+
+one:
+  user: one
+  quiz: one
+  questions_answered: 1
+  questions_correct: 1
+  total_points: 1
+  completed: false
+
+two:
+  user: two
+  quiz: two
+  questions_answered: 1
+  questions_correct: 1
+  total_points: 1
+  completed: false
