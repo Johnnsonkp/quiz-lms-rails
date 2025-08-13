@@ -34,4 +34,8 @@ class QuizFacade < ApplicationController
     }
   end
 
+  def formatted_questions
+
+  end
+
 end

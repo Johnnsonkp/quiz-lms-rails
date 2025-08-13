@@ -1,16 +1,25 @@
-import React, { useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 
+import FileUpload from '../components/fileUpload/FileUpload';
+import FileUploadButton from '../components/fileUpload/FileUploadButton';
+import SingleQuestionComponent from '../components/cards/SingleQuestionComp';
+// import QuizPage from './QuizPage';
+// import SingleQuestionComponent from '../components/SingleQuestionComponent';
 import SubjectCards from '../components/cards/SubjectCard';
+import lmsBannerImg from '/assets/lms-banner.jpg';
 
-function Dashboard({ categories, quizzes }: any) {
+function Dashboard({ categories, quiz_preview }: any) {
   const [openSidebar, setOpenSidebar] = useState(false);
   const [activeSection, setActiveSection] = useState('dashboard');
   const [isMobile, setIsMobile] = useState(false);
-  const [quizTopics, setQuizTopics] = useState<any[]>([]);
   const [selectedTopic, setSelectedTopic] = useState<string | null>(null);
   const [selectedSubject, setSelectedSubject] = useState<any | null>(null);
+  const [quizData, setQuizData] = useState<any>(null);
+  const [showForm, setShowForm] = useState(false);
 
   useEffect(() => {
+    console.log("quiz_preview:", quiz_preview);
+    
     const handleResize = () => {
         setIsMobile(window.innerWidth < 768);
       };
@@ -23,17 +32,43 @@ function Dashboard({ categories, quizzes }: any) {
     if (topicName) {
       setSelectedTopic(topicName);
       setSelectedSubject(null);
+      setActiveSection(topicName);
     }
   };
 
-  const handleSubjectClick = (subject: any) => {
+  const handleSubjectClick = async (subject: any) => {
+    console.log('Subject clicked:', subject);
     setSelectedSubject(subject);
     setActiveSection('quiz');
+
+    try {
+      const response = await fetch(`/dashboard/${selectedTopic}`, {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+          'Accept': 'application/json'
+        }
+      });
+
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+
+      const data = await response.json();
+      console.log('Topic data:', data);
+      setQuizData(data);
+      console.log('Subject quizzes:', data);
+      return data;
+    } catch (error) {
+      console.error('Error fetching topic data:', error);
+      return null;
+    }
   };
 
   const handleBackToDashboard = () => {
     setSelectedSubject(null);
-    setActiveSection(selectedTopic || 'dashboard');
+    setSelectedTopic(null);
+    setActiveSection('dashboard');
   };
 
   return (
@@ -69,17 +104,16 @@ function Dashboard({ categories, quizzes }: any) {
             <li className="pt-4">
               <ul className="space-y-2">
                 {categories.map((topic: any) => (
-                  <li key={topic}>
+                  <li key={topic.topic} className="relative">
                     <a
                       href="#"
                       onClick={(e) => {
                         e.preventDefault();
-                        handleTopicClick(topic)
-                        setActiveSection(topic);
+                        handleTopicClick(topic.topic);
                         setOpenSidebar(false);
                       }}
                       className={`flex items-center space-x-3 px-4 py-2 hover:bg-gray-100 rounded-lg transition-colors ${
-                        activeSection === topic ? 'bg-gray-100' : ''
+                        activeSection === topic.topic ? 'bg-gray-100' : ''
                       }`}
                     >
                       <div className="flex items-center space-x-3">
@@ -91,7 +125,7 @@ function Dashboard({ categories, quizzes }: any) {
                             openSidebar || !isMobile ? 'block opacity-100' : 'hidden opacity-0'
                           }`}
                         >
-                          {topic}
+                          {topic.topic}
                         </span>
                       </div>
                     </a>
@@ -105,89 +139,104 @@ function Dashboard({ categories, quizzes }: any) {
 
       {/* Main Content */}
       <main className="flex-1 p-4 md:p-6 overflow-y-auto border-2 w-[100%] bg-gray-100">
-        {/* Mobile Header */}
-        {isMobile && (
-          <div className="md:hidden flex justify-between items-center mb-4">
-            <h1 className="text-xl font-bold text-gray-800">E-Commerce</h1>
-            <button onClick={() => setOpenSidebar(!openSidebar)} className="p-2 rounded-full hover:bg-gray-200">
-              <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 6h16M4 12h16m-7 6h7" />
-              </svg>
-            </button>
-          </div>
-        )}
-
 
         {/* Default Dashboard View */}
         {!selectedTopic && activeSection === 'dashboard' && (
           <section className="space-y-6">
-            <header>
-              <h1 className="text-left !text-lg font-bold text-gray-800">Welcome Back!</h1>
-              <p className="text-left text-gray-600">Here's what's happening with your quiz journey today.</p>
+            <header className='flex justify-between items-center'>
+              <h1 className="text-left !text-xl font-bold text-gray-800">Welcome Back!</h1>
+              {/* <p className="text-left text-gray-600">Here's what's happening with your quiz journey today.</p> */}
+
+              <FileUploadButton setAction={() => setShowForm(!showForm)} />
+              { showForm && <FileUpload /> }
             </header>
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
               <div className="bg-white p-4 rounded-lg shadow-md">
                 <h2 className="text-lg font-semibold text-gray-700">Available Topics</h2>
-                <p className="text-2xl font-bold text-green-600">{quizTopics.length}</p>
+                <p className="text-2xl font-bold text-green-600">{categories.length}</p>
               </div>
               <div className="bg-white p-4 rounded-lg shadow-md">
                 <h2 className="text-lg font-semibold text-gray-700">Total Subjects</h2>
                 <p className="text-2xl font-bold text-yellow-600">
-                  {quizTopics.reduce((total, topic) => total + topic.subjects.length, 0)}
+                  {quiz_preview ? quiz_preview.length : 0}
                 </p>
               </div>
               <div className="bg-white p-4 rounded-lg shadow-md">
                 <h2 className="text-lg font-semibold text-gray-700">Total Questions</h2>
-                {/* <p className="text-2xl font-bold text-blue-600">
-                  {quizTopics.reduce((total, topic) => 
-                    total + topic.subjects.reduce((subTotal, subject) => 
-                      subTotal + subject.concepts.reduce((conceptTotal, concept) => 
-                        conceptTotal + concept.questions.length, 0), 0), 0)}
-                </p> */}
+                <p className="text-2xl font-bold text-blue-600">-</p>
               </div>
             </div>
           </section>
         )}
 
 
-        {/* {selectedSubject && activeSection === 'quiz' && (
+        {/* Quiz View - Show quiz component for selected subject */}
+        {selectedSubject && activeSection === 'quiz' && quizData && (
           <SingleQuestionComponent
-            subject={selectedSubject}
+            quizData={quizData}
+            selectedSubject={selectedSubject}
             onBack={handleBackToDashboard}
           />
-        )} */}
+        )}
+
+        {/* Topic View - Show subjects for selected topic */}
+        {selectedTopic && activeSection === selectedTopic && (
+          <section className="space-y-6">
+            <header 
+               style={{
+                // backgroundImage: `url(${quiz_preview.find((quiz: any) => quiz.topic === selectedTopic)?.img})`,
+                backgroundImage: `url(${lmsBannerImg})`,
+                backgroundSize: 'cover',
+                backgroundPosition: 'center center',
+                // filter: 'brightness(0.7) blur(1px)',
+                filter: 'blur(1px)',
+                // height: '20%',
+                // width: '80%',
+                height: '130px',
+                // position: 'absolute',
+                zIndex: 1,
+              }}
+              className={`flex items-center space-x-4 border-2 h-[130px] overflow-hidden rounded-md`}
+            >
+
+              <button
+                onClick={handleBackToDashboard}
+                className="p-2 rounded-full hover:bg-gray-200 transition-colors"
+              >
+                <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 19l-7-7 7-7" />
+                </svg>
+              </button>
+              <div>
+                <h1 className="text-left !text-lg font-bold text-gray-800">{selectedTopic}</h1>
+                <p className="text-left text-gray-600">
+                  {categories.find((cat: any) => cat.topic === selectedTopic)?.description}
+                </p>
+              </div>
+
+            </header>
+
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+              {quiz_preview && quiz_preview.map((quiz: any, index: number) => (
+                quiz.topic === selectedTopic &&
+                <SubjectCards 
+                    key={index}
+                    titles={quiz.titles}
+                    subject={quiz.subject}
+                    selectedTopicData={"test"}
+                    subjectImg={quiz.img}
+                    onSubjectClick={handleSubjectClick}
+                />
+              ))}
+            </div>
 
 
-        {categories && categories[0] && (
-          (() => {
-            // const selectedTopicData = quizTopics.find(topic => topic.topic === selectedTopic);
-            // if (!selectedTopicData) return null;
-            
-            return (
-              <section className="space-y-6">
-                <header>
-                  <h1 className="text-left !text-lg font-bold text-gray-800">{selectedTopic}</h1>
-                  {/* <h1 className="text-left !text-lg font-bold text-gray-800">{categories[0]}</h1> */}
-                  <p className="text-left text-gray-600">Choose a subject to start practicing questions.</p>
-                </header>
-
-                {/* <SubjectCards 
-                  selectedTopicData={selectedTopicData} 
-                  onSubjectClick={handleSubjectClick}
-                /> */}
-
-                {quizzes && quizzes.map((quiz: any) => (
-                    quiz.topic == selectedTopic && (
-                      // <p>{quiz.subject}</p>
-                      <SubjectCards 
-                        selectedTopicData={quiz} 
-                        onSubjectClick={handleSubjectClick}
-                      />
-                    )
-                ))}
-              </section>
-            );
-          })()
+            {quiz_preview && quiz_preview.filter((quiz: any) => quiz.topic === selectedTopic).length === 0 && (
+              <div className="text-center py-8">
+                <p className="text-gray-500">No subjects available for this topic.</p>
+              </div>
+            )}
+          </section>
         )}
 
        </main>
