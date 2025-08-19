@@ -1,4 +1,4 @@
-import React from 'react'
+import ProgressBar from "../controls/ProgressBar";
 
 function SingleComponentHeader(
   {
@@ -33,23 +33,14 @@ function SingleComponentHeader(
           {/* <h1 className="!text-4xl font-bold text-gray-800 mb-2">{subject.subject}</h1> */}
           {/* <p className="text-gray-600">Navigate through {totalQuestions} questions</p> */}
         </div>
-
-
       </div>
 
         {/* Progress Bar */}
-        <div className="mb-4">
-          <div className="flex justify-between text-sm text-gray-600 mb-2">
-            <span>Progress: {calculateProgress()}%</span>
-            <span>Question {currentQuestionIndex + 1} of {totalQuestions}</span>
-          </div>
-          <div className="w-full bg-gray-200 rounded-full h-2">
-            <div 
-              className="bg-blue-600 h-2 rounded-full transition-all duration-300"
-              style={{ width: `${((currentQuestionIndex + 1) / totalQuestions) * 100}%` }}
-            ></div>
-          </div>
-        </div>
+        <ProgressBar 
+          currentQuestionIndex={currentQuestionIndex}
+          totalQuestions={totalQuestions}
+          calculateProgress={calculateProgress}
+        />
       </div>
   )
 }

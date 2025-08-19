@@ -1,12 +1,12 @@
 import { useEffect, useState } from 'react';
 
+import DashboardBanner from '../components/header/dashboardHeader/DashboardBanner';
 import FileUpload from '../components/fileUpload/FileUpload';
 import FileUploadButton from '../components/fileUpload/FileUploadButton';
 import SingleQuestionComponent from '../components/cards/SingleQuestionComp';
 // import QuizPage from './QuizPage';
 // import SingleQuestionComponent from '../components/SingleQuestionComponent';
 import SubjectCards from '../components/cards/SubjectCard';
-import lmsBannerImg from '/assets/lms-banner.jpg';
 
 function Dashboard({ categories, quiz_preview }: any) {
   const [openSidebar, setOpenSidebar] = useState(false);
@@ -138,7 +138,7 @@ function Dashboard({ categories, quiz_preview }: any) {
       </aside>
 
       {/* Main Content */}
-      <main className="flex-1 p-4 md:p-6 overflow-y-auto border-2 w-[100%] bg-gray-100">
+      <main className="flex-1 p-4 md:p-6 overflow-y-auto  w-[100%] bg-gray-100">
 
         {/* Default Dashboard View */}
         {!selectedTopic && activeSection === 'dashboard' && (
@@ -182,39 +182,12 @@ function Dashboard({ categories, quiz_preview }: any) {
         {/* Topic View - Show subjects for selected topic */}
         {selectedTopic && activeSection === selectedTopic && (
           <section className="space-y-6">
-            <header 
-               style={{
-                // backgroundImage: `url(${quiz_preview.find((quiz: any) => quiz.topic === selectedTopic)?.img})`,
-                backgroundImage: `url(${lmsBannerImg})`,
-                backgroundSize: 'cover',
-                backgroundPosition: 'center center',
-                // filter: 'brightness(0.7) blur(1px)',
-                filter: 'blur(1px)',
-                // height: '20%',
-                // width: '80%',
-                height: '130px',
-                // position: 'absolute',
-                zIndex: 1,
-              }}
-              className={`flex items-center space-x-4 border-2 h-[130px] overflow-hidden rounded-md`}
-            >
 
-              <button
-                onClick={handleBackToDashboard}
-                className="p-2 rounded-full hover:bg-gray-200 transition-colors"
-              >
-                <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 19l-7-7 7-7" />
-                </svg>
-              </button>
-              <div>
-                <h1 className="text-left !text-lg font-bold text-gray-800">{selectedTopic}</h1>
-                <p className="text-left text-gray-600">
-                  {categories.find((cat: any) => cat.topic === selectedTopic)?.description}
-                </p>
-              </div>
-
-            </header>
+            <DashboardBanner 
+              handleBackToDashboard={handleBackToDashboard}
+              selectedTopic={selectedTopic}
+              categories={categories}
+            />
 
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
               {quiz_preview && quiz_preview.map((quiz: any, index: number) => (
@@ -223,6 +196,10 @@ function Dashboard({ categories, quiz_preview }: any) {
                     key={index}
                     titles={quiz.titles}
                     subject={quiz.subject}
+                    description={quiz.description.filter((a: string) => a.includes(quiz.subject))}
+                    topic={selectedTopic}
+                    // difficulty={quiz.difficulty[index]}
+                    tags={quiz.tags}
                     selectedTopicData={"test"}
                     subjectImg={quiz.img}
                     onSubjectClick={handleSubjectClick}

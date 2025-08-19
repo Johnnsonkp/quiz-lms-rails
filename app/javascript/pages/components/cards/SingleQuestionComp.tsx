@@ -18,6 +18,7 @@ export default function SingleQuestionComponent({ quizData, selectedSubject, onB
     : allQuestions;
     
   const currentQuestion = allQuestions[currentQuestionIndex];
+  const currentQuestionHint = allQuestions[currentQuestionIndex].hint;
   const totalQuestions = allQuestions.length;
 
   // If no questions are available, show loading or empty state
@@ -93,6 +94,7 @@ export default function SingleQuestionComponent({ quizData, selectedSubject, onB
   }
 
   useEffect(() => {
+    console.log(quizData.questions[0].hint)
     handleCompletion()
   }, [calculateProgress]);
 
@@ -142,6 +144,7 @@ export default function SingleQuestionComponent({ quizData, selectedSubject, onB
           showResult={showResults[currentQuestion.id] || false}
           questionNumber={currentQuestionIndex + 1}
           totalQuestions={totalQuestions}
+          hint={currentQuestionHint}
         />
 
       </div>

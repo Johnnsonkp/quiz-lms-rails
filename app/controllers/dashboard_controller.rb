@@ -6,8 +6,17 @@ class DashboardController < ApplicationController
   skip_before_action :verify_authenticity_token, only: [:file_upload_extract]
 
   def index
-    # render inertia: 'dashboard/Dashboard', props: { categories: @categories, quizzes: @result }
-    render inertia: 'dashboard/Dashboard', props: { categories: @categories, quiz_preview: @quiz_preview }
+    # puts "Categories: #{@categories.inspect}" if Rails.env.development?
+    # puts "Quiz Preview: #{@quiz_preview.inspect}" if Rails.env.development?
+    
+    # Provide fallback data if collections are empty
+    @categories = [] if @categories.nil?
+    @quiz_preview = [] if @quiz_preview.nil?
+    
+    render inertia: 'dashboard/Dashboard', props: { 
+      categories: @categories, 
+      quiz_preview: @quiz_preview 
+    }
   end
 
 
@@ -241,7 +250,10 @@ class DashboardController < ApplicationController
       desc = Quiz.where(topic: topic).pluck(:description).first
       { topic: topic, description: desc }
     end
-    puts "Categories: #{@categories.inspect}" if Rails.env.development?
+    puts "Setting Categories: #{@categories.inspect}" if Rails.env.development?
+  rescue => e
+    Rails.logger.error "Error loading categories: #{e.message}"
+    @categories = []
   end
 
 
@@ -259,16 +271,25 @@ class DashboardController < ApplicationController
     # Group quizzes by topic and subject, then collect titles for each subject
     @quiz_preview = Quiz.all.group_by(&:topic).map do |topic, topic_quizzes|
       subjects = topic_quizzes.group_by(&:subject).map do |subject, subject_quizzes|
+         puts "Setting Quiz topic_quizzes: #{topic_quizzes.inspect}" if Rails.env.development?
+         puts "Setting Quiz topic: #{topic.inspect}" if Rails.env.development?
         {
           topic: topic,
           subject: subject,
           titles: subject_quizzes.map(&:title),
+          description: topic_quizzes.map(&:description),
+          # difficulty: Quiz.where(topic: topic).questions.map(&:difficulty),
+          # tags: topic_quizzes.map(&:tags),
           img: get_pic_from_unsplash(subject),
         }
       end
       subjects
     end.flatten
     
+    # puts "Setting Quiz Preview: #{@quiz_preview.inspect}" if Rails.env.development?
+  rescue => e
+    Rails.logger.error "Error loading quiz preview: #{e.message}"
+    @quiz_preview = []
   end
 
 
