@@ -7,6 +7,8 @@ import SingleQuestionComponent from '../components/cards/SingleQuestionComp';
 // import QuizPage from './QuizPage';
 // import SingleQuestionComponent from '../components/SingleQuestionComponent';
 import SubjectCards from '../components/cards/SubjectCard';
+// import quizIcon from '../../../assets/quiz-icon.png';
+import quizIcon from '../../assets/quiz-icon.png'
 
 function Dashboard({ categories, quiz_preview }: any) {
   const [openSidebar, setOpenSidebar] = useState(false);
@@ -85,7 +87,8 @@ function Dashboard({ categories, quiz_preview }: any) {
               openSidebar || !isMobile ? 'opacity-100 block' : 'opacity-0 hidden'
             }`}
           >
-            LearnNest
+            <img src={quizIcon} alt="Quiz Logo" className="w-8 h-8 inline-block ml-2" />
+            QLearn
           </h1>
           <button
             onClick={() => setOpenSidebar(!openSidebar)}
