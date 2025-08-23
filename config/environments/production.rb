@@ -9,6 +9,8 @@ Rails.application.configure do
   
   # Allow additional Railway.app domains if they change
   config.hosts << /.*\.up\.railway\.app/
+  config.hosts << "quiz-lms-rails-production.up.railway.app"
+  config.hosts << "https://quiz-lms-rails-production.up.railway.app/"
   
   # Allow custom domains if you add them later
   # config.hosts << "your-custom-domain.com"

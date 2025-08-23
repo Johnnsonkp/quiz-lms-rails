@@ -18,5 +18,10 @@ module RubyRailsPostgres
     #
     # config.time_zone = "Central Time (US & Canada)"
     # config.eager_load_paths << Rails.root.join("extras")
+
+    # Configured production host
+    config.hosts << /.*\.up\.railway\.app/
+    config.hosts << "quiz-lms-rails-production.up.railway.app"
+    config.hosts << "https://quiz-lms-rails-production.up.railway.app/"
   end
 end
