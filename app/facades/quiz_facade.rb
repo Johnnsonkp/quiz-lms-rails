@@ -1,3 +1,5 @@
+require "pdf-reader"
+
 class QuizFacade < ApplicationController
   def initialize(quiz)
     @quiz = quiz

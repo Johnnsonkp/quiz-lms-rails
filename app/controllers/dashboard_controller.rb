@@ -155,7 +155,15 @@ class DashboardController < ApplicationController
 
     prompt = build_quiz_prompt(file_text, filename)
 
-    quiz_data = OpenAI::Client.new.chat(
+    # Get API key from Rails credentials or environment variable
+    api_key = Rails.application.credentials.openai_api_key || ENV['OPENAI_API_KEY']
+    
+    unless api_key.present?
+      Rails.logger.error "OpenAI API key not found"
+      return nil
+    end
+
+    quiz_data = OpenAI::Client.new(access_token: api_key).chat(
       parameters: {
         model: "gpt-4o",
         messages: [
@@ -189,7 +197,7 @@ class DashboardController < ApplicationController
 
 
   def build_quiz_prompt(file_text, filename)
-     # Truncate content if too long (OpenAI has token limits)
+     # Truncate content if too long
     truncated_text = file_text.length > 8000 ? file_text[0..8000] + "..." : file_text
 
     json_quiz_example = {
@@ -208,6 +216,7 @@ class DashboardController < ApplicationController
               "Wrong option 2",
               "Wrong option 3"
             ],
+            "code_snippet": "[Optional code snippet related to the question]",
             "hint": "[Optional helpful hint]",
             "explanation": "[Explanation of why this answer is correct]",
             "difficulty": "[easy|intermediate|advanced]",
@@ -223,23 +232,22 @@ class DashboardController < ApplicationController
 
     Requirements:
     - Generate 5-15 questions based on content complexity
-    - If any quiz is related to an existing topic (#{categories} act as topics for each quiz), use that topic for the quiz topic
+    - If any quiz is related to an existing topic (#{@categories} act as topics for each quiz), use that topic for the quiz topic
     - create a mix of multiple choice or long response questions
     - Each mutiple choice question must have exactly 3 incorrect answers
     - Each long response should provide 1 option providing contentext / structure on how to answer the question
-    - Each long response should also proivde a clear answer to the question
+    - Each long response should also provide a clear answer to the question
     - Use meaningful external_id format like: quiz_subject_001, etc.
-    - Set appropriate difficulty levels based on content complexity
+    - Set appropriate difficulty levels to intermediate but throw in some advanced questions
     - Include relevant tags that describe the question topic
     - Set realistic time estimates (30-120 seconds per question)
     - Provide clear explanations for each correct answer
     - Ensure questions test different aspects: comprehension, application, analysis
+    - Provide optional code snippets for the question for more context, format the code snippets as needed
 
     Text content to analyze:
     #{truncated_text}"
   end
-
-
 
   def categories
     @categories = Quiz.distinct.pluck(:topic).map do |topic|
