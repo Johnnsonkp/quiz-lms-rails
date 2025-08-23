@@ -1,5 +1,6 @@
 import HintButton from '../buttons/HintButton';
 import QuestionOptions from './QuestionOptions';
+import { SingleQuestionCardProps } from '../../../types/dashboard';
 
 export function SingleQuestionCard({ 
   question, 
@@ -9,15 +10,18 @@ export function SingleQuestionCard({
   questionNumber,
   totalQuestions,
   hint 
-}: any) {
+}: SingleQuestionCardProps) {
 
   return (
-
     <div className="flex bg-white rounded-lg shadow-lg overflow-hidden mx-auto max-w-sm lg:max-w-4xl">
 
       {/* Image section */}
       <div className="hidden lg:block lg:w-1/2 bg-cover"
-          style={{ backgroundImage: "url('https://images.unsplash.com/photo-1546514714-df0ccc50d7bf?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=crop&w=667&q=80')" }}>
+          style={{ 
+            // backgroundImage: "url('https://images.unsplash.com/photo-1546514714-df0ccc50d7bf?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=crop&w=667&q=80')" 
+            backgroundImage: `url(${question?.image})` 
+          }}
+      >
       </div>
 
       {/* Quiz card */}

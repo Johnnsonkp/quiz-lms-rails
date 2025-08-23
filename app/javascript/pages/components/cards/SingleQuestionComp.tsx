@@ -14,7 +14,7 @@ export default function SingleQuestionComponent({ quizData, selectedSubject, onB
   
   // Filter questions by selected subject if needed, or use all questions
   const subjectQuestions = selectedSubject 
-    ? allQuestions.filter((q: any) => q.subject === selectedSubject.subject)
+    ? allQuestions.filter((q: { subject: string }) => q.subject === selectedSubject.subject)
     : allQuestions;
     
   const currentQuestion = allQuestions[currentQuestionIndex];

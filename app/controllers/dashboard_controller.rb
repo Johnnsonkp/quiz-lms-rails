@@ -6,10 +6,6 @@ class DashboardController < ApplicationController
   skip_before_action :verify_authenticity_token, only: [:file_upload_extract]
 
   def index
-    # puts "Categories: #{@categories.inspect}" if Rails.env.development?
-    # puts "Quiz Preview: #{@quiz_preview.inspect}" if Rails.env.development?
-    
-    # Provide fallback data if collections are empty
     @categories = [] if @categories.nil?
     @quiz_preview = [] if @quiz_preview.nil?
     
@@ -49,7 +45,8 @@ class DashboardController < ApplicationController
             tags: question.tags,
             path: question.path,
             quiz_title: quiz.title,
-            subject: quiz.subject
+            subject: quiz.subject,
+            image: get_pic_from_unsplash(quiz.subject)
           }
         end
       end

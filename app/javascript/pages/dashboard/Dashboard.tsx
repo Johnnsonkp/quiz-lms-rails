@@ -1,16 +1,14 @@
+import { Category, DashboardProps, QuizPreview } from '../../types/dashboard';
 import { useEffect, useState } from 'react';
 
 import DashboardBanner from '../components/header/dashboardHeader/DashboardBanner';
 import FileUpload from '../components/fileUpload/FileUpload';
 import FileUploadButton from '../components/fileUpload/FileUploadButton';
 import SingleQuestionComponent from '../components/cards/SingleQuestionComp';
-// import QuizPage from './QuizPage';
-// import SingleQuestionComponent from '../components/SingleQuestionComponent';
 import SubjectCards from '../components/cards/SubjectCard';
-// import quizIcon from '../../../assets/quiz-icon.png';
 import quizIcon from '../../assets/quiz-icon.png'
 
-function Dashboard({ categories, quiz_preview }: any) {
+function Dashboard({ categories, quiz_preview }: DashboardProps) {
   const [openSidebar, setOpenSidebar] = useState(false);
   const [activeSection, setActiveSection] = useState('dashboard');
   const [isMobile, setIsMobile] = useState(false);
@@ -38,7 +36,7 @@ function Dashboard({ categories, quiz_preview }: any) {
     }
   };
 
-  const handleSubjectClick = async (subject: any) => {
+  const handleSubjectClick = async (subject: string) => {
     console.log('Subject clicked:', subject);
     setSelectedSubject(subject);
     setActiveSection('quiz');
@@ -106,7 +104,7 @@ function Dashboard({ categories, quiz_preview }: any) {
             {/* Quiz Topics Section */}
             <li className="pt-4">
               <ul className="space-y-2">
-                {categories.map((topic: any) => (
+                {categories.map((topic: Category) => (
                   <li key={topic.topic} className="relative">
                     <a
                       href="#"
@@ -193,7 +191,7 @@ function Dashboard({ categories, quiz_preview }: any) {
             />
 
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-              {quiz_preview && quiz_preview.map((quiz: any, index: number) => (
+              {quiz_preview && quiz_preview.map((quiz: QuizPreview, index: number) => (
                 quiz.topic === selectedTopic &&
                 <SubjectCards 
                     key={index}
@@ -201,9 +199,10 @@ function Dashboard({ categories, quiz_preview }: any) {
                     subject={quiz.subject}
                     description={quiz.description.filter((a: string) => a.includes(quiz.subject))}
                     topic={selectedTopic}
+                    tag={quiz?.tag}
                     // difficulty={quiz.difficulty[index]}
-                    tags={quiz.tags}
-                    selectedTopicData={"test"}
+                    // tags={quiz.tags}
+                    // selectedTopicData={"test"}
                     subjectImg={quiz.img}
                     onSubjectClick={handleSubjectClick}
                 />
@@ -211,7 +210,7 @@ function Dashboard({ categories, quiz_preview }: any) {
             </div>
 
 
-            {quiz_preview && quiz_preview.filter((quiz: any) => quiz.topic === selectedTopic).length === 0 && (
+            {quiz_preview && quiz_preview.filter((quiz: QuizPreview) => quiz.topic === selectedTopic).length === 0 && (
               <div className="text-center py-8">
                 <p className="text-gray-500">No subjects available for this topic.</p>
               </div>

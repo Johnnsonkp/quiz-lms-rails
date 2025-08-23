@@ -1,9 +1,7 @@
 
 function QuizPage({ quiz_id }: { quiz_id: any }) {
   return (
-    // <div>QuizPage</div>
-
-  <section className="space-y-6">
+  <section key={quiz_id} className="space-y-6">
       <header className="flex items-center space-x-4">
         <button
           // onClick={handleBackToDashboard}
