@@ -156,7 +156,7 @@ class DashboardController < ApplicationController
     prompt = build_quiz_prompt(file_text, filename)
 
     # Get API key from Rails credentials or environment variable
-    api_key = Rails.application.credentials.openai_api_key || ENV['OPENAI_API_KEY']
+    api_key = Rails.application.credentials.openai_api_key || ENV['OPENAI_API_KEY'] || ENV['OPENAI_ACCESS_TOKEN']
     
     unless api_key.present?
       Rails.logger.error "OpenAI API key not found"
