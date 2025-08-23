@@ -6,6 +6,12 @@ Rails.application.configure do
 
   # configure hosts in production
   config.hosts << "quiz-lms-rails-production.up.railway.app"
+  
+  # Allow additional Railway.app domains if they change
+  config.hosts << /.*\.up\.railway\.app/
+  
+  # Allow custom domains if you add them later
+  # config.hosts << "your-custom-domain.com"
 
 
   # Code is not reloaded between requests.
