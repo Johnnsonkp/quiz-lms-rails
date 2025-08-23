@@ -64,9 +64,9 @@
 
                 <div class="xl:col-span-3 relative">
                     <%# <img class="w-full mx-auto scale-110 blur-xs" src="https://d33wubrfki0l68.cloudfront.net/29c501c64b21014b3f2e225abe02fe31fd8f3a5c/f866d/images/hero/3/illustration.png" alt="" /> %>
-                    <img class="transform scale-110 h-[500px] w-[100%] blur-xs" src="https://cdn.rareblocks.xyz/collection/clarity/images/hero/2/illustration.png" alt="" />
+                    <img class="transform scale-110 h-[510px] w-[100%] m-auto blur-xs" src="https://cdn.rareblocks.xyz/collection/clarity/images/hero/2/illustration.png" alt="" />
 
-                    <div class="mx-auto w-[80%] h-[450px] bg-white absolute inset-0 flex items-start justify-center shadow-lg rounded-lg py-6 px-10 border-1">
+                    <div class="mx-auto w-[80%] h-[450px] bg-white absolute inset-0 flex items-start justify-center shadow-lg rounded-lg py-6 px-7 border-1">
                       <%= form_with url: dashboard_file_upload_path, method: :post, multipart: true, local: false, id: "quiz-upload-form", class: "py-0 px-6 w-full flex justify-between" do |form| %>
                           
                           <!-- Drag & Drop File Upload -->
@@ -174,25 +174,29 @@ document.addEventListener('DOMContentLoaded', function() {
     const form = document.getElementById('quiz-upload-form');
     
     // Form validation
-    // function validateForm() {
-    //     const title = document.getElementById('quiz_title').value.trim();
-    //     const topic = document.getElementById('quiz_topic').value.trim();
-    //     const subject = document.getElementById('quiz_subject').value.trim();
-    //     const file = fileInput.files[0];
-        
-    //     if (title && topic && subject && file) {
-    //         submitBtn.disabled = false;
-    //         submitBtn.className = submitBtn.className.replace('bg-gray-400 cursor-not-allowed', 'bg-indigo-600 hover:bg-indigo-700 cursor-pointer');
-    //     } else {
-    //         submitBtn.disabled = true;
-    //         submitBtn.className = submitBtn.className.replace('bg-indigo-600 hover:bg-indigo-700 cursor-pointer', 'bg-gray-400 cursor-not-allowed');
-    //     }
-    // }
+    function validateForm() {
+        const title = document.getElementById('quiz_title').value.trim();
+        const topic = document.getElementById('quiz_topic').value.trim();
+        const subject = document.getElementById('quiz_subject').value.trim();
+        const file = fileInput.files[0];
+
+        console.log("validateForm title", title)
+        console.log("validateForm topic", topic)
+        console.log("validateForm subject", subject)
+
+        if (title && topic && subject && file) {
+            submitBtn.disabled = false;
+            submitBtn.className = submitBtn.className.replace('bg-gray-400 cursor-not-allowed', 'bg-indigo-600 hover:bg-indigo-700 cursor-pointer');
+        } else {
+            submitBtn.disabled = true;
+            submitBtn.className = submitBtn.className.replace('bg-indigo-600 hover:bg-indigo-700 cursor-pointer', 'bg-gray-400 cursor-not-allowed');
+        }
+    }
     
-    // // Add event listeners for form validation
-    // ['quiz_title', 'quiz_topic', 'quiz_subject'].forEach(id => {
-    //     document.getElementById(id).addEventListener('input', validateForm);
-    // });
+    // Add event listeners for form validation
+    ['quiz_title', 'quiz_topic', 'quiz_subject'].forEach(id => {
+        document.getElementById(id).addEventListener('input', validateForm);
+    });
     
     // File upload functions
     function handleFile(file) {
@@ -280,6 +284,11 @@ document.addEventListener('DOMContentLoaded', function() {
         }
         
         const formData = new FormData(form);
+
+        console.log("formData:", formData);
+        console.log("form:", form);
+        // console.log("form getAll title:", form.getAll('title');
+        // console.log("form get title:", form.get('title');
         
         // Change button to loading state
         const originalText = submitBtn.textContent;

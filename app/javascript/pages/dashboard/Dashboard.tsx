@@ -1,6 +1,7 @@
 import { Category, DashboardProps, QuizPreview } from '../../types/dashboard';
 import { useEffect, useState } from 'react';
 
+import CategoryIcons from '../components/icons/CategoryIcons';
 import DashboardBanner from '../components/header/dashboardHeader/DashboardBanner';
 import FileUpload from '../components/fileUpload/FileUpload';
 import FileUploadButton from '../components/fileUpload/FileUploadButton';
@@ -81,11 +82,11 @@ function Dashboard({ categories, quiz_preview }: DashboardProps) {
       >
         <a href="/" className="p-4 flex items-center justify-between border-b">
           <h1
-            className={`!text-lg font-bold text-gray-600 transition-opacity duration-300 ${
+            className={`!text-xl font-bold text-gray-600 transition-opacity duration-300 ${
               openSidebar || !isMobile ? 'opacity-100 block' : 'opacity-0 hidden'
             }`}
           >
-            <img src={quizIcon} alt="Quiz Logo" className="w-8 h-8 inline-block ml-2" />
+            <img src={quizIcon} alt="Quiz Logo" className="w-10 h-10 inline-block ml-2" />
             QLearn
           </h1>
           <button
@@ -118,9 +119,10 @@ function Dashboard({ categories, quiz_preview }: DashboardProps) {
                       }`}
                     >
                       <div className="flex items-center space-x-3">
-                        <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 text-gray-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        {/* <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 text-gray-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-                        </svg>
+                        </svg> */}
+                        <CategoryIcons firstLetter={topic.topic.charAt(0)} active={activeSection === topic.topic} />
                         <span
                           className={`text-gray-700 text-sm transition-opacity duration-300 ${
                             openSidebar || !isMobile ? 'block opacity-100' : 'hidden opacity-0'

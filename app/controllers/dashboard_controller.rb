@@ -8,9 +8,9 @@ class DashboardController < ApplicationController
   def index
     @categories = [] if @categories.nil?
     @quiz_preview = [] if @quiz_preview.nil?
-    
+
     render inertia: 'dashboard/Dashboard', props: { 
-      categories: @categories, 
+      categories:@categories,
       quiz_preview: @quiz_preview 
     }
   end
@@ -64,29 +64,80 @@ class DashboardController < ApplicationController
 
 
   def file_upload_extract
+    # Safely extract and validate parameters
     uploaded_file = params[:file]
+    title = params[:title]&.strip&.presence
+    topic = params[:topic]&.strip&.presence
+    subject = params[:subject]&.strip&.presence
 
-    unless uploaded_file
+    puts "Uploaded file: #{uploaded_file.inspect}" if Rails.env.development?
+    puts "Title: #{title}" if Rails.env.development?
+    puts "Topic: #{topic}" if Rails.env.development?
+    puts "Subject: #{subject}" if Rails.env.development?
+
+    # Validate required file parameter
+    unless uploaded_file.present?
       render json: { error: "No file uploaded" }, status: :unprocessable_entity
       return
     end
 
-    file_text = extract_text(uploaded_file)
-    quiz_data = generate_quiz_from_uploaded_file(file_text, uploaded_file.original_filename)
-
-    if quiz_data
-      save_quiz_to_database(quiz_data)
+    # Validate file type
+    unless ['application/pdf', 'text/plain'].include?(uploaded_file.content_type)
+      render json: { 
+        error: "Invalid file type. Only PDF and TXT files are supported." 
+      }, status: :unprocessable_entity
+      return
     end
 
-    puts "Extracted text: #{file_text}" if Rails.env.development?
-    puts "quiz_data: #{quiz_data}" if Rails.env.development?
-    
-    render json: { 
-      message: "File uploaded successfully", 
-      text: file_text,
-      filename: uploaded_file.original_filename,
-      content_type: uploaded_file.content_type
-    }
+    # Validate file size (e.g., max 10MB)
+    max_size = 10.megabytes
+    if uploaded_file.size > max_size
+      render json: { 
+        error: "File too large. Maximum size is #{max_size / 1.megabyte}MB." 
+      }, status: :unprocessable_entity
+      return
+    end
+
+    begin
+      file_text = extract_text(uploaded_file)
+      
+      # Generate quiz with optional parameters
+      quiz_data = generate_quiz_from_uploaded_file(
+        file_text, 
+        uploaded_file.original_filename, 
+        title, 
+        topic, 
+        subject
+      )
+
+      if quiz_data.present?
+        saved_quiz = save_quiz_to_database(quiz_data)
+        if saved_quiz
+          puts "Successfully saved quiz: #{saved_quiz.title}" if Rails.env.development?
+        else
+          Rails.logger.error "Failed to save quiz to database"
+        end
+      else
+        Rails.logger.error "Failed to generate quiz data from file"
+      end
+
+      puts "Extracted text: #{file_text.truncate(100)}" if Rails.env.development?
+      puts "Quiz data generated: #{quiz_data.present? ? 'Yes' : 'No'}" if Rails.env.development?
+      
+      render json: { 
+        message: "File uploaded and processed successfully", 
+        filename: uploaded_file.original_filename,
+        content_type: uploaded_file.content_type,
+        quiz_generated: quiz_data.present?,
+        quiz_saved: quiz_data.present? && saved_quiz.present?
+      }
+      
+    rescue => e
+      Rails.logger.error "Error processing file upload: #{e.message}"
+      render json: { 
+        error: "Failed to process uploaded file: #{e.message}" 
+      }, status: :internal_server_error
+    end
   end
 
 
@@ -148,7 +199,7 @@ class DashboardController < ApplicationController
     return created_q
   end
 
-  def generate_quiz_from_uploaded_file(file_text, filename)
+  def generate_quiz_from_uploaded_file(file_text, filename, title=nil, topic=nil, subject=nil)
     system_prompt = <<~PROMPT
       You are an expert quiz generator. Generate quiz questions based on the provided text content. Return ONLY valid JSON in the exact format specified, with no additional text or explanations.
     PROMPT
@@ -196,9 +247,14 @@ class DashboardController < ApplicationController
 
 
 
-  def build_quiz_prompt(file_text, filename)
+  def build_quiz_prompt(file_text, filename, title=nil, topic=nil, subject=nil)
      # Truncate content if too long
     truncated_text = file_text.length > 8000 ? file_text[0..8000] + "..." : file_text
+
+    # Build conditional instructions based on provided parameters
+    title_instruction = title.present? ? "- Use '#{title}' as the quiz title" : "- Generate an appropriate quiz title based on content"
+    topic_instruction = topic.present? ? "- Use '#{topic}' as the quiz topic" : "- If quiz is related to an existing topic (#{@categories&.map { |c| c[:topic] }&.join(', ')}), use that topic (case insensitive)"
+    subject_instruction = subject.present? ? "- Use '#{subject}' as the quiz subject" : "- Generate an appropriate subject based on content"
 
     json_quiz_example = {
         "topic": "[Main topic/category from the content]",
@@ -231,11 +287,10 @@ class DashboardController < ApplicationController
     "Based on the following text content from file '#{filename}', generate quiz questions in this EXACT JSON format: #{json_quiz_example.to_json}
 
     Requirements:
-    - Generate 5-15 questions based on content complexity
-    - If any quiz is related to an existing topic (#{@categories} act as topics for each quiz), use that topic for the quiz topic
-    - create a mix of multiple choice or long response questions
-    - Each mutiple choice question must have exactly 3 incorrect answers
-    - Each long response should provide 1 option providing contentext / structure on how to answer the question
+    - Generate 10-20 questions based on content complexity and amount of information covered
+    - Create a mix of multiple choice or long response questions
+    - Each multiple choice question must have exactly 3 incorrect answers
+    - Each long response should provide 1 option providing context/structure on how to answer the question
     - Each long response should also provide a clear answer to the question
     - Use meaningful external_id format like: quiz_subject_001, etc.
     - Set appropriate difficulty levels to intermediate but throw in some advanced questions
@@ -244,13 +299,16 @@ class DashboardController < ApplicationController
     - Provide clear explanations for each correct answer
     - Ensure questions test different aspects: comprehension, application, analysis
     - Provide optional code snippets for the question for more context, format the code snippets as needed
+    #{title_instruction}
+    #{topic_instruction}
+    #{subject_instruction}
 
     Text content to analyze:
     #{truncated_text}"
   end
 
   def categories
-    @categories = Quiz.distinct.pluck(:topic).map do |topic|
+    @categories = Quiz.distinct.order(:topic).pluck(:topic).map do |topic|
       # Get the first description for this topic
       desc = Quiz.where(topic: topic).pluck(:description).first
       { topic: topic, description: desc }
