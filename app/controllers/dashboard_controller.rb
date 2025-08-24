@@ -228,7 +228,8 @@ class DashboardController < ApplicationController
           }
         ],
         temperature: 0.7,
-        max_tokens: 2000
+        max_tokens: 2000,
+        response_format: { type: "json_object" }
       }
     ).dig("choices", 0, "message", "content")
 
