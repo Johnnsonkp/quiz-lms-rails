@@ -4,11 +4,13 @@
 
 .bg-card {
   position: relative;
-  height: 200px;
+  height: 180px;
   width: 100%;
   border-radius: 1rem;
   overflow: hidden;
-  background-image: url('https://lh3.googleusercontent.com/gIrG8AMwLDarHJMs68aoBE327dT_O74kyQe5rVddstbe_ndAk5PXSf0UrzCI1PbZlPDhLN0TFWuIb7CkpNuZghX4VRgX3wOjzNeg5axIz8ISTI5CZQ=w1200-rj');
+  background-image: url('/assets/lms-banner_2.jpg');
+  background-size: cover;
+  background-position: center;
 }
 
 .bg-card::before {
@@ -18,7 +20,7 @@
   left: 0;
   right: 0;
   bottom: 0;
-  background-image: url('https://lh3.googleusercontent.com/gIrG8AMwLDarHJMs68aoBE327dT_O74kyQe5rVddstbe_ndAk5PXSf0UrzCI1PbZlPDhLN0TFWuIb7CkpNuZghX4VRgX3wOjzNeg5axIz8ISTI5CZQ=w1200-rj');
+  background-image: url('/assets/lms-banner_2.jpg');
   background-size: cover;
   background-position: center;
   filter: blur(3px);
@@ -35,13 +37,7 @@
   flex-direction: column;
   justify-content: center;
   padding: 2.5rem;
-  width: 70%;
-  background-color: red;
-  /* border: 1px solid red; */
-  background: #23074d;
-  background: -webkit-linear-gradient(to right, #cc5333, #23074d);
-  background: linear-gradient(to right, #cc5333, #23074d);
-
+  width: 100%;
 }
 
 .bg-card-b {

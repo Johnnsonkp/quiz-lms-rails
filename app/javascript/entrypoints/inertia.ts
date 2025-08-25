@@ -1,5 +1,6 @@
+import { ReactNode, createElement } from 'react'
+
 import { createInertiaApp } from '@inertiajs/react'
-import { createElement, ReactNode } from 'react'
 import { createRoot } from 'react-dom/client'
 
 // Temporary type definition, until @inertiajs/react provides one
@@ -8,11 +9,13 @@ type ResolvedComponent = {
   layout?: (page: ReactNode) => ReactNode
 }
 
+const path = window.location.pathname.replace('/', '');
+
 createInertiaApp({
   // Set default page title
   // see https://inertia-rails.dev/guide/title-and-meta
   //
-  // title: title => title ? `${title} - App` : 'App',
+  title: title => title ? `${title} | ${path}` : 'App',
 
   // Disable progress bar
   //

@@ -4,12 +4,19 @@ export interface Category {
   description: string;
 }
 
+export interface QuizDetails {
+  title: string;
+  external_ids: string[];
+}
+
 // Interface for individual quiz preview
 export interface QuizPreview {
+  ids: number[] | null;
   topic: string;
   subject: string;
   titles: string[];
   description: string[];
+  quiz_details: QuizDetails[] | null;
   img: string | null;
   tag?: string[] | string | any;
 }
@@ -52,11 +59,13 @@ export interface SingleQuestionCardProps {
 }
 
 export interface SubjectCardProps {
+  ids: number[] | null;
   titles: string[];
   subject: string;
-  onSubjectClick: (subject: string) => void;
+  onSubjectClick: (subject: string, externalIds: string[] | null, quizIds: number[] | null) => void;
   subjectImg: string | null;
   tag: string | null;
   description: string[];
   topic: string;
+  quiz_details: QuizDetails[] | null;
 }

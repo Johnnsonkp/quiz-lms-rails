@@ -1,12 +1,15 @@
 <!DOCTYPE html>
 <html>
   <head>
-    <title inertia>RubyRailsPostgres</title>
+    <title inertia>QLearn.ai</title>
     <meta name="viewport" content="width=device-width,initial-scale=1">
+    <meta name="description" content="An AI powered-quiz Learning Management System app" />
+
+    <%= favicon_link_tag 'quiz-icon.png' %>
+
     <%= csrf_meta_tags %>
     <%= csp_meta_tag %>
     <%= stylesheet_link_tag "tailwind", "data-turbo-track": "reload" %>
-
     <%= stylesheet_link_tag "application", "data-turbo-track": "reload" %>
     <%# <%= javascript_importmap_tags %> 
     <%= vite_stylesheet_tag "application" %>
@@ -15,6 +18,7 @@
     <%= vite_typescript_tag "inertia" %>
     <%= inertia_ssr_head %>
     <%= vite_javascript_tag 'application' %>
+
     <!--
       If using a TypeScript entrypoint file:
         vite_typescript_tag 'application'

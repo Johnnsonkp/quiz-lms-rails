@@ -9,6 +9,8 @@ class DashboardController < ApplicationController
     @categories = [] if @categories.nil?
     @quiz_preview = [] if @quiz_preview.nil?
 
+    print("Quiz preview: #{@quiz_preview.inspect}")
+
     render inertia: 'dashboard/Dashboard', props: { 
       categories:@categories,
       quiz_preview: @quiz_preview 
@@ -199,12 +201,12 @@ class DashboardController < ApplicationController
     return created_q
   end
 
-  def generate_quiz_from_uploaded_file(file_text, filename, title=nil, topic=nil, subject=nil)
+  def generate_quiz_from_uploaded_file(file_text, filename, title, topic, subject)
     system_prompt = <<~PROMPT
       You are an expert quiz generator. Generate quiz questions based on the provided text content. Return ONLY valid JSON in the exact format specified, with no additional text or explanations.
     PROMPT
 
-    prompt = build_quiz_prompt(file_text, filename)
+    prompt = build_quiz_prompt(file_text, filename, title, topic, subject)
 
     # Get API key from Rails credentials or environment variable
     api_key = Rails.application.credentials.openai_api_key || ENV['OPENAI_API_KEY'] || ENV['OPENAI_ACCESS_TOKEN']
@@ -248,8 +250,9 @@ class DashboardController < ApplicationController
 
 
 
-  def build_quiz_prompt(file_text, filename, title=nil, topic=nil, subject=nil)
-     # Truncate content if too long
+  def build_quiz_prompt(file_text, filename, title, topic, subject)
+    puts "Building quiz prompt...", title, topic, subject
+    # Truncate content if too long
     truncated_text = file_text.length > 8000 ? file_text[0..8000] + "..." : file_text
 
     # Build conditional instructions based on provided parameters
@@ -264,7 +267,7 @@ class DashboardController < ApplicationController
         "description": "[Brief description of what this quiz covers]",
         "questions": [
           {
-            "external_id": "[unique_id_001]",
+            "external_id": "[topic_subject_uniqueID_001]",
             "question_format": "multiple_choice",
             "question": "[Your question text here]",
             "answer": "[Correct answer]",
@@ -332,23 +335,44 @@ class DashboardController < ApplicationController
 
 
   def get_quizzes_preview
-    # Group quizzes by topic and subject, then collect titles for each subject
-    @quiz_preview = Quiz.all.group_by(&:topic).map do |topic, topic_quizzes|
+    # adding external_ids intp quiz preview
+    @quiz_preview = Quiz.all.includes(:questions).group_by(&:topic).map do |topic, topic_quizzes|
       subjects = topic_quizzes.group_by(&:subject).map do |subject, subject_quizzes|
-         puts "Setting Quiz topic_quizzes: #{topic_quizzes.inspect}" if Rails.env.development?
-         puts "Setting Quiz topic: #{topic.inspect}" if Rails.env.development?
+        # mapping each quiz title to its external_ids
+        quiz_external_ids = subject_quizzes.map do |quiz|
+          {
+            title: quiz.title,
+            external_ids: quiz.questions.pluck(:external_id)
+          }
+        end
         {
+          ids: subject_quizzes.map(&:id),
           topic: topic,
           subject: subject,
           titles: subject_quizzes.map(&:title),
           description: topic_quizzes.map(&:description),
-          # difficulty: Quiz.where(topic: topic).questions.map(&:difficulty),
-          # tags: topic_quizzes.map(&:tags),
+          quiz_details: quiz_external_ids,
           img: get_pic_from_unsplash(subject),
         }
       end
       subjects
-    end.flatten
+    end.flatten 
+
+    # Group quizzes by topic and subject, then collect titles for each subject
+    # @quiz_preview = Quiz.all.group_by(&:topic).map do |topic, topic_quizzes|
+    #   subjects = topic_quizzes.group_by(&:subject).map do |subject, subject_quizzes|
+    #      puts "Setting Quiz topic_quizzes: #{topic_quizzes.inspect}" if Rails.env.development?
+    #      puts "Setting Quiz topic: #{topic.inspect}" if Rails.env.development?
+    #     {
+    #       topic: topic,
+    #       subject: subject,
+    #       titles: subject_quizzes.map(&:title),
+    #       description: topic_quizzes.map(&:description),
+    #       img: get_pic_from_unsplash(subject),
+    #     }
+    #   end
+    #   subjects
+    # end.flatten
     
     # puts "Setting Quiz Preview: #{@quiz_preview.inspect}" if Rails.env.development?
   rescue => e
