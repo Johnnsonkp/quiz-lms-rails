@@ -9,8 +9,6 @@ class DashboardController < ApplicationController
     @categories = [] if @categories.nil?
     @quiz_preview = [] if @quiz_preview.nil?
 
-    print("Quiz preview: #{@quiz_preview.inspect}")
-
     render inertia: 'dashboard/Dashboard', props: { 
       categories:@categories,
       quiz_preview: @quiz_preview 
@@ -28,13 +26,21 @@ class DashboardController < ApplicationController
 
   def show
     if params[:topic].present?
-      topic_quizzes = Quiz.includes(:questions).where(topic: params[:topic])
 
-      # Flatten all questions from all quizzes, including quiz context
-      questions_only = []
-      topic_quizzes.each do |quiz|
-        quiz.questions.each do |question|
-          questions_only << {
+    quiz_conditions = { topic: params[:topic] }
+    quiz_conditions[:subject] = params[:subject] if params[:subject].present?
+        
+    if params[:quiz_ids].present?
+      quiz_ids = params[:quiz_ids].is_a?(Array) ? params[:quiz_ids] : [params[:quiz_ids]]
+      quiz_conditions[:id] = quiz_ids
+    end
+
+    filtered_quizzes = Quiz.includes(:questions).where(quiz_conditions)
+    
+    questions_only = []
+    filtered_quizzes.each do |quiz|
+      quiz.questions.each do |question|
+        questions_only << {
             id: question.external_id,
             type: question.question_format,
             question: question.question,

@@ -9,8 +9,6 @@ import StatsCard from '../components/cards/StatsCard';
 import SubjectCards from '../components/cards/SubjectCard';
 
 function Dashboard({ categories, quiz_preview }: DashboardProps) {
-  // const [openSidebar, setOpenSidebar] = useState(false);
-  // const [isMobile, setIsMobile] = useState(false);
   const [activeSection, setActiveSection] = useState('dashboard');
   const [selectedTopic, setSelectedTopic] = useState<string | null>(null);
   const [selectedSubject, setSelectedSubject] = useState<any | null>(null);
@@ -35,6 +33,19 @@ function Dashboard({ categories, quiz_preview }: DashboardProps) {
     }
   };
 
+  const handleURLParams = (subject: string | null, quizIds: number[] | null) => {
+    const url = new URL(window.location.href);
+    url.searchParams.set('topic', selectedTopic || '');
+    url.searchParams.set('subject', subject || '');
+    url.searchParams.set('quiz_ids', quizIds ? quizIds.join(',') : '');
+    console.log(url);
+
+    if(subject && quizIds){
+      window.history.pushState({}, '', url);
+    }
+
+  }
+
   const handleSubjectClick = async (subject: string, externalIds: string[] | null, quizIds: number[] | null) => {
     console.log('Subject clicked:', subject);
     console.log('External IDs:', externalIds);
@@ -42,9 +53,10 @@ function Dashboard({ categories, quiz_preview }: DashboardProps) {
 
     setSelectedSubject(subject);
     setActiveSection('quiz');
+    handleURLParams(subject, quizIds)
 
     try {
-      const response = await fetch(`/dashboard/${selectedTopic}`, {
+      const response = await fetch(`/dashboard/${selectedTopic}/${subject}/${quizIds}`, {
         method: 'GET',
         headers: {
           'Content-Type': 'application/json',

@@ -25,14 +25,14 @@ function SideNav({categories, handleTopicClick, activeSection}:
               {categories.map((topic: Category) => (
                 <li key={topic.topic} className="relative">
                   <a href="#"
-                    className={`flex items-center space-x-3 px-4 py-2 hover:bg-gray-100 rounded-lg transition-colors ${
+                    className={`flex items-center space-x-3 px-5 py-2 hover:bg-gray-100 rounded-lg transition-colors ${
                       activeSection === topic.topic ? 'bg-gray-100' : ''}`}
                     onClick={(e) => {
                       e.preventDefault();
                       handleTopicClick(topic.topic);
                     }}
                   >
-                    <div className="flex items-center space-x-3">
+                    <div className="flex items-center space-x-3 max-w-55">
                       <CategoryIcons firstLetter={topic.topic.charAt(0)} active={activeSection === topic.topic} />
                       <span className={`text-gray-700 text-sm transition-opacity duration-300`}>
                         {topic.topic}
