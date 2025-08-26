@@ -2,9 +2,7 @@ import './header.css';
 
 function DashboardBanner({handleBackToDashboard, selectedTopic, categories}: any) {
   return (
-    <header 
-      className="p-0 mx-auto relative h-[180px] w-[100%] mb-8 mt-0"
-    >
+    <header className="p-0 mx-auto relative h-[180px] w-[100%] mb-8 mt-0 shadow-md rounded-lg bg-[#D1D7E3]">
       <button
         onClick={handleBackToDashboard}
         className="p-2 rounded-full hover:bg-white/20 transition-colors absolute top-3 left-5 flex align-middle items-center cursor-pointer text-bold z-30 text-white backdrop-blur-sm bg-black/20 text-sm px-3 hover:text-black/80"

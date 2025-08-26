@@ -20,19 +20,33 @@ function SubjectCards(
   const [externalIds, setExternalIds] = useState<string[]>([]);
   const [quizIds, setQuizIds] = useState<number[] | null>([]);
 
-  const matchTopicSubjectWithExternal_ID = (val_1: string, val_2: string ) => {
-    return val_1.toLowerCase().includes(val_2.toLowerCase()) || val_1.toLowerCase() === val_2.toLowerCase() || val_2.toLowerCase().includes(val_1.toLowerCase())
-  }
+  const matchTopicSubjectWithExternal_ID = (a: string, b: string): boolean => {
+    if (!a || !b) return false;
+
+    const normalize = (str: string) => str.toLowerCase().trim();
+    const val1 = normalize(a);
+    const val2 = normalize(b);
+
+    return (
+      val1 === val2 ||
+      val1.includes(val2) ||
+      val2.includes(val1)
+    );
+  };
+
 
   const getExternalIDs: any = () => {
     quiz_details && quiz_details.map((quiz: any) => {
-      quiz?.external_ids.length > 0 && quiz?.external_ids[0].toLowerCase().split("_").forEach((id_name: any) => {
+      
+      quiz?.external_ids.length > 0 && 
+      quiz?.external_ids[0].toLowerCase().split("_")
+      .forEach((id_name: any) => {
+
         if(matchTopicSubjectWithExternal_ID(id_name, topic)) {
           setExternalIds(quiz?.external_ids);
         }
       })
     })
-
   }
 
   useEffect(() => {
@@ -46,12 +60,13 @@ function SubjectCards(
   }, [externalIds])
 
   return (
-    // <div className="border-2 border-red-500 p-10 flex justify-center items-center min-w-[350px] cursor-pointer" onClick={() => onSubjectClick(subject)}>
-      <div className="bg-white rounded-xl overflow-hidden shadow-md flex flex-col cursor-pointer" onClick={() => onSubjectClick(subject, externalIds, quizIds)}>
-  <div className=" bg-white rounded-xl overflow-hidden shadow-lg border border-gray-100">
+  <div 
+    className="bg-white rounded-xl overflow-hidden shadow-sm flex flex-col cursor-pointer" 
+    onClick={() => onSubjectClick(subject, externalIds, quizIds)}
+  >
+    <div className=" bg-white rounded-xl overflow-hidden shadow-lg h-[100%] border border-gray-100">
 
     <div className="relative">
-      {/* <img src="https://i0.wp.com/port2flavors.com/wp-content/uploads/2022/07/placeholder-614.png?w=1200&ssl=1" alt="Placeholder Course Image" className="w-full h-40 object-cover" /> */}
       {!subjectImg ? (
           <div className="h-full flex items-center justify-center">
             <div className="animate-spin rounded-full h-6 w-4 border-b-2 border-blue-600"></div>

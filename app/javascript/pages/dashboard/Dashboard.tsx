@@ -1,5 +1,4 @@
 import { DashboardProps, QuizPreview } from '../../types/dashboard';
-import { useEffect, useState } from 'react';
 
 import DashboardBanner from '../components/header/dashboardHeader/DashboardBanner';
 import { Head } from '@inertiajs/react';
@@ -7,6 +6,8 @@ import SideNav from '../components/aside/SideNav';
 import SingleQuestionComponent from '../components/cards/SingleQuestionComp';
 import StatsCard from '../components/cards/StatsCard';
 import SubjectCards from '../components/cards/SubjectCard';
+import { slugify } from '../../utils/slugify';
+import { useState } from 'react';
 
 function Dashboard({ categories, quiz_preview }: DashboardProps) {
   const [activeSection, setActiveSection] = useState('dashboard');
@@ -14,27 +15,21 @@ function Dashboard({ categories, quiz_preview }: DashboardProps) {
   const [selectedSubject, setSelectedSubject] = useState<any | null>(null);
   const [quizData, setQuizData] = useState<any>(null);
 
-  useEffect(() => {
-    console.log("quiz_preview:", quiz_preview);
-    
-    const handleResize = () => {
-        // setIsMobile(window.innerWidth < 768);
-      };
-      handleResize();
-      window.addEventListener('resize', handleResize);
-      return () => window.removeEventListener('resize', handleResize);
-  }, []);
 
   const handleTopicClick = (topicName: string) => {
     if (topicName) {
       setSelectedTopic(topicName);
       setSelectedSubject(null);
       setActiveSection(topicName);
+      
+
+      window.history.pushState({}, '', `/dashboard/${slugify(topicName)}`);
     }
   };
 
   const handleURLParams = (subject: string | null, quizIds: number[] | null) => {
-    const url = new URL(window.location.href);
+    const url = new URL(window.location.origin);
+    url.pathname = '/dashboard';
     url.searchParams.set('topic', selectedTopic || '');
     url.searchParams.set('subject', subject || '');
     url.searchParams.set('quiz_ids', quizIds ? quizIds.join(',') : '');
@@ -43,13 +38,10 @@ function Dashboard({ categories, quiz_preview }: DashboardProps) {
     if(subject && quizIds){
       window.history.pushState({}, '', url);
     }
-
   }
 
   const handleSubjectClick = async (subject: string, externalIds: string[] | null, quizIds: number[] | null) => {
-    console.log('Subject clicked:', subject);
     console.log('External IDs:', externalIds);
-    console.log('Quiz IDs:', quizIds);
 
     setSelectedSubject(subject);
     setActiveSection('quiz');
@@ -69,10 +61,7 @@ function Dashboard({ categories, quiz_preview }: DashboardProps) {
       }
 
       const data = await response.json();
-      console.log('Topic data:', data);
       setQuizData(data);
-      console.log('Subject quizzes:', data);
-      return data;
     } catch (error) {
       console.error('Error fetching topic data:', error);
       return null;
@@ -98,7 +87,7 @@ function Dashboard({ categories, quiz_preview }: DashboardProps) {
       <main className="flex-1 p-4 !pt-3 !mt-0 md:p-6 overflow-y-auto w-[100%] bg-[#F9FAFB]">
         {/* Default Dashboard View */}
         {!selectedTopic && activeSection === 'dashboard' && (
-          <section className="space-y-6">
+          <section className="space-y-6 ">
             <header className='flex justify-between items-center'>
               <h1 className="text-left !text-xl font-bold text-gray-800">Welcome Back!</h1>
             </header>
@@ -124,7 +113,9 @@ function Dashboard({ categories, quiz_preview }: DashboardProps) {
               categories={categories}
             />
 
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+            <hr className='bg-gray-500 border-t border-gray-300'></hr>
+
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mt-7">
               {quiz_preview && quiz_preview.map((quiz: QuizPreview, index: number) => (
                 quiz.topic === selectedTopic &&
                 <SubjectCards 
