@@ -1,13 +1,14 @@
 import { DashboardProps, QuizPreview } from '../../types/dashboard';
+import { useEffect, useState } from 'react';
 
 import DashboardBanner from '../components/header/dashboardHeader/DashboardBanner';
+import { DashboardHome } from './DashboardHome';
 import { Head } from '@inertiajs/react';
 import SideNav from '../components/aside/SideNav';
 import SingleQuestionComponent from '../components/cards/SingleQuestionComp';
 import StatsCard from '../components/cards/StatsCard';
 import SubjectCards from '../components/cards/SubjectCard';
 import { slugify } from '../../utils/slugify';
-import { useState } from 'react';
 
 function Dashboard({ categories, quiz_preview }: DashboardProps) {
   const [activeSection, setActiveSection] = useState('dashboard');
@@ -17,32 +18,27 @@ function Dashboard({ categories, quiz_preview }: DashboardProps) {
 
 
   const handleTopicClick = (topicName: string) => {
-    if (topicName) {
-      setSelectedTopic(topicName);
-      setSelectedSubject(null);
-      setActiveSection(topicName);
-      
+    if (!topicName) return;
 
-      window.history.pushState({}, '', `/dashboard/${slugify(topicName)}`);
-    }
+    setSelectedTopic(topicName);
+    setSelectedSubject(null);
+    setActiveSection(topicName);
+    window.history.pushState({}, '', `/dashboard/${slugify(topicName)}`);
   };
 
   const handleURLParams = (subject: string | null, quizIds: number[] | null) => {
+    if(!subject && !quizIds) return;
+
     const url = new URL(window.location.origin);
     url.pathname = '/dashboard';
     url.searchParams.set('topic', selectedTopic || '');
     url.searchParams.set('subject', subject || '');
     url.searchParams.set('quiz_ids', quizIds ? quizIds.join(',') : '');
-    console.log(url);
-
-    if(subject && quizIds){
-      window.history.pushState({}, '', url);
-    }
+    window.history.pushState({}, '', url);
   }
 
   const handleSubjectClick = async (subject: string, externalIds: string[] | null, quizIds: number[] | null) => {
     console.log('External IDs:', externalIds);
-
     setSelectedSubject(subject);
     setActiveSection('quiz');
     handleURLParams(subject, quizIds)
@@ -74,6 +70,14 @@ function Dashboard({ categories, quiz_preview }: DashboardProps) {
     setActiveSection('dashboard');
   };
 
+  const getCurrentParams: any = () => {
+    console.log("pathname:", window.location.pathname);
+  }
+
+  useEffect(() => {
+    getCurrentParams();
+  }, [])
+
   return (
     <div className="flex flex-col md:flex-row min-h-screen w-full">
       <Head title="QLearn.ai" />
@@ -83,16 +87,12 @@ function Dashboard({ categories, quiz_preview }: DashboardProps) {
         activeSection={activeSection}
       />
 
-      {/* Main Content */}
       <main className="flex-1 p-4 !pt-3 !mt-0 md:p-6 overflow-y-auto w-[100%] bg-[#F9FAFB]">
-        {/* Default Dashboard View */}
         {!selectedTopic && activeSection === 'dashboard' && (
-          <section className="space-y-6 ">
-            <header className='flex justify-between items-center'>
-              <h1 className="text-left !text-xl font-bold text-gray-800">Welcome Back!</h1>
-            </header>
-            <StatsCard quiz_preview={quiz_preview} categories={categories} />
-          </section>
+          <DashboardHome 
+            quiz_preview={quiz_preview}
+            categories={categories}
+          />
         )}
 
         {/* Quiz View - Show quiz component for selected subject */}
