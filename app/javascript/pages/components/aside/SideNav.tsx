@@ -1,5 +1,6 @@
 import { Category } from '../../../types/dashboard';
 import CategoryIcons from '../icons/CategoryIcons';
+import Divider from '../divider/Divider';
 import quizIcon from '../../../assets/quiz-icon.png'
 
 function SideNav({categories, handleTopicClick, activeSection}: 
@@ -10,12 +11,15 @@ function SideNav({categories, handleTopicClick, activeSection}:
   }) {
   return (
     <aside className={`bg-white shadow-lg transition-all ease-in-out fixed md:static inset-y-0 left-0 z-50`}>
-      <a href="/" className="p-4 flex items-center justify-between border-b border-b-black-100">
-        <h1 className={`!text-2xl font-bold text-gray-600 transition-opacity duration-300`}>
-          <img src={quizIcon} alt="Quiz Logo" className="w-10 h-10 inline-block ml-2" />
+      {/* <a href="/" className="p-4 flex items-center justify-between border-b border-b-black-100"> */}
+      <a href="/" className="p-4 flex items-center justify-between">
+        <h1 className={`!text-1xl font-bold text-black-500 transition-opacity duration-300`}>
+          <img src={quizIcon} alt="Quiz Logo" className="w-8 h-8 inline-block ml-2" />
           QLearn
         </h1>
       </a>
+
+      <Divider />
 
       <nav className="py-4">
         <ul className="space-y-2">

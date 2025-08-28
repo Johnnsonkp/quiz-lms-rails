@@ -1,25 +1,25 @@
 import { DashboardProps, QuizPreview } from '../../types/dashboard';
-import { useEffect, useState } from 'react';
 
 import DashboardBanner from '../components/header/dashboardHeader/DashboardBanner';
 import { DashboardHome } from './DashboardHome';
+import Divider from '../components/divider/Divider';
 import { Head } from '@inertiajs/react';
 import SideNav from '../components/aside/SideNav';
+import SimpleLoadScreen from '../components/loading/SimpleLoadScreen';
 import SingleQuestionComponent from '../components/cards/SingleQuestionComp';
-import StatsCard from '../components/cards/StatsCard';
 import SubjectCards from '../components/cards/SubjectCard';
 import { slugify } from '../../utils/slugify';
+import { useQuizData } from '../../hooks/useQuizData';
+import { useState } from 'react';
 
 function Dashboard({ categories, quiz_preview }: DashboardProps) {
   const [activeSection, setActiveSection] = useState('dashboard');
   const [selectedTopic, setSelectedTopic] = useState<string | null>(null);
-  const [selectedSubject, setSelectedSubject] = useState<any | null>(null);
-  const [quizData, setQuizData] = useState<any>(null);
-
+  const [selectedSubject, setSelectedSubject] = useState<string | null>(null);
+  const { quizData, loading, error, fetchQuizData } = useQuizData();
 
   const handleTopicClick = (topicName: string) => {
     if (!topicName) return;
-
     setSelectedTopic(topicName);
     setSelectedSubject(null);
     setActiveSection(topicName);
@@ -38,30 +38,13 @@ function Dashboard({ categories, quiz_preview }: DashboardProps) {
   }
 
   const handleSubjectClick = async (subject: string, externalIds: string[] | null, quizIds: number[] | null) => {
+    if (!subject || !quizIds || !externalIds) return;
+
     console.log('External IDs:', externalIds);
     setSelectedSubject(subject);
     setActiveSection('quiz');
     handleURLParams(subject, quizIds)
-
-    try {
-      const response = await fetch(`/dashboard/${selectedTopic}/${subject}/${quizIds}`, {
-        method: 'GET',
-        headers: {
-          'Content-Type': 'application/json',
-          'Accept': 'application/json'
-        }
-      });
-
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
-      }
-
-      const data = await response.json();
-      setQuizData(data);
-    } catch (error) {
-      console.error('Error fetching topic data:', error);
-      return null;
-    }
+    await fetchQuizData(selectedTopic, subject, quizIds);
   };
 
   const handleBackToDashboard = () => {
@@ -70,13 +53,7 @@ function Dashboard({ categories, quiz_preview }: DashboardProps) {
     setActiveSection('dashboard');
   };
 
-  const getCurrentParams: any = () => {
-    console.log("pathname:", window.location.pathname);
-  }
-
-  useEffect(() => {
-    getCurrentParams();
-  }, [])
+  if(error){ return <div className="text-center py-8 text-red-500">{error}</div>}
 
   return (
     <div className="flex flex-col md:flex-row min-h-screen w-full">
@@ -92,17 +69,16 @@ function Dashboard({ categories, quiz_preview }: DashboardProps) {
           <DashboardHome 
             quiz_preview={quiz_preview}
             categories={categories}
-          />
-        )}
+          />)}
 
         {/* Quiz View - Show quiz component for selected subject */}
-        {selectedSubject && activeSection === 'quiz' && quizData && (
+        {loading && <SimpleLoadScreen />}
+        {selectedSubject && activeSection === 'quiz' && quizData && !loading &&(
           <SingleQuestionComponent
             quizData={quizData}
             selectedSubject={selectedSubject}
             onBack={handleBackToDashboard}
-          />
-        )}
+          /> )}
 
         {/* Topic View - Show subjects for selected topic */}
         {selectedTopic && activeSection === selectedTopic && (
@@ -113,7 +89,7 @@ function Dashboard({ categories, quiz_preview }: DashboardProps) {
               categories={categories}
             />
 
-            <hr className='bg-gray-500 border-t border-gray-300'></hr>
+            <Divider />
 
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mt-7">
               {quiz_preview && quiz_preview.map((quiz: QuizPreview, index: number) => (
@@ -137,9 +113,9 @@ function Dashboard({ categories, quiz_preview }: DashboardProps) {
                 <p className="text-gray-500">No subjects available for this topic.</p>
               </div>)}
           </section>)}
-       </main>
-      </div>
-    )
+      </main>
+    </div>
+  )
 }
 
 export default Dashboard

@@ -6,13 +6,13 @@ export const useQuizData = () => {
   const [quizData, setQuizData] = useState<QuizData | null>(null);
   const [loading, setLoading] = useState<Boolean>(false);
   const [error, setError] = useState<string | null>(null);
-  
-  const fetchQuizData = useCallback(async (topic: string) => {
+
+  const fetchQuizData = useCallback(async (selectedTopic: string | null, subject: string | null, quizIds: number[] | null) => {
     setLoading(true);
     setError(null);
     
     try {
-      const response = await fetch(`/dashboard/${topic}`, {
+      const response = await fetch(`/dashboard/${selectedTopic}/${subject}/${quizIds}`, {
         method: 'GET',
         headers: {
           'Content-Type': 'application/json',

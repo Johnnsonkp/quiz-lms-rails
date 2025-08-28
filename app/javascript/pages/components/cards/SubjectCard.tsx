@@ -1,8 +1,7 @@
 import './singleCard.css';
 
-import  { useEffect, useState } from 'react';
-
 import { SubjectCardProps } from '../../../types/dashboard';
+import { useExternalIDs } from '../../../hooks/useExternalIDs';
 
 function SubjectCards(
   { 
@@ -17,53 +16,12 @@ function SubjectCards(
     quiz_details
   }: SubjectCardProps) {
 
-  const [externalIds, setExternalIds] = useState<string[]>([]);
-  const [quizIds, setQuizIds] = useState<number[] | null>([]);
-
-  const matchTopicSubjectWithExternal_ID = (a: string, b: string): boolean => {
-    if (!a || !b) return false;
-
-    const normalize = (str: string) => str.toLowerCase().trim();
-    const val1 = normalize(a);
-    const val2 = normalize(b);
-
-    return (
-      val1 === val2 ||
-      val1.includes(val2) ||
-      val2.includes(val1)
-    );
-  };
-
-
-  const getExternalIDs: any = () => {
-    quiz_details && quiz_details.map((quiz: any) => {
-      
-      quiz?.external_ids.length > 0 && 
-      quiz?.external_ids[0].toLowerCase().split("_")
-      .forEach((id_name: any) => {
-
-        if(matchTopicSubjectWithExternal_ID(id_name, topic)) {
-          setExternalIds(quiz?.external_ids);
-        }
-      })
-    })
-  }
-
-  useEffect(() => {
-    if(externalIds?.length < 1){
-      getExternalIDs()
-      setQuizIds(ids)
-    }
-
-    console.log("externalIds", externalIds)
-    console.log("quizIds", quizIds)
-  }, [externalIds])
+  const { externalIds } = useExternalIDs(quiz_details, topic);
 
   return (
-  <div 
-    className="bg-white rounded-xl overflow-hidden shadow-sm flex flex-col cursor-pointer" 
-    onClick={() => onSubjectClick(subject, externalIds, quizIds)}
-  >
+    <div className="bg-white rounded-xl overflow-hidden shadow-sm flex flex-col cursor-pointer" 
+      onClick={() => onSubjectClick(subject, externalIds, ids)}
+    >
     <div className=" bg-white rounded-xl overflow-hidden shadow-lg h-[100%] border border-gray-100">
 
     <div className="relative">
@@ -113,9 +71,9 @@ function SubjectCards(
       </svg>
       <span>{tag || 'BEGINNER'}</span>
 
-      <span className="">
+      {/* <span className="">
         {externalIds && externalIds[0]}
-      </span>
+      </span> */}
     </div>
 
     <div className="p-4">
