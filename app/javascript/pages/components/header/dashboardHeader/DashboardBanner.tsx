@@ -1,6 +1,6 @@
 import './header.css';
 
-function DashboardBanner({handleBackToDashboard, selectedTopic, categories}: any) {
+function DashboardBanner({handleBackToDashboard, selectedTopic, titles}: any) {
   return (
     <header className="p-0 mx-auto relative h-[180px] w-[100%] mb-5 mt-0 shadow-md rounded-lg bg-[#D1D7E3]">
       <button
@@ -19,8 +19,12 @@ function DashboardBanner({handleBackToDashboard, selectedTopic, categories}: any
           <h2 className="text-3xl text-black/80 font-medium font-roboto drop-shadow-lg mt-10">
             {selectedTopic}
           </h2>
-          <p className="text-md text-black/50 font-medium pt-2 w-[80%] font-roboto drop-shadow-md">
-            {categories.find((cat: any) => cat.topic === selectedTopic)?.description.slice(0, 150)}
+          <p className="text-md text-black/50 font-medium pt-2 w-[100%] font-roboto drop-shadow-sm">
+            {titles && titles.map((title: string, index: number) => (
+                <span key={index} className="inline-block bg-gray-200 rounded-full px-3 py-1 text-sm font-medium text-gray-800 mr-2 mt-2 mb-2">
+                  {title}
+                </span>
+              ))}
           </p>
         </div>
       </div>

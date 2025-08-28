@@ -70,6 +70,7 @@ class DashboardController < ApplicationController
     end
   end
 
+  
 
   def file_upload_extract
     # Safely extract and validate parameters
@@ -156,6 +157,54 @@ class DashboardController < ApplicationController
 
 
   private
+
+
+
+  def render_quiz_data
+    if params[:topic].present?
+
+    quiz_conditions = { topic: params[:topic] }
+    quiz_conditions[:subject] = params[:subject] if params[:subject].present?
+        
+    if params[:quiz_ids].present?
+      quiz_ids = params[:quiz_ids].is_a?(Array) ? params[:quiz_ids] : [params[:quiz_ids]]
+      quiz_conditions[:id] = quiz_ids
+    end
+
+    filtered_quizzes = Quiz.includes(:questions).where(quiz_conditions)
+    
+    questions_only = []
+    filtered_quizzes.each do |quiz|
+      quiz.questions.each do |question|
+        questions_only << {
+            id: question.external_id,
+            type: question.question_format,
+            question: question.question,
+            answer: question.answer,
+            incorrect_answers: question.incorrect_answers,
+            hint: question.hint,
+            explanation: question.explanation,
+            difficulty: question.difficulty,
+            estimated_time_seconds: question.estimated_time_seconds,
+            tags: question.tags,
+            path: question.path,
+            quiz_title: quiz.title,
+            subject: quiz.subject,
+            image: get_pic_from_unsplash(quiz.subject)
+          }
+        end
+      end
+      
+      render json: { 
+        topic: params[:topic], 
+        total_questions: questions_only.length,
+        questions: questions_only 
+      }
+
+    else
+      render json: { error: "Missing topic parameter" }, status: 400
+    end
+  end
 
 
   def save_quiz_to_database(quiz_data)
@@ -297,18 +346,22 @@ class DashboardController < ApplicationController
     "Based on the following text content from file '#{filename}', generate quiz questions in this EXACT JSON format: #{json_quiz_example.to_json}
 
     Requirements:
-    - Generate 10-20 questions based on content complexity and amount of information covered
-    - Create a mix of multiple choice or long response questions
-    - Each multiple choice question must have exactly 3 incorrect answers
-    - Each long response should provide 1 option providing context/structure on how to answer the question
-    - Each long response should also provide a clear answer to the question
-    - Use meaningful external_id format like: quiz_subject_001, etc.
-    - Set appropriate difficulty levels to intermediate but throw in some advanced questions
-    - Include relevant tags that describe the question topic
-    - Set realistic time estimates (30-120 seconds per question)
-    - Provide clear explanations for each correct answer
-    - Ensure questions test different aspects: comprehension, application, analysis
-    - Provide optional code snippets for the question for more context, format the code snippets as needed
+    - Generate 10-20 challenging questions that deeply cover the content, designed to promote true understanding and retention.
+    - Include a mix of multiple choice and long response questions.
+    - Ensure topic names are concise (2 words preferred, maximum 3 words).
+    - Each multiple choice question must have exactly 3 plausible but incorrect distractors.
+    - Each long response question must provide:
+        1. A structured guideline for how to approach the answer
+        2. A clear, accurate solution
+    - Use meaningful `external_id` values like: quiz_subject_001, quiz_subject_002, etc.
+    - Assign difficulty levels: mostly advanced, with a few intermediate questions for variety.
+    - Include relevant tags describing the topic of each question.
+    - Set realistic time estimates per question (30–120 seconds).
+    - Provide clear explanations for **why the correct answer is correct**.
+    - Ensure questions evaluate multiple cognitive skills: comprehension, application, analysis, and synthesis.
+    - Include optional code snippets or examples when relevant; format them clearly for readability.
+    - Make questions thought-provoking, avoiding surface-level recall.
+
     #{title_instruction}
     #{topic_instruction}
     #{subject_instruction}

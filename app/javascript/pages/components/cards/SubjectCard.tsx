@@ -54,11 +54,11 @@ function SubjectCards(
         <div
           className="relative bg-white pl-3 pr-4 py-1 text-xs font-semibold text-gray-700 flex items-center gap-1 badge-flag shadow-sm z-20">
           <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth="1.5"
-            stroke="currentColor" className="w-4 h-4">
+            stroke="currentColor" className="w-5 h-4">
             <path strokeLinecap="round" strokeLinejoin="round"
               d="M4.26 10.147a60.438 60.438 0 0 0-.491 6.347A48.627 48.627 0 0 1 12 20.904a48.627 48.627 0 0 1 8.232-4.41 60.46 60.46 0 0 0-.491-6.347m-15.482 0a50.57 50.57 0 0 0-2.658-.813A59.906 59.906 0 0 1 12 3.493a59.903 59.903 0 0 1 10.399 5.84c-.896.248-1.783.52-2.658.814m-15.482 0A50.697 50.697 0 0 1 12 13.489a50.702 50.702 0 0 1 7.74-3.342M6.75 15a.75.75 0 1 0 0-1.5.75.75 0 0 0 0 1.5Zm0 0v-3.675A55.378 55.378 0 0 1 12 8.443m-7.007 11.55A5.981 5.981 0 0 0 6.75 15.75v-1.5" />
           </svg>
-          <div className='z-20'>CERTIFICATE</div>
+          <div className='z-20 text-[0.83rem]'>Average Score: <span className='font-bold text-green-700'>90%</span></div>
         </div>
       </div>
     </div>
@@ -69,7 +69,7 @@ function SubjectCards(
         <path strokeLinecap="round" strokeLinejoin="round"
           d="M3 13.125C3 12.504 3.504 12 4.125 12h2.25c.621 0 1.125.504 1.125 1.125v6.75C7.5 20.496 6.996 21 6.375 21h-2.25A1.125 1.125 0 0 1 3 19.875v-6.75ZM9.75 8.625c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125v11.25c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 0 1-1.125-1.125V8.625ZM16.5 4.125c0-.621.504-1.125 1.125-1.125h2.25C20.496 3 21 3.504 21 4.125v15.75c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 0 1-1.125-1.125V4.125Z" />
       </svg>
-      <span>{tag || 'BEGINNER'}</span>
+      <span>{tag || 'ADVANCE'}</span>
 
       {/* <span className="">
         {externalIds && externalIds[0]}
