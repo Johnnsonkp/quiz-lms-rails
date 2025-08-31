@@ -70,7 +70,6 @@ function Dashboard({ categories, quiz_preview }: DashboardProps) {
       const pathname = window.location.pathname;
       const search = window.location.search;
       const pathSegments = pathname.split('/').filter(segment => segment !== '');
-
       // Check if this is a search route (has query parameters) or path route
       const isSearchRoute = search.length > 0;
       const isPathRoute = pathSegments.length > 1;
@@ -80,17 +79,14 @@ function Dashboard({ categories, quiz_preview }: DashboardProps) {
         const subject = urlParams.get('subject'); // "Algorithm Design and Implementation" 
         const quizIds = urlParams.get('quiz_ids'); // "43"
         const quizIdsArray = quizIds ? quizIds.split(',').map(id => parseInt(id)) : null;
-
         await handleSubjectClick(subject, eIDs, quizIdsArray);
         
       } else if (isPathRoute && pathSegments.length >= 2) {
         const topicSegment = pathSegments[1];
-        const topicName = topicSegment.split('-').join(' '); // "canva-interview" -> "canva interview"
-        
+        const topicName = topicSegment.split('-').join(' ');
         handleTopicClick(topicName);
       }
     };
-
     handleURLRouting();
   }, []);
 
@@ -133,7 +129,7 @@ function Dashboard({ categories, quiz_preview }: DashboardProps) {
 
             <Divider />
 
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mt-7">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mt-5">
               {quiz_preview && quiz_preview.map((quiz: QuizPreview, index: number) => (
                 quiz.topic.toLowerCase() === selectedTopic.toLowerCase() &&
                 <SubjectCards 

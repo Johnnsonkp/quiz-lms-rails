@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Login Page</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="relative bg-gray-50 font-sans">
+
+  <%= render 'shared/header' %>
+
+  <div class="min-h-screen flex items-start justify-center px-6 py-0">
+    <div class="w-full max-w-6xl grid grid-cols-1 md:grid-cols-2 bg-white shadow-sm rounded-3xl overflow-hidden">
+      <!-- Side Shoe Image -->
+      <div class="bg-[url('https://cdn.midjourney.com/414e303a-faf5-4816-a36a-ac61bfe6277b/0_0.png')] bg-cover bg-center hidden md:block relative">
+      </div>
+
+      <!-- Login Form -->
+      <div class="p-10 sm:p-16 flex flex-col justify-center bg-white">
+        <h2 class="text-3xl font-extrabold text-gray-800 mb-8">Sign in to your account</h2>
+        
+        <%= form_with(model: resource, as: resource_name, url: session_path(resource_name), local: true, class: "space-y-6") do |form| %>
+          <% if resource.errors.any? %>
+            <div class="bg-red-50 border border-red-200 rounded-lg p-4 mb-4">
+              <ul class="text-red-600 text-sm">
+                <% resource.errors.full_messages.each do |message| %>
+                  <li><%= message %></li>
+                <% end %>
+              </ul>
+            </div>
+          <% end %>
+
+          <!-- Email -->
+          <div class="relative">
+            <%= form.email_field :email, 
+                id: "email",
+                required: true,
+                autofocus: true,
+                autocomplete: "email",
+                class: "peer w-full border-b-2 border-gray-300 placeholder-transparent focus:outline-none focus:border-blue-500 text-gray-900 py-3 px-1",
+                placeholder: "Email address" %>
+            <label for="email"
+              class="absolute left-1 top-2 text-gray-500 text-sm transition-all peer-placeholder-shown:top-3.5 peer-placeholder-shown:text-base peer-focus:top-2 peer-focus:text-sm">
+              Email address
+            </label>
+          </div>
+
+          <!-- Password -->
+          <div class="relative">
+            <%= form.password_field :password,
+                id: "password", 
+                required: true,
+                autocomplete: "current-password",
+                class: "peer w-full border-b-2 border-gray-300 placeholder-transparent focus:outline-none focus:border-blue-500 text-gray-900 py-3 px-1",
+                placeholder: "Password" %>
+            <label for="password"
+              class="absolute left-1 top-2 text-gray-500 text-sm transition-all peer-placeholder-shown:top-3.5 peer-placeholder-shown:text-base peer-focus:top-2 peer-focus:text-sm">
+              Password
+            </label>
+          </div>
+
+          <!-- Options -->
+          <div class="flex items-center justify-between text-sm">
+            <% if devise_mapping.rememberable? %>
+              <label class="flex items-center gap-2 text-gray-600">
+                <%= form.check_box :remember_me, class: "accent-blue-600" %>
+                Remember me
+              </label>
+            <% end %>
+            <%= link_to "Forgot password?", new_password_path(resource_name), class: "text-blue-600 hover:underline" %>
+          </div>
+
+          <!-- Submit Button -->
+          <%= form.submit "Sign In", 
+              class: "cursor-pointer w-full bg-blue-600 hover:bg-blue-700 text-white py-3 rounded-xl font-semibold transition duration-300 shadow-lg" %>
+        <% end %>
+
+        <!-- Divider -->
+        <div class="flex items-center gap-4 my-6">
+          <hr class="flex-grow border-gray-300" />
+          <span class="text-gray-400 text-sm">OR</span>
+          <hr class="flex-grow border-gray-300" />
+        </div>
+
+        <!-- Social Logins -->
+        <div class="flex flex-col gap-4">
+          <%= button_to user_google_oauth2_omniauth_authorize_path, 
+              method: :post, 
+              data: { turbo: false },
+              class: "flex items-center justify-center gap-3 py-2 px-4 border border-gray-300 rounded-xl bg-white hover:bg-gray-100 transition w-full" do %>
+            <img src="https://www.svgrepo.com/show/475656/google-color.svg" class="w-5 h-5" alt="Google" />
+            Continue with Google
+          <% end %>
+
+        <!-- Sign Up Link -->
+        <p class="text-center text-sm text-gray-600 mt-6">
+          Don’t have an account?
+          <%= link_to "Sign up", new_registration_path(resource_name), class: "text-blue-600 hover:underline" %>
+        </p>
+      </div>
+    </div>
+  </div>
+
+</body>
+</html>

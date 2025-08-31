@@ -1,6 +1,13 @@
 Rails.application.routes.draw do
   root to: 'template#home'
+
+  devise_for :users, controllers: {
+    omniauth_callbacks: 'users/omniauth_callbacks'
+  }
+
   get 'inertia-example', to: 'inertia_example#index'
+  get '/login', to: 'template#login'
+  get '/signup', to: 'template#signup'
 
   # dashboard routes
   get 'dashboard', to: 'dashboard#index'

@@ -1,0 +1,72 @@
+<header class="relative py-2 md:py-4">
+        <div class="px-4 mx-auto max-w-7xl sm:px-6 lg:px-8">
+            <div class="flex items-center justify-between">
+                <div class="flex-shrink-0">
+                    <a href="/" title="" class="flex text-2xl font-bold rounded outline-none focus:ring-1 focus:ring-gray-900 focus:ring-offset-2">
+                      <%= image_tag "quiz-icon.png", alt: "Quiz Logo", class: "w-9 h-9" %>
+                      QLearn
+                    </a>
+                </div>
+
+                <div class="lg:flex lg:ml-16 lg:items-center lg:justify-center lg:space-x-10">
+                  <% if user_signed_in? %>
+                    <!-- User Avatar and Menu -->
+                    <div class="flex items-center space-x-4">
+
+                      <!-- Dashboard Link -->
+                      <%= link_to dashboard_path,
+                          class: "inline-block px-6 py-2 text-sm font-semibold text-white transition-all duration-200 bg-indigo-600 rounded-lg hover:bg-indigo-700 hover:shadow-lg transform hover:-translate-y-0.5" do %>
+                        Dashboard
+                      <% end %>
+
+                      <!-- Logout Button -->
+                      <%= button_to destroy_user_session_path, 
+                          method: :delete, 
+                          data: { confirm: "Are you sure you want to log out?" },
+                          class: "inline-flex items-center px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition-all duration-200 cursor-pointer" do %>
+                        <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"></path>
+                        </svg>
+                        Logout
+                      <% end %>
+
+                       <!-- User Avatar with Initial -->
+                      <div class="flex items-center space-x-3">
+                        <div class="w-10 h-10 bg-indigo-600 rounded-full flex items-center justify-center">
+                          <span class="text-white font-semibold text-lg">
+                            <%= current_user.name&.first&.upcase || current_user.email&.first&.upcase || "U" %>
+                          </span>
+                        </div>
+                        <div class="hidden md:block">
+                          <p class="text-sm font-medium text-gray-900">
+                            <%= current_user.name || current_user.email&.split('@')&.first&.titleize || "User" %>
+                          </p>
+                          <% if current_user.provider.present? %>
+                            <p class="text-xs text-gray-500">
+                              via <%= current_user.provider.titleize %>
+                            </p>
+                          <% end %>
+                        </div>
+                      </div>
+                    </div>
+                  <% else %>
+                    <!-- Guest User Links -->
+
+                    <%= link_to "Sign up", new_registration_path(resource_name), 
+                      class: "text-base font-medium text-gray-900 transition-all duration-200 rounded focus:outline-none font-pj hover:text-opacity-50 focus:ring-1 focus:ring-gray-900 focus:ring-offset-2" 
+                    %>
+
+                    <%= link_to login_path,
+                        class: "text-base font-medium text-gray-900 transition-all duration-200 rounded focus:outline-none font-pj hover:text-opacity-50 focus:ring-1 focus:ring-gray-900 focus:ring-offset-2" do %>
+                          Login
+                      <% end %>
+
+                    <%= link_to dashboard_path,
+                        class: "inline-block px-8 py-2 text-md font-semibold text-white transition-all duration-200 bg-indigo-600 rounded-xl hover:bg-indigo-700 hover:shadow-lg transform hover:-translate-y-0.2" do %>
+                          Go to Dashboard
+                      <% end %>
+                  <% end %>
+                </div>
+            </div>
+        </div>
+    </header>
