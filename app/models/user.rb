@@ -14,6 +14,6 @@ class User < ApplicationRecord
     end
   end
   
-  # Your existing code stays here...
-  # has_many :quizzes, etc.
+  # Quiz associations
+  has_many :quizzes, dependent: :destroy
 end

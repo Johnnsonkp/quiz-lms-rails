@@ -2,7 +2,7 @@ import { useCallback, useEffect, useState } from "react";
 
 import { QuizDetails } from "../types/dashboard";
 
-export const useExternalIDs = (quiz_details: QuizDetails[] | null, topic: string) => {
+export const useExternalIDs = (quiz_details: QuizDetails[] | null, topic: string | null) => {
   const [externalIds, setExternalIds] = useState<string[]>([]);
   // const [loading, setLoading] = useState<Boolean>(false);
   // const [error, setError] = useState<string | null>(null);

@@ -1,18 +1,53 @@
 require "pdf-reader"
 
 class DashboardController < ApplicationController
-  before_action :categories
+  skip_before_action :authenticate_user! # Allow unauthenticated access to dashboard
+  before_action :categories, :dashboard_stats
   before_action :get_quizzes_preview, only: [:index]
   skip_before_action :verify_authenticity_token, only: [:file_upload_extract]
 
   def index
     @categories = [] if @categories.nil?
     @quiz_preview = [] if @quiz_preview.nil?
+    @dashboard_stats = [] if @dashboard_stats.nil?
+
+    puts "Dashboard stats: #{@dashboard_stats.inspect}" if Rails.env.development?
 
     render inertia: 'dashboard/Dashboard', props: { 
-      categories:@categories,
-      quiz_preview: @quiz_preview 
+      categories: @categories,
+      dashboard_stats: @dashboard_stats,
+      url_params: "/dashboard"
     }
+  end
+
+  def get_topic_quizzes
+    if params[:topic].present?
+      puts "Fetching quizzes for topic: #{params[:topic]}" if Rails.env.development?
+      topic_name = params[:topic]
+
+      subjects = get_subjects_for_topic(topic_name)
+      quiz_preview = get_topic_quizzes_preview(topic_name)
+
+      render json: { subjects: subjects, quiz_preview: quiz_preview }
+    else
+      render json: { error: "Missing topic parameter" }, status: 400
+    end
+  end
+
+  def page_refresh
+    if params[:topic].present?
+      puts "Page refresh for topic: #{params[:topic]}" if Rails.env.development?
+      puts "Current categories: #{@categories.inspect}" if Rails.env.development?
+      puts "Current dashboard stats: #{@dashboard_stats.inspect}" if Rails.env.development?
+
+      render inertia: 'dashboard/Dashboard', props: { 
+        categories: @categories,
+        dashboard_stats: @dashboard_stats,
+        url_params: params[:topic],
+      }
+    else
+      render json: { error: "Missing topic parameter" }, status: 400
+    end
   end
 
 
@@ -79,11 +114,6 @@ class DashboardController < ApplicationController
     topic = params[:topic]&.strip&.presence
     subject = params[:subject]&.strip&.presence
 
-    puts "Uploaded file: #{uploaded_file.inspect}" if Rails.env.development?
-    puts "Title: #{title}" if Rails.env.development?
-    puts "Topic: #{topic}" if Rails.env.development?
-    puts "Subject: #{subject}" if Rails.env.development?
-
     # Validate required file parameter
     unless uploaded_file.present?
       render json: { error: "No file uploaded" }, status: :unprocessable_entity
@@ -129,9 +159,6 @@ class DashboardController < ApplicationController
       else
         Rails.logger.error "Failed to generate quiz data from file"
       end
-
-      puts "Extracted text: #{file_text.truncate(100)}" if Rails.env.development?
-      puts "Quiz data generated: #{quiz_data.present? ? 'Yes' : 'No'}" if Rails.env.development?
       
       render json: { 
         message: "File uploaded and processed successfully", 
@@ -151,14 +178,19 @@ class DashboardController < ApplicationController
 
 
 
-  def check_score
-
-  end
-
-
   private
 
+  def check_score
+  end
 
+  def dashboard_stats
+    @dashboard_stats = { 
+      total_quizzes: Quiz.count,
+      total_questions: Question.count,
+      total_topics: Quiz.distinct.count(:topic),
+      total_subjects: Quiz.distinct.count
+    }
+  end
 
   def render_quiz_data
     if params[:topic].present?
@@ -342,7 +374,6 @@ class DashboardController < ApplicationController
         ]
     }
     
-    
     "Based on the following text content from file '#{filename}', generate quiz questions in this EXACT JSON format: #{json_quiz_example.to_json}
 
     Requirements:
@@ -370,11 +401,21 @@ class DashboardController < ApplicationController
     #{truncated_text}"
   end
 
+  # def categories
+  #   @categories = Quiz.distinct.order(:topic).pluck(:topic).map do |topic|
+  #     # Get the first description for this topic
+  #     desc = Quiz.where(topic: topic).pluck(:description).first
+  #     { topic: topic, description: desc }
+  #   end
+  #   puts "Setting Categories: #{@categories.inspect}" if Rails.env.development?
+  # rescue => e
+  #   Rails.logger.error "Error loading categories: #{e.message}"
+  #   @categories = []
+  # end
+
   def categories
     @categories = Quiz.distinct.order(:topic).pluck(:topic).map do |topic|
-      # Get the first description for this topic
-      desc = Quiz.where(topic: topic).pluck(:description).first
-      { topic: topic, description: desc }
+      { topic: topic }
     end
     puts "Setting Categories: #{@categories.inspect}" if Rails.env.development?
   rescue => e
@@ -392,10 +433,51 @@ class DashboardController < ApplicationController
     end
   end
 
+  def get_topic_quizzes_preview(topic)
+    # Fetch quizzes for the given topic, including their questions
+    # Filter by user if signed in, otherwise show public quizzes
+    quizzes = if user_signed_in?
+      current_user.quizzes.includes(:questions).where(topic: topic)
+    else
+      Quiz.public_quizzes.includes(:questions).where(topic: topic)
+    end
+
+    # Group quizzes by subject
+    subjects = quizzes.group_by(&:subject).map do |subject, subject_quizzes|
+      # For each quiz, map its title and external_ids of its questions
+      quiz_details = subject_quizzes.map do |quiz|
+        {
+          id: quiz.id,
+          title: quiz.title,
+          description: quiz.description,
+          external_ids: quiz.questions.pluck(:external_id)
+        }
+      end
+
+      {
+        subject: subject,
+        topic: topic,
+        quiz_details: quiz_details,
+        img: get_pic_from_unsplash(subject)
+      }
+    end
+    puts "Quiz preview for topic '#{topic}': #{subjects.inspect}" if Rails.env.development?
+    subjects
+  rescue => e
+    Rails.logger.error "Error loading quiz preview: #{e.message}"
+    []
+  end
+
 
   def get_quizzes_preview
-    # adding external_ids intp quiz preview
-    @quiz_preview = Quiz.all.includes(:questions).group_by(&:topic).map do |topic, topic_quizzes|
+    # Get quizzes for current user only
+    user_quizzes = if user_signed_in?
+      current_user.quizzes.includes(:questions)
+    else
+      Quiz.public_quizzes.includes(:questions)  # Show quizzes without users for non-logged in users
+    end
+
+    @quiz_preview = user_quizzes.group_by(&:topic).map do |topic, topic_quizzes|
       subjects = topic_quizzes.group_by(&:subject).map do |subject, subject_quizzes|
         # mapping each quiz title to its external_ids
         quiz_external_ids = subject_quizzes.map do |quiz|
@@ -416,24 +498,6 @@ class DashboardController < ApplicationController
       end
       subjects
     end.flatten 
-
-    # Group quizzes by topic and subject, then collect titles for each subject
-    # @quiz_preview = Quiz.all.group_by(&:topic).map do |topic, topic_quizzes|
-    #   subjects = topic_quizzes.group_by(&:subject).map do |subject, subject_quizzes|
-    #      puts "Setting Quiz topic_quizzes: #{topic_quizzes.inspect}" if Rails.env.development?
-    #      puts "Setting Quiz topic: #{topic.inspect}" if Rails.env.development?
-    #     {
-    #       topic: topic,
-    #       subject: subject,
-    #       titles: subject_quizzes.map(&:title),
-    #       description: topic_quizzes.map(&:description),
-    #       img: get_pic_from_unsplash(subject),
-    #     }
-    #   end
-    #   subjects
-    # end.flatten
-    
-    # puts "Setting Quiz Preview: #{@quiz_preview.inspect}" if Rails.env.development?
   rescue => e
     Rails.logger.error "Error loading quiz preview: #{e.message}"
     @quiz_preview = []
@@ -478,7 +542,6 @@ class DashboardController < ApplicationController
       request['Accept'] = 'application/json'
       request['Accept-Version'] = 'v1'
       request['Authorization'] = "Client-ID #{client_id}"
-
       response = http.request(request)
 
       if response.code == '200'
@@ -494,8 +557,5 @@ class DashboardController < ApplicationController
       return nil
     end
   end
-
-
-
 
 end

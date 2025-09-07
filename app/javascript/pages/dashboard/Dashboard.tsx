@@ -12,26 +12,53 @@ import SubjectCards from '../components/cards/SubjectCard';
 import { slugify } from '../../utils/slugify';
 import { useQuizData } from '../../hooks/useQuizData';
 
-function Dashboard({ categories, quiz_preview }: DashboardProps) {
+function Dashboard({ categories, dashboard_stats, url_params }: DashboardProps) {
   const [activeSection, setActiveSection] = useState('dashboard');
   const [selectedTopic, setSelectedTopic] = useState<string | null>(null);
   const [selectedSubject, setSelectedSubject] = useState<string | null>(null);
   const [eIDs, setEIDs] = useState<string[] | null>(null);
   const { quizData, loading, error, fetchQuizData } = useQuizData();
+  const [quiz_preview, setQuizPreview] = useState<QuizPreview[] | null>([]);
+  const [loadingQuizPreview, setLoadingQuizPreview] = useState(false);
+
+  const getSelectedTopic = async (topic: string) => {
+    setLoadingQuizPreview(true);
+
+    try {
+      const response = await fetch(`/dashboard/${encodeURIComponent(topic)}/get`, {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+          'Accept': 'application/json'
+        },
+      });
+      
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+
+      const data = await response.json();
+      setQuizPreview(data.quiz_preview);
+      
+    } catch (error) {
+      console.error("Error fetching topic data:", error);
+      setQuizPreview([]);
+    } finally {
+      setLoadingQuizPreview(false);
+    }
+  }
 
   const handleTopicClick = (topicName: string) => {
     if (!topicName) return;
 
-    console.log("topicName:", topicName);
     setSelectedTopic(topicName);
-    setSelectedSubject(null);
     setActiveSection(topicName);
+    getSelectedTopic(topicName);
     window.history.pushState({}, '', `/dashboard/${slugify(topicName)}`);
   };
 
   const handleURLParams = (subject: string | null, quizIds: number[] | null) => {
     if(!subject && !quizIds) return;
-
     const url = new URL(window.location.origin);
     url.pathname = '/dashboard';
     url.searchParams.set('topic', selectedTopic || '');
@@ -43,19 +70,20 @@ function Dashboard({ categories, quiz_preview }: DashboardProps) {
   const handleSubjectClick = async (
     subject: string | null, 
     externalIds: string[] | null, 
-    quizIds: number[] | null
+    quizIds: number[] | number | null
   ) => {
     if (!subject || !quizIds || !externalIds) return;
-
     console.log('External IDs:', externalIds);
-    console.log("subject:", subject);
-    console.log("quizIds:", quizIds);
+    console.log('eIDs:', eIDs);
+    
+    // Normalize quizIds to always be an array
+    const normalizedQuizIds = Array.isArray(quizIds) ? quizIds : [quizIds];
     
     setEIDs(externalIds);
     setSelectedSubject(subject);
     setActiveSection('quiz');
-    handleURLParams(subject, quizIds)
-    await fetchQuizData(selectedTopic, subject, quizIds);
+    handleURLParams(subject, normalizedQuizIds);
+    await fetchQuizData(selectedTopic, subject, normalizedQuizIds);
   };
 
   const handleBackToDashboard = () => {
@@ -64,31 +92,30 @@ function Dashboard({ categories, quiz_preview }: DashboardProps) {
     setActiveSection('dashboard');
   };
 
-  // useEffect to get all pathnames in the URL
+  // Handle page refresh and initial URL routing
   useEffect(() => {
-    const handleURLRouting = async () => {
-      const pathname = window.location.pathname;
-      const search = window.location.search;
-      const pathSegments = pathname.split('/').filter(segment => segment !== '');
-      // Check if this is a search route (has query parameters) or path route
-      const isSearchRoute = search.length > 0;
-      const isPathRoute = pathSegments.length > 1;
-
-      if (isSearchRoute) {
-        const urlParams = new URLSearchParams(search);
-        const subject = urlParams.get('subject'); // "Algorithm Design and Implementation" 
-        const quizIds = urlParams.get('quiz_ids'); // "43"
-        const quizIdsArray = quizIds ? quizIds.split(',').map(id => parseInt(id)) : null;
-        await handleSubjectClick(subject, eIDs, quizIdsArray);
+    const handleInitialRouting = async () => {
+      if (!url_params || url_params === '/dashboard') return;
+      
+      try {
+        const topicName = url_params
+          .replace(/-/g, ' ')
+          .replace(/\b\w/g, (char: string) => char.toUpperCase());
         
-      } else if (isPathRoute && pathSegments.length >= 2) {
-        const topicSegment = pathSegments[1];
-        const topicName = topicSegment.split('-').join(' ');
-        handleTopicClick(topicName);
+        console.log("Initializing topic from URL:", topicName);
+        setSelectedTopic(topicName);
+        setActiveSection(topicName);
+        
+        // Fetch topic data
+        await getSelectedTopic(topicName);
+      } catch (error) {
+        console.error("Error during page refresh routing:", error);
+        setSelectedTopic(null);
+        setActiveSection('dashboard');
       }
     };
-    handleURLRouting();
-  }, []);
+    handleInitialRouting();
+  }, [url_params])
 
   if(error){ return <div className="text-center py-8 text-red-500">{error}</div>}
 
@@ -101,15 +128,17 @@ function Dashboard({ categories, quiz_preview }: DashboardProps) {
         activeSection={activeSection}
       />
 
-      <main className="flex-1 p-4 !pt-3 !mt-0 md:p-6 overflow-y-auto w-[100%] bg-[#F9FAFB]">
+      <main
+        className="flex-1 p-4 !pt-3 !mt-0 md:p-6 overflow-y-auto w-[100%] bg-[#F9FAFB] transition-opacity duration-500"
+        style={{ opacity: loading || loadingQuizPreview ? 0 : 1 }}
+      >
         {!selectedTopic && activeSection === 'dashboard' && (
-          <DashboardHome 
-            quiz_preview={quiz_preview}
-            categories={categories}
-          />)}
+          <DashboardHome dashboard_stats={dashboard_stats}/>)}
 
         {/* Quiz View - Show quiz component for selected subject */}
         {loading && <SimpleLoadScreen />}
+        {loadingQuizPreview && <SimpleLoadScreen />}
+
         {selectedSubject && activeSection === 'quiz' && quizData && !loading &&(
           <SingleQuestionComponent
             quizData={quizData}
@@ -124,26 +153,33 @@ function Dashboard({ categories, quiz_preview }: DashboardProps) {
               handleBackToDashboard={handleBackToDashboard}
               selectedTopic={selectedTopic}
               categories={categories}
-              titles={quiz_preview.filter((quiz: QuizPreview) => quiz.topic == selectedTopic).flatMap(quiz => quiz.titles)}
+              titles={quiz_preview?.filter((quiz: QuizPreview) => quiz.topic == selectedTopic).flatMap((quiz, idx) => quiz?.quiz_details?.[idx]?.title)}
             />
 
             <Divider />
 
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mt-5">
-              {quiz_preview && quiz_preview.map((quiz: QuizPreview, index: number) => (
-                quiz.topic.toLowerCase() === selectedTopic.toLowerCase() &&
-                <SubjectCards 
-                  key={index}
-                  ids={quiz?.ids || null}
-                  titles={quiz.titles}
-                  subject={quiz.subject}
-                  description={quiz.description.filter((a: string) => a.includes(quiz.subject))}
-                  topic={selectedTopic}
-                  tag={quiz?.tag || null}
-                  quiz_details={quiz.quiz_details || null}
-                  subjectImg={quiz.img}
-                  onSubjectClick={handleSubjectClick}
-                />))}
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mt-7 gap-y-8">
+              {quiz_preview &&
+                quiz_preview
+                  .filter(
+                    (quiz: QuizPreview) =>
+                      quiz?.topic &&
+                      quiz.topic.toLowerCase() === selectedTopic.toLowerCase()
+                  )
+                  .map((quiz: QuizPreview, index: number) => (
+                    <SubjectCards
+                      key={index}
+                      ids={quiz.quiz_details?.map((detail) => detail?.id) || null}
+                      titles={quiz.quiz_details?.filter((a) => a.title)?.map((a) => a.title) || []}
+                      subject={quiz.subject}
+                      description={quiz?.quiz_details?.[0]?.description || null}
+                      topic={quiz.topic}
+                      tag={quiz.tag || null}
+                      quiz_details={quiz.quiz_details || null}
+                      subjectImg={quiz.img}
+                      onSubjectClick={handleSubjectClick}
+                    />
+                  ))}
             </div>
 
             {quiz_preview && quiz_preview.filter((quiz: QuizPreview) => quiz.topic === selectedTopic).length === 0 && (
