@@ -26,7 +26,8 @@ function SingleComponentHeader(
           <h1 className="!text-3xl font-bold text-gray-800 mb-0">
             {selectedSubject?.subject || quizData?.topic || 'Quiz'}
           </h1>
-          <p className="text-gray-600">Navigate through {totalQuestions} questions</p>
+          {/* <p className="text-gray-600">Navigate through {totalQuestions} questions</p> */}
+          <p className="text-gray-600">{selectedSubject && selectedSubject? selectedSubject : ""}</p>
         </div>
 
         <div className="text-center mb-6 flex-[0.3]">

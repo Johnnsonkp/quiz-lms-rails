@@ -107,6 +107,8 @@ export default function SingleQuestionComponent({ quizData, selectedSubject, onB
         calculateProgress={calculateProgress} 
         answers={answers} 
         setCurrentQuestionIndex={setCurrentQuestionIndex}
+        quizData={quizData}
+        selectedSubject={selectedSubject}
       />
 
       <div className=''>

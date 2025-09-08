@@ -417,7 +417,6 @@ class DashboardController < ApplicationController
     @categories = Quiz.distinct.order(:topic).pluck(:topic).map do |topic|
       { topic: topic }
     end
-    puts "Setting Categories: #{@categories.inspect}" if Rails.env.development?
   rescue => e
     Rails.logger.error "Error loading categories: #{e.message}"
     @categories = []
@@ -461,7 +460,6 @@ class DashboardController < ApplicationController
         img: get_pic_from_unsplash(subject)
       }
     end
-    puts "Quiz preview for topic '#{topic}': #{subjects.inspect}" if Rails.env.development?
     subjects
   rescue => e
     Rails.logger.error "Error loading quiz preview: #{e.message}"

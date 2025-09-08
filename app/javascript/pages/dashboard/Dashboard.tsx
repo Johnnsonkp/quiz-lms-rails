@@ -20,6 +20,7 @@ function Dashboard({ categories, dashboard_stats, url_params }: DashboardProps) 
   const { quizData, loading, error, fetchQuizData } = useQuizData();
   const [quiz_preview, setQuizPreview] = useState<QuizPreview[] | null>([]);
   const [loadingQuizPreview, setLoadingQuizPreview] = useState(false);
+  const [showSidebar, setShowSidebar] = useState(false);
 
   const getSelectedTopic = async (topic: string) => {
     setLoadingQuizPreview(true);
@@ -122,71 +123,96 @@ function Dashboard({ categories, dashboard_stats, url_params }: DashboardProps) 
   return (
     <div className="flex flex-col md:flex-row min-h-screen w-full">
       <Head title="QLearn.ai" />
-      <SideNav 
-        categories={categories}
-        handleTopicClick={handleTopicClick}
-        activeSection={activeSection}
-      />
+
+      {/* Sidebar Toggle Button */}
+      <button
+        className="md:hidden fixed top-4 left-4 z-40 bg-white border rounded p-2 shadow"
+        onClick={() => setShowSidebar((prev) => !prev)}
+        aria-label="Toggle sidebar"
+      >
+        {showSidebar ? (
+          <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+          </svg>
+        ) : (
+          <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
+          </svg>
+        )}
+      </button>
+
+      {/* SideNav with toggle */}
+      <div className={`md:static md:translate-x-0 md:block
+        fixed top-0 left-0 h-full transition-transform duration-300
+        ${showSidebar ? 'translate-x-0' : '-translate-x-full'} w-64 z-30`}
+        style={{ background: '#fff', height: '100vh' }}
+      >
+        <SideNav 
+          categories={categories}
+          handleTopicClick={handleTopicClick}
+          activeSection={activeSection}
+        />
+      </div>
 
       <main
-        className="flex-1 p-4 !pt-3 !mt-0 md:p-6 overflow-y-auto w-[100%] bg-[#F9FAFB] transition-opacity duration-500"
-        style={{ opacity: loading || loadingQuizPreview ? 0 : 1 }}
+      className="flex-1 p-4 !pt-3 !mt-0 md:p-6 overflow-y-auto w-[100%] bg-[#F9FAFB] transition-opacity duration-300"
+      style={{ opacity: loading || loadingQuizPreview ? 0 : 1 }}
       >
-        {!selectedTopic && activeSection === 'dashboard' && (
-          <DashboardHome dashboard_stats={dashboard_stats}/>)}
+      {!selectedTopic && activeSection === 'dashboard' && (
+        <DashboardHome dashboard_stats={dashboard_stats}/>)}
 
-        {/* Quiz View - Show quiz component for selected subject */}
-        {loading && <SimpleLoadScreen />}
-        {loadingQuizPreview && <SimpleLoadScreen />}
+      {/* Quiz View - Show quiz component for selected subject */}
+      {loading && <SimpleLoadScreen />}
+      {loadingQuizPreview && <SimpleLoadScreen />}
 
-        {selectedSubject && activeSection === 'quiz' && quizData && !loading &&(
-          <SingleQuestionComponent
-            quizData={quizData}
-            selectedSubject={selectedSubject}
-            onBack={handleBackToDashboard}
-          /> )}
+      {selectedSubject && activeSection === 'quiz' && quizData && !loading &&(
+        <SingleQuestionComponent
+        quizData={quizData}
+        selectedSubject={selectedSubject}
+        onBack={handleBackToDashboard}
+        /> )}
 
-        {/* Topic View - Show subjects for selected topic */}
-        {selectedTopic && activeSection === selectedTopic && (
-          <section className="space-y-2">
-            <DashboardBanner 
-              handleBackToDashboard={handleBackToDashboard}
-              selectedTopic={selectedTopic}
-              categories={categories}
-              titles={quiz_preview?.filter((quiz: QuizPreview) => quiz.topic == selectedTopic).flatMap((quiz, idx) => quiz?.quiz_details?.[idx]?.title)}
+      {/* Topic View - Show subjects for selected topic */}
+      {selectedTopic && activeSection === selectedTopic && (
+        <section className="space-y-2">
+        <DashboardBanner 
+          handleBackToDashboard={handleBackToDashboard}
+          selectedTopic={selectedTopic}
+          categories={categories}
+          titles={quiz_preview?.filter((quiz: QuizPreview) => quiz.topic?.toLowerCase() == selectedTopic?.toLowerCase()).flatMap((quiz) => quiz?.quiz_details?.map(detail => detail?.title).filter(Boolean) || [])}
+        />
+
+        <Divider />
+
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mt-7 gap-y-8">
+          {quiz_preview &&
+          quiz_preview
+            .filter(
+            (quiz: QuizPreview) =>
+              quiz?.topic &&
+              quiz.topic.toLowerCase() === selectedTopic.toLowerCase()
+            )
+            .map((quiz: QuizPreview, index: number) => (
+            <SubjectCards
+              key={index}
+              ids={quiz.quiz_details?.map((detail) => detail?.id) || null}
+              titles={quiz.quiz_details?.filter((a) => a.title)?.map((a) => a.title) || []}
+              subject={quiz.subject}
+              description={quiz?.quiz_details?.[0]?.description || null}
+              topic={quiz.topic}
+              tag={quiz.tag || null}
+              quiz_details={quiz.quiz_details || null}
+              subjectImg={quiz.img}
+              onSubjectClick={handleSubjectClick}
             />
+            ))}
+        </div>
 
-            <Divider />
-
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mt-7 gap-y-8">
-              {quiz_preview &&
-                quiz_preview
-                  .filter(
-                    (quiz: QuizPreview) =>
-                      quiz?.topic &&
-                      quiz.topic.toLowerCase() === selectedTopic.toLowerCase()
-                  )
-                  .map((quiz: QuizPreview, index: number) => (
-                    <SubjectCards
-                      key={index}
-                      ids={quiz.quiz_details?.map((detail) => detail?.id) || null}
-                      titles={quiz.quiz_details?.filter((a) => a.title)?.map((a) => a.title) || []}
-                      subject={quiz.subject}
-                      description={quiz?.quiz_details?.[0]?.description || null}
-                      topic={quiz.topic}
-                      tag={quiz.tag || null}
-                      quiz_details={quiz.quiz_details || null}
-                      subjectImg={quiz.img}
-                      onSubjectClick={handleSubjectClick}
-                    />
-                  ))}
-            </div>
-
-            {quiz_preview && quiz_preview.filter((quiz: QuizPreview) => quiz.topic === selectedTopic).length === 0 && (
-              <div className="text-center py-8">
-                <p className="text-gray-500">No subjects available for this topic.</p>
-              </div>)}
-          </section>)}
+        {quiz_preview && quiz_preview.filter((quiz: QuizPreview) => quiz.topic === selectedTopic).length === 0 && (
+          <div className="text-center py-8">
+          <p className="text-gray-500">No subjects available for this topic.</p>
+          </div>)}
+        </section>)}
       </main>
     </div>
   )
