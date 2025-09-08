@@ -39,7 +39,7 @@ function DashboardBanner({handleBackToDashboard, selectedTopic, titles}: any) {
               {titles &&
               titles
                 .filter(Boolean)
-                .slice(startIndex, startIndex + 6)
+                .slice(startIndex, startIndex + 5)
                 .map((title: string, index: number) => (
                 <span
                   key={startIndex + index}
@@ -53,10 +53,10 @@ function DashboardBanner({handleBackToDashboard, selectedTopic, titles}: any) {
               className="p-1 px-2 rounded-full bg-gray-200 hover:bg-gray-300 text-gray-700 ml-2 disabled:opacity-50 cursor-pointer"
               onClick={() =>
               setStartIndex((prev: number) =>
-                Math.min(prev + 1, Math.max(0, titles.filter(Boolean).length - 6))
+                Math.min(prev + 1, Math.max(0, titles.filter(Boolean).length - 5))
               )
               }
-              disabled={titles && startIndex + 6 >= titles.filter(Boolean).length}
+              disabled={titles && startIndex + 5 >= titles.filter(Boolean).length}
               aria-label="Next"
               type="button"
             >

@@ -193,18 +193,18 @@ function Dashboard({ categories, dashboard_stats, url_params }: DashboardProps) 
               quiz.topic.toLowerCase() === selectedTopic.toLowerCase()
             )
             .map((quiz: QuizPreview, index: number) => (
-            <SubjectCards
-              key={index}
-              ids={quiz.quiz_details?.map((detail) => detail?.id) || null}
-              titles={quiz.quiz_details?.filter((a) => a.title)?.map((a) => a.title) || []}
-              subject={quiz.subject}
-              description={quiz?.quiz_details?.[0]?.description || null}
-              topic={quiz.topic}
-              tag={quiz.tag || null}
-              quiz_details={quiz.quiz_details || null}
-              subjectImg={quiz.img}
-              onSubjectClick={handleSubjectClick}
-            />
+              <SubjectCards
+                key={index}
+                ids={quiz.quiz_details?.map((detail) => detail?.id) || null}
+                titles={quiz.quiz_details?.filter((a) => a.title)?.map((a) => a.title) || []}
+                subject={quiz.subject}
+                description={quiz?.quiz_details?.[0]?.description || null}
+                topic={quiz.topic}
+                tag={quiz.tag || null}
+                quiz_details={quiz.quiz_details || null}
+                subjectImg={quiz.img}
+                onSubjectClick={handleSubjectClick}
+              />
             ))}
         </div>
 
