@@ -47,8 +47,8 @@
   bottom: 0;
   z-index: 1;
   background: #11998e;  /* fallback for old browsers */
-  background: -webkit-linear-gradient(to right, rgba(56, 239, 125, 0.6), rgba(17, 153, 142, 0.6));  /* Chrome 10-25, Safari 5.1-6 */
-  background: linear-gradient(to right, rgba(56, 239, 125, 0.6), rgba(17, 153, 142, 0.6)); /* W3C, IE 10+/ Edge, Firefox 16+, Chrome 26+, Opera 12+, Safari 7+ */
+  background: -webkit-linear-gradient(to right, rgba(56, 239, 125, 0.4), rgba(17, 153, 142, 0.6));  /* Chrome 10-25, Safari 5.1-6 */
+  background: linear-gradient(to right, rgba(56, 239, 125, 0.4), rgba(17, 153, 142, 0.6)); /* W3C, IE 10+/ Edge, Firefox 16+, Chrome 26+, Opera 12+, Safari 7+ */
 
 }
 

@@ -31,6 +31,11 @@ class DashboardController < ApplicationController
       puts "Attempting to delete quiz with ID: #{params[:quiz_ids]}" if Rails.env.development?
 
       quizzes = Quiz.where(id: params[:quiz_ids])
+      quizzes.each do |quiz|
+        # Destroy associated quiz_questions and questions if needed
+        quiz.quiz_questions.destroy_all if quiz.respond_to?(:quiz_questions)
+        quiz.questions.destroy_all if quiz.respond_to?(:questions)
+      end
 
       if quizzes.exists?
         quizzes.destroy_all

@@ -59,9 +59,7 @@ function Dashboard({ categories, dashboard_stats, url_params }: DashboardProps) 
 
     // Filter out undefined and convert to string
     const quizIds = ids.filter((id): id is number => id !== undefined);
-
     if (quizIds.length === 0) return;
-
     console.log("Deleting quiz with IDs:", quizIds);
 
     try {
@@ -81,6 +79,11 @@ function Dashboard({ categories, dashboard_stats, url_params }: DashboardProps) 
       }
       const data = await response.json();
       console.log("Quiz deleted successfully:", data);
+
+      setSelectedSubject(null);
+      setSelectedTopic(null);
+      setActiveSection('dashboard');
+
     } catch (error) {
       console.error("Error deleting quiz:", error);
     }
@@ -181,7 +184,7 @@ function Dashboard({ categories, dashboard_stats, url_params }: DashboardProps) 
       {/* SideNav with toggle */}
       <div className={`md:static md:translate-x-0 md:block
         fixed top-0 left-0 h-full transition-transform duration-300 shadow-lg
-        ${showSidebar ? 'translate-x-0' : '-translate-x-full'} w-64 z-30`}
+        ${showSidebar ? 'translate-x-0' : '-translate-x-full'} w-64 z-30 h-full`}
         style={{ background: '#fff', height: '100vh' }}
       >
         <SideNav 
