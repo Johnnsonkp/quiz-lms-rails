@@ -22,6 +22,10 @@ Rails.application.routes.draw do
   get 'dashboard/:topic', to: 'dashboard#page_refresh'
   # get 'dashboard/:topic/:subject/:quiz_ids', to: 'dashboard#show'
 
+  patch 'dashboard/:quiz_id/update', to: 'dashboard#update'
+  
+  delete 'dashboard/delete_quiz', to: 'dashboard#delete'
+
   get 'dashboard/:topic/:subject/:quiz_ids', to: 'dashboard#show'
 
   post 'dashboard/file_upload', to: 'dashboard#file_upload_extract'

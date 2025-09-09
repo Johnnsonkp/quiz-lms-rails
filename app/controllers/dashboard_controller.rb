@@ -4,7 +4,7 @@ class DashboardController < ApplicationController
   skip_before_action :authenticate_user! # Allow unauthenticated access to dashboard
   before_action :categories, :dashboard_stats
   before_action :get_quizzes_preview, only: [:index]
-  skip_before_action :verify_authenticity_token, only: [:file_upload_extract]
+  skip_before_action :verify_authenticity_token, only: [:file_upload_extract, :delete]
 
   def index
     @categories = [] if @categories.nil?
@@ -20,6 +20,32 @@ class DashboardController < ApplicationController
     }
   end
 
+
+  def update 
+    # if params[:quiz_id].present?
+  end 
+
+  def delete
+    if params[:quiz_ids].present?
+      
+      puts "Attempting to delete quiz with ID: #{params[:quiz_ids]}" if Rails.env.development?
+
+      quizzes = Quiz.where(id: params[:quiz_ids])
+
+      if quizzes.exists?
+        quizzes.destroy_all
+        render json: { message: "Quizzes deleted successfully" }
+      else
+        render json: { error: "Quizzes not found" }, status: 404
+      end
+
+    else
+      render json: { error: "Missing quiz_ids parameter" }, status: 400
+    end
+
+  end
+
+  
   def get_topic_quizzes
     if params[:topic].present?
       puts "Fetching quizzes for topic: #{params[:topic]}" if Rails.env.development?
@@ -33,6 +59,7 @@ class DashboardController < ApplicationController
       render json: { error: "Missing topic parameter" }, status: 400
     end
   end
+
 
   def page_refresh
     if params[:topic].present?

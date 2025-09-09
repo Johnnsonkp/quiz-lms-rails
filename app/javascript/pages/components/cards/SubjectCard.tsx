@@ -13,7 +13,9 @@ function SubjectCards(
     // description,
     tag, 
     topic,
-    quiz_details
+    quiz_details,
+    editStatus,
+    deleteQuizData
   }: SubjectCardProps) {
 
   const { externalIds } = useExternalIDs(quiz_details, topic);
@@ -69,6 +71,21 @@ function SubjectCards(
           <div className='z-20 text-[0.83rem]'>Average Score: <span className='font-bold text-green-700'>90%</span></div>
         </div>
       </div>
+
+      {editStatus && (
+        <button
+          onClick={(e) => {
+            e.stopPropagation(); 
+            deleteQuizData(ids, e);
+          }}
+          className="absolute top-1 right-2 text-red-500 hover:text-red-700 z-22 cursor-pointer"
+        >
+          <svg className="w-8 h-8 bg-white rounded-full text-red-500 hover:bg-red-500 hover:text-white p-0 border border-red-500" 
+        aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" viewBox="0 0 24 24">
+        <path stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="m15 9-6 6m0-6 6 6m6-3a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z"/>
+          </svg>
+        </button>
+      )}
     </div>
 
     <div className="bg-cyan-50 text-cyan-700 px-4 py-1 text-xs font-semibold flex items-center gap-2">

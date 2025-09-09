@@ -21,6 +21,7 @@ function Dashboard({ categories, dashboard_stats, url_params }: DashboardProps) 
   const [quiz_preview, setQuizPreview] = useState<QuizPreview[] | null>([]);
   const [loadingQuizPreview, setLoadingQuizPreview] = useState(false);
   const [showSidebar, setShowSidebar] = useState(false);
+  const [editStatus, setEditStatus] = useState(false);
 
   const getSelectedTopic = async (topic: string) => {
     setLoadingQuizPreview(true);
@@ -46,6 +47,42 @@ function Dashboard({ categories, dashboard_stats, url_params }: DashboardProps) 
       setQuizPreview([]);
     } finally {
       setLoadingQuizPreview(false);
+    }
+  }
+
+  const deleteQuizData = async (
+    ids: (number | undefined)[] | null,
+    e: React.MouseEvent<HTMLButtonElement, MouseEvent>
+  ) => {
+    e.preventDefault();
+    if (!ids || ids.length === 0) return;
+
+    // Filter out undefined and convert to string
+    const quizIds = ids.filter((id): id is number => id !== undefined);
+
+    if (quizIds.length === 0) return;
+
+    console.log("Deleting quiz with IDs:", quizIds);
+
+    try {
+      const csrfToken = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content');
+      const response = await fetch(`/dashboard/delete_quiz`, {
+        method: 'DELETE',
+        headers: {
+          'Content-Type': 'application/json',
+          'Accept': 'application/json',
+          'X-CSRF-Token': csrfToken || ''
+        },
+        body: JSON.stringify({ quiz_ids: quizIds }),
+      });
+
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+      const data = await response.json();
+      console.log("Quiz deleted successfully:", data);
+    } catch (error) {
+      console.error("Error deleting quiz:", error);
     }
   }
 
@@ -143,7 +180,7 @@ function Dashboard({ categories, dashboard_stats, url_params }: DashboardProps) 
 
       {/* SideNav with toggle */}
       <div className={`md:static md:translate-x-0 md:block
-        fixed top-0 left-0 h-full transition-transform duration-300
+        fixed top-0 left-0 h-full transition-transform duration-300 shadow-lg
         ${showSidebar ? 'translate-x-0' : '-translate-x-full'} w-64 z-30`}
         style={{ background: '#fff', height: '100vh' }}
       >
@@ -167,15 +204,17 @@ function Dashboard({ categories, dashboard_stats, url_params }: DashboardProps) 
 
       {selectedSubject && activeSection === 'quiz' && quizData && !loading &&(
         <SingleQuestionComponent
-        quizData={quizData}
-        selectedSubject={selectedSubject}
-        onBack={handleBackToDashboard}
+          quizData={quizData}
+          selectedSubject={selectedSubject}
+          onBack={handleBackToDashboard}
         /> )}
 
       {/* Topic View - Show subjects for selected topic */}
       {selectedTopic && activeSection === selectedTopic && (
         <section className="space-y-2">
-        <DashboardBanner 
+        <DashboardBanner
+          setEditStatus={setEditStatus}
+          deleteQuizData={deleteQuizData}
           handleBackToDashboard={handleBackToDashboard}
           selectedTopic={selectedTopic}
           categories={categories}
@@ -204,6 +243,8 @@ function Dashboard({ categories, dashboard_stats, url_params }: DashboardProps) 
                 quiz_details={quiz.quiz_details || null}
                 subjectImg={quiz.img}
                 onSubjectClick={handleSubjectClick}
+                editStatus={editStatus}
+                deleteQuizData={deleteQuizData}
               />
             ))}
         </div>

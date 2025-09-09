@@ -79,4 +79,6 @@ export interface SubjectCardProps {
   description: string | null;
   topic: string | null;
   quiz_details: QuizDetails[] | null;
+  editStatus: boolean;
+  deleteQuizData: (ids: (number | undefined)[] | null, e: React.MouseEvent<HTMLButtonElement, MouseEvent>) => void;
 }

@@ -10,7 +10,7 @@ function SideNav({categories, handleTopicClick, activeSection}:
     activeSection: string;
   }) {
   return (
-    <aside className={`bg-white h-full shadow-lg transition-all ease-in-out fixed md:static inset-y-0 left-0 z-50`}>
+    <aside className={`bg-white h-full transition-all ease-in-out fixed md:static inset-y-0 left-0 z-50`}>
       {/* <a href="/" className="p-4 flex items-center justify-between border-b border-b-black-100"> */}
       <a href="/" className="p-4 flex items-center justify-between">
         <h1 className={`!text-1xl font-bold text-black-500 transition-opacity duration-300`}>
