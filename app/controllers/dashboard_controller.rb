@@ -22,7 +22,9 @@ class DashboardController < ApplicationController
 
 
   def update 
-    # if params[:quiz_id].present?
+    if params[id].present?
+      puts "Attempting to update quiz with ID: #{params[:id]}" if Rails.env.development?
+    end
   end 
 
   def delete

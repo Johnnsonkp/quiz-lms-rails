@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.0].define(version: 2025_08_31_084939) do
+ActiveRecord::Schema[8.0].define(version: 2025_09_07_204300) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -51,6 +51,8 @@ ActiveRecord::Schema[8.0].define(version: 2025_08_31_084939) do
     t.string "subject"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.bigint "user_id"
+    t.index ["user_id"], name: "index_quizzes_on_user_id"
   end
 
   create_table "user_question_attempts", force: :cascade do |t|
@@ -96,6 +98,7 @@ ActiveRecord::Schema[8.0].define(version: 2025_08_31_084939) do
 
   add_foreign_key "quiz_questions", "questions"
   add_foreign_key "quiz_questions", "quizzes"
+  add_foreign_key "quizzes", "users"
   add_foreign_key "user_question_attempts", "questions"
   add_foreign_key "user_question_attempts", "users"
   add_foreign_key "user_quiz_progresses", "quizzes"

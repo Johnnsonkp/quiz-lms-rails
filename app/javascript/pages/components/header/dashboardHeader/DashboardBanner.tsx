@@ -41,8 +41,6 @@ function DashboardBanner({setEditStatus, handleBackToDashboard, selectedTopic, t
         <span className="text-sm font-medium text-gray-700">Edit</span>
       </button>
 
-      {/* <button className='absolute top-2 right-10 z-20' onClick={deleteQuizData}>Edit</button> */}
-
       {/* Main Card with Blurred Background */}
       <div className="bg-card">
         <div className="bg-card-content">

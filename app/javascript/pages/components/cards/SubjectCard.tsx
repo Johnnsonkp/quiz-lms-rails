@@ -2,6 +2,8 @@ import './singleCard.css';
 
 import { SubjectCardProps } from '../../../types/dashboard';
 import { useExternalIDs } from '../../../hooks/useExternalIDs';
+import React from 'react';
+import { deleteQuizData } from '../../../api/quiz';
 
 function SubjectCards(
   { 
@@ -15,7 +17,7 @@ function SubjectCards(
     topic,
     quiz_details,
     editStatus,
-    deleteQuizData
+    // deleteQuizData,
   }: SubjectCardProps) {
 
   const { externalIds } = useExternalIDs(quiz_details, topic);
@@ -23,6 +25,87 @@ function SubjectCards(
   const imgOverlaySelector = () => {
     let overLayClasses = ["image-overlay", "image-overlay-2", "image-overlay-3"];
     return overLayClasses[Math.floor(Math.random() * overLayClasses.length)];
+  }
+  const [showEditForm, setShowEditForm] = React.useState(false);
+
+  const handleDelete = (ids: (number | undefined)[] | null, e: React.MouseEvent<HTMLButtonElement, MouseEvent>) => {
+    e.stopPropagation();
+    deleteQuizData(ids, e);
+    window.location.reload();
+  };
+
+  const EditQuizCard: React.FC<{ subject: string | null; topic: string | null, show: boolean, ids: number[] }> = 
+  ({ subject, topic, show, ids }) => {
+    const [onSubjectChange, setOnSubjectChange] = React.useState(subject || '');
+    const [onTopicChange, setOnTopicChange] = React.useState(topic || '');
+
+    const UpdateQuizCardEdit = async () => {
+      try {
+        const response = await fetch(`/dashboard/update_quiz`, {
+          method: 'PUT',
+          headers: {
+            'Content-Type': 'application/json',
+            'Accept': 'application/json'
+          },
+          body: JSON.stringify({
+            subject: onSubjectChange,
+            topic: onTopicChange,
+            qui: ids
+          })
+        });
+
+        if (!response.ok) {
+          throw new Error(`HTTP error! status: ${response.status}`);
+        }
+        const data = await response.json();
+        console.log("Quiz updated successfully:", data);
+      } catch (error) {
+        console.error("Error updating quiz:", error);
+      }
+    }
+
+    const onCloseForm = () => {
+      return window.history.go();
+    }
+
+    return (
+      <div className={`${show ? "fixed" : "hidden"} inset-0 z-50 flex items-center justify-center bg-[rgba(0,0,0,0.6)] bg-opacity-50`}>
+        <form className="bg-white rounded-lg shadow-lg p-6 w-full max-w-md z-50">
+          <div className="p-4">
+            <div className="mb-4">
+              <label className="block text-gray-700 text-sm font-bold mb-2" htmlFor="subject">
+                Subject Name
+              </label>
+              <input
+                type="text"
+                id="subject"
+                value={onSubjectChange}
+                onChange={(e) => setOnSubjectChange(e.target.value)}
+                className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+                placeholder={`e.g., ${subject}`}
+              />
+
+              <label className="block text-gray-700 text-sm font-bold mb-2" htmlFor="subject">
+                Topic name
+              </label>
+              <input
+                type="text"
+                id="topic"
+                value={onTopicChange}
+                onChange={(e) => setOnTopicChange(e.target.value)}
+                className="shadow border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+                placeholder="Enter subject name"
+              />
+            </div>
+        </div>
+
+        <button 
+          className="relative bottom-50 left-90 bg-red-500 text-white rounded px-4 py-2" 
+          onClick={() => onCloseForm()}>X</button>
+        <button className='bg-blue-500 text-white rounded px-4 py-2' onClick={() => UpdateQuizCardEdit()}>Update Quiz</button>
+      </form>
+      </div>
+    )
   }
 
   return (
@@ -62,7 +145,7 @@ function SubjectCards(
         )}
       <div className="absolute top-3 badge-flag-container">
         <div
-          className="relative bg-white pl-3 pr-4 py-1 text-xs font-semibold text-gray-700 flex items-center gap-1 badge-flag shadow-sm z-20">
+          className="relative bg-white pl-1 pr-1 py-1 text-[8px] font-semibold text-gray-700 flex items-center gap-1 badge-flag shadow-sm z-20">
           <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth="1.5"
             stroke="currentColor" className="w-5 h-4">
             <path strokeLinecap="round" strokeLinejoin="round"
@@ -73,20 +156,47 @@ function SubjectCards(
       </div>
 
       {editStatus && (
-        <button
-          onClick={(e) => {
-            e.stopPropagation(); 
-            deleteQuizData(ids, e);
-          }}
-          className="absolute top-1 right-2 text-red-500 hover:text-red-700 z-22 cursor-pointer"
-        >
-          <svg className="w-8 h-8 bg-white rounded-full text-red-500 hover:bg-red-500 hover:text-white p-0 border border-red-500" 
-        aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" viewBox="0 0 24 24">
-        <path stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="m15 9-6 6m0-6 6 6m6-3a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z"/>
-          </svg>
-        </button>
+        <div className='rounded-lg bg-white h-[90px] w-[35px] absolute top-2 right-1 z-22'>
+        {/* Edit Button */}
+          <button 
+            onClick={(e) => {
+              e.stopPropagation();
+              e.preventDefault()
+              setShowEditForm(true)
+            }}
+            className="z-22 bg-white text-white w-7 border-2 border-blue-500 absolute top-2 right-1 flex items-center justify-center gap-1 cursor-pointer"
+          >
+
+            <svg className="w-5 h-5 text-blue-500" 
+              fill="none" 
+              stroke="currentColor" 
+              strokeWidth="2" 
+              viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" d="M16.862 4.487a2.25 2.25 0 1 1 3.182 3.182l-11.25 11.25a2.25 2.25 0 0 1-1.012.573l-4.125 1.031a.375.375 0 0 1-.456-.456l1.03-4.125a2.25 2.25 0 0 1 .574-1.012l11.25-11.25z" />
+            </svg>
+
+          </button>
+          
+          <button
+            onClick={(e) => handleDelete(ids, e)}
+            className="absolute top-11 right-1 text-red-500 hover:text-red-700 z-22 cursor-pointer"
+          >
+            <svg className="w-7 h-7 bg-white rounded-full text-red-500 hover:bg-red-500 hover:text-white p-0 border border-red-500" 
+          aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" viewBox="0 0 24 24">
+          <path stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="m15 9-6 6m0-6 6 6m6-3a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z"/>
+            </svg>
+          </button>
+        </div>
       )}
-    </div>
+
+      <EditQuizCard 
+        subject={subject} 
+        topic={topic} 
+        show={showEditForm}
+        ids={ids as number[]}
+      />
+
+      </div>
 
     <div className="bg-cyan-50 text-cyan-700 px-4 py-1 text-xs font-semibold flex items-center gap-2">
       <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth="2" stroke="currentColor"

@@ -3,15 +3,20 @@ import CategoryIcons from '../icons/CategoryIcons';
 import Divider from '../divider/Divider';
 import quizIcon from '../../../assets/quiz-icon.png'
 
-function SideNav({categories, handleTopicClick, activeSection}: 
+function SideNav({categories, handleTopicClick, activeSection, showSidebar}: 
   {
     categories: Category[];
     handleTopicClick: (topic: string) => void;
     activeSection: string;
+    showSidebar: boolean;
   }) {
   return (
-    <aside className={`bg-white h-full transition-all ease-in-out fixed md:static inset-y-0 left-0 z-50`}>
-      {/* <a href="/" className="p-4 flex items-center justify-between border-b border-b-black-100"> */}
+    <aside
+      className={`md:static md:translate-x-0 md:block
+        fixed top-0 left-0 h-[calc(100vh-64px)] transition-transform duration-300 shadow-lg
+        ${showSidebar ? 'translate-x-0' : '-translate-x-full'} w-64 z-30`}
+        style={{ background: '#fff', height: '100vh' }}
+    >
       <a href="/" className="p-4 flex items-center justify-between">
         <h1 className={`!text-1xl font-bold text-black-500 transition-opacity duration-300`}>
           <img src={quizIcon} alt="Quiz Logo" className="w-8 h-8 inline-block ml-2" />
