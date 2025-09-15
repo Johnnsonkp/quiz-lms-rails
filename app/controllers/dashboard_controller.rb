@@ -22,8 +22,29 @@ class DashboardController < ApplicationController
 
 
   def update 
-    if params[id].present?
-      puts "Attempting to update quiz with ID: #{params[:id]}" if Rails.env.development?
+    if params[:quiz_ids].present?
+      puts "Attempting to update quiz with ID: #{params[:quiz_ids]}" if Rails.env.development?
+
+      quizzes = Quiz.where(id: params[:quiz_ids])
+      topic = params[:topic].strip if params[:topic].present?
+      subject = params[:subject].strip if params[:subject].present?
+
+      if quizzes.exists?
+        puts "Found #{quizzes.count} quizzes to update" if Rails.env.development?
+        puts "Quiz details: #{quizzes}" if Rails.env.development?
+
+        quizzes.update_all(topic: topic) if topic.present?
+        quizzes.update_all(subject: subject) if subject.present?
+
+        render json: {
+          updated_subject: subject, 
+          updated_topic: topic,
+          status: 200
+        }, status: 200
+      else
+        render json: { error: "Quizzes not found" }, status: 404
+      end
+
     end
   end 
 

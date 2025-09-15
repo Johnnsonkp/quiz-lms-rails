@@ -1,9 +1,9 @@
 import './singleCard.css';
 
-import { SubjectCardProps } from '../../../types/dashboard';
-import { useExternalIDs } from '../../../hooks/useExternalIDs';
 import React from 'react';
+import { SubjectCardProps } from '../../../types/dashboard';
 import { deleteQuizData } from '../../../api/quiz';
+import { useExternalIDs } from '../../../hooks/useExternalIDs';
 
 function SubjectCards(
   { 
@@ -21,6 +21,9 @@ function SubjectCards(
   }: SubjectCardProps) {
 
   const { externalIds } = useExternalIDs(quiz_details, topic);
+  const [updatedSubject, setUpdatedSubject] = React.useState([]);
+  const [updatedTopic, setUpdatedTopic] = React.useState(null);
+  const [loading, setLoading] = React.useState(false);
 
   const imgOverlaySelector = () => {
     let overLayClasses = ["image-overlay", "image-overlay-2", "image-overlay-3"];
@@ -34,23 +37,33 @@ function SubjectCards(
     window.location.reload();
   };
 
+  const deleteConfirmation = (ids: (number | undefined)[] | null, e: React.MouseEvent<HTMLButtonElement, MouseEvent>) => {
+    return window.confirm("Are you sure you want to delete this quiz? This action cannot be undone.") ? handleDelete(ids, e) : null;
+  }
+
   const EditQuizCard: React.FC<{ subject: string | null; topic: string | null, show: boolean, ids: number[] }> = 
   ({ subject, topic, show, ids }) => {
     const [onSubjectChange, setOnSubjectChange] = React.useState(subject || '');
     const [onTopicChange, setOnTopicChange] = React.useState(topic || '');
 
-    const UpdateQuizCardEdit = async () => {
+    const UpdateQuizCardEdit = async (e: React.MouseEvent<HTMLButtonElement, MouseEvent>) => {
+      e.preventDefault();
+      e.stopPropagation();
+      setLoading(true);
+
       try {
-        const response = await fetch(`/dashboard/update_quiz`, {
-          method: 'PUT',
+        const csrfToken = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content');
+        const response = await fetch(`/dashboard/update_quiz`, {   
+          method: 'PATCH',
           headers: {
             'Content-Type': 'application/json',
-            'Accept': 'application/json'
+            'Accept': 'application/json',
+            'X-CSRF-Token': csrfToken || ''
           },
           body: JSON.stringify({
             subject: onSubjectChange,
             topic: onTopicChange,
-            qui: ids
+            quiz_ids: ids
           })
         });
 
@@ -58,19 +71,27 @@ function SubjectCards(
           throw new Error(`HTTP error! status: ${response.status}`);
         }
         const data = await response.json();
-        console.log("Quiz updated successfully:", data);
+        if (data && data?.status === 200) {
+          setTimeout(() => {
+            setLoading(false);
+            setUpdatedSubject(data.updated_subject)
+            setUpdatedTopic(data.updated_topic)
+            setShowEditForm(false);
+          }, 1500)
+        }
       } catch (error) {
         console.error("Error updating quiz:", error);
       }
     }
 
     const onCloseForm = () => {
-      return window.history.go();
+      setShowEditForm(false);
     }
 
     return (
       <div className={`${show ? "fixed" : "hidden"} inset-0 z-50 flex items-center justify-center bg-[rgba(0,0,0,0.6)] bg-opacity-50`}>
         <form className="bg-white rounded-lg shadow-lg p-6 w-full max-w-md z-50">
+          <h3 className='font-bold text-md'>Update Quiz Item</h3>
           <div className="p-4">
             <div className="mb-4">
               <label className="block text-gray-700 text-sm font-bold mb-2" htmlFor="subject">
@@ -84,31 +105,51 @@ function SubjectCards(
                 className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
                 placeholder={`e.g., ${subject}`}
               />
-
+            </div>
+            
+            <div className="mb-4">
               <label className="block text-gray-700 text-sm font-bold mb-2" htmlFor="subject">
-                Topic name
-              </label>
-              <input
-                type="text"
-                id="topic"
-                value={onTopicChange}
-                onChange={(e) => setOnTopicChange(e.target.value)}
-                className="shadow border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
-                placeholder="Enter subject name"
-              />
+                  Topic name
+                </label>
+                <input
+                  type="text"
+                  id="topic"
+                  value={onTopicChange}
+                  onChange={(e) => setOnTopicChange(e.target.value)}
+                  className="shadow border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+                  placeholder="Enter subject name"
+                />
             </div>
         </div>
 
+        
         <button 
-          className="relative bottom-50 left-90 bg-red-500 text-white rounded px-4 py-2" 
+          className="hover:bg-red-400 cursor-pointer relative bottom-50 left-90 bg-red-500 text-white rounded px-4 py-2" 
           onClick={() => onCloseForm()}>X</button>
-        <button className='bg-blue-500 text-white rounded px-4 py-2' onClick={() => UpdateQuizCardEdit()}>Update Quiz</button>
+
+        <div>
+            <button 
+            className='cursor-pointer hover:bg-blue-400 bg-blue-500 text-white rounded px-4 py-2 flex items-center justify-center min-w-[110px]' 
+            onClick={(e) => UpdateQuizCardEdit(e)}
+            disabled={loading}
+            >
+            {loading ? (
+              <svg className="animate-spin h-5 w-5 mr-2 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+              <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+              <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8z"></path>
+              </svg>
+            ) : null}
+            {loading ? 'Updating...' : 'Update Quiz'}
+            </button>
+        </div>
+
       </form>
       </div>
     )
   }
 
   return (
+    <>
     <div className="bg-white rounded-xl overflow-hidden shadow-sm flex flex-col cursor-pointer w-full max-w-[300px]" 
       onClick={() => {
         const validIds = ids ? ids.filter((id): id is number => id !== undefined) : null;
@@ -178,7 +219,7 @@ function SubjectCards(
           </button>
           
           <button
-            onClick={(e) => handleDelete(ids, e)}
+            onClick={(e) => deleteConfirmation(ids, e)}
             className="absolute top-11 right-1 text-red-500 hover:text-red-700 z-22 cursor-pointer"
           >
             <svg className="w-7 h-7 bg-white rounded-full text-red-500 hover:bg-red-500 hover:text-white p-0 border border-red-500" 
@@ -188,13 +229,6 @@ function SubjectCards(
           </button>
         </div>
       )}
-
-      <EditQuizCard 
-        subject={subject} 
-        topic={topic} 
-        show={showEditForm}
-        ids={ids as number[]}
-      />
 
       </div>
 
@@ -210,9 +244,9 @@ function SubjectCards(
     <div className="p-4">
       <div className='flex justify-between'>
         <div>
-          <p className="text-xs text-gray-500 mb-1">{topic}</p>
+          <p className="text-xs text-gray-500 mb-1">{updatedTopic || topic}</p>
           <h3 className="text-base font-semibold text-gray-800 mb-3 leading-tight">
-            {subject && subject?.slice(0, 15)}
+            {updatedSubject.length > 0 && updatedSubject?.slice(0, 15) || subject && subject?.slice(0, 15)}
           </h3>
         </div>
 
@@ -287,6 +321,14 @@ function SubjectCards(
     </div>
   </div>
 </div>
+
+    <EditQuizCard 
+      subject={subject} 
+      topic={topic} 
+      show={showEditForm}
+      ids={ids as number[]}
+    />
+  </>
   )
 }
 
