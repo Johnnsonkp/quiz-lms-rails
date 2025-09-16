@@ -73,7 +73,7 @@ export interface SubjectCardProps {
   ids: (number | undefined)[] | null;
   titles: string[];
   subject: string | null;
-  onSubjectClick: (subject: string | null, externalIds: string[] | null, quizIds: number[] | null) => void;
+  onSubjectClick: (subject: string | null, externalIds: string[] | null, quizIds: number[] | null, titles: string[] | null) => void;
   subjectImg: string | null;
   tag: string | null;
   description: string | null;

@@ -28,6 +28,8 @@ Rails.application.routes.draw do
 
   get 'dashboard/:topic/:subject/:quiz_ids', to: 'dashboard#show'
 
+  get 'dashboard/get_all_quizzes_from_subject', to: 'dashboard#get_all_quizzes_from_subject'
+
   post 'dashboard/file_upload', to: 'dashboard#file_upload_extract'
   # Define your application routes per the DSL in https://guides.rubyonrails.org/routing.html
 

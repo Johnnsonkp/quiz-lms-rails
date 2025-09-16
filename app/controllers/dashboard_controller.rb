@@ -73,6 +73,32 @@ class DashboardController < ApplicationController
 
   end
 
+  def get_all_quizzes_from_subject
+    if params[:subject].present?
+      puts "Fetching all quizzes for subject: #{params[:subject]}" if Rails.env.development?
+      subject_name = params[:subject]
+
+      quizzes = Quiz.where(subject: subject_name).includes(:questions)
+
+      quiz_details = quizzes.map do |quiz|
+        {
+          id: quiz.id,
+          title: quiz.title,
+          description: quiz.description,
+          external_ids: quiz.questions.pluck(:external_id)
+        }
+      end
+
+      render json: { 
+        subject: subject_name,
+        total_quizzes: quizzes.count,
+        quiz_details: quiz_details 
+      }
+    else
+      render json: { error: "Missing subject parameter" }, status: 400
+    end
+  end
+
   
   def get_topic_quizzes
     if params[:topic].present?

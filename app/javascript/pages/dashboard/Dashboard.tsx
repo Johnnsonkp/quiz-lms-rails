@@ -1,30 +1,34 @@
 import { DashboardProps, QuizPreview } from '../../types/dashboard';
 import { useEffect, useState } from 'react';
-import {SideButton} from '../components/buttons/SideButton';
 
 import DashboardBanner from '../components/header/dashboardHeader/DashboardBanner';
 import { DashboardHome } from './DashboardHome';
 import Divider from '../components/divider/Divider';
 import { Head } from '@inertiajs/react';
+import QuizListPage from './QuizListPage';
+import {SideButton} from '../components/buttons/SideButton';
 import SideNav from '../components/aside/SideNav';
 import SimpleLoadScreen from '../components/loading/SimpleLoadScreen';
 import SingleQuestionComponent from '../components/cards/SingleQuestionComp';
 import SubjectCards from '../components/cards/SubjectCard';
-import { slugify } from '../../utils/slugify';
-import { useQuizData } from '../../hooks/useQuizData';
 import { getSelectedTopic } from '../../api/quiz';
 import { handleURLParams } from '../../utils/urlParams';
+import { slugify } from '../../utils/slugify';
+import { useQuizData } from '../../hooks/useQuizData';
 
 function Dashboard({ categories, dashboard_stats, url_params }: DashboardProps) {
   const [activeSection, setActiveSection] = useState('dashboard');
   const [selectedTopic, setSelectedTopic] = useState<string | null>(null);
   const [selectedSubject, setSelectedSubject] = useState<string | null>(null);
-  const [eIDs, setEIDs] = useState<string[] | null>(null);
+  // const [eIDs, setEIDs] = useState<string[] | null>(null);
   const { quizData, loading, error, fetchQuizData } = useQuizData();
   const [quiz_preview, setQuizPreview] = useState<QuizPreview[] | null>([]);
   const [loadingQuizPreview, setLoadingQuizPreview] = useState(false);
   const [showSidebar, setShowSidebar] = useState(false);
   const [editStatus, setEditStatus] = useState(false);
+  const [listTitles, setListTitles] = useState<string[] | null>(null);
+  const [listSubject, setListSubject] = useState<string | null>(null);
+  const [showQuizCards, setShowQuizCards] = useState(true);
 
   const handleTopicClick = async (topicName: string) => {
     if (!topicName) return;
@@ -32,30 +36,65 @@ function Dashboard({ categories, dashboard_stats, url_params }: DashboardProps) 
     setSelectedTopic(topicName);
     setActiveSection(topicName);
     setLoadingQuizPreview(true)
+    setShowQuizCards(true);
+    
     const data: any = await getSelectedTopic(topicName);
     if(data && data?.quiz_preview) {
       setQuizPreview(data?.quiz_preview);
       setLoadingQuizPreview(false)
+      setListTitles(null);
+      setListSubject(null);
     }
     window.history.pushState({}, '', `/dashboard/${slugify(topicName)}`);
   };
 
-  const handleSubjectClick = async (
+  // const handleSubjectClick = async (
+  //   subject: string | null, 
+  //   externalIds: string[] | null, 
+  //   quizIds: number[] | number | null
+  // ) => {
+  //   if (!subject || !quizIds || !externalIds) return;
+  //   console.log('External IDs:', externalIds);
+  //   console.log('eIDs:', eIDs);
+    
+  //   // Normalize quizIds to always be an array
+  //   const normalizedQuizIds = Array.isArray(quizIds) ? quizIds : [quizIds];
+  //   setEIDs(externalIds);
+  //   setSelectedSubject(subject);
+  //   setActiveSection('quiz');
+  //   handleURLParams(subject, normalizedQuizIds, selectedTopic);
+  //   await fetchQuizData(selectedTopic, subject, normalizedQuizIds);
+  // };
+
+  const getQuizData = async (
     subject: string | null, 
-    externalIds: string[] | null, 
+    // externalIds: string[] | null,
     quizIds: number[] | number | null
   ) => {
-    if (!subject || !quizIds || !externalIds) return;
-    console.log('External IDs:', externalIds);
-    console.log('eIDs:', eIDs);
+    // if (!subject || !quizIds || !externalIds) return;
+    if (!subject || !quizIds) return;
     
     // Normalize quizIds to always be an array
     const normalizedQuizIds = Array.isArray(quizIds) ? quizIds : [quizIds];
-    setEIDs(externalIds);
+    // setEIDs(externalIds);
     setSelectedSubject(subject);
     setActiveSection('quiz');
     handleURLParams(subject, normalizedQuizIds, selectedTopic);
     await fetchQuizData(selectedTopic, subject, normalizedQuizIds);
+  };
+
+
+  const handleSubjectClick = async (
+    subject: string | null, 
+    externalIds: string[] | null, 
+    quizIds: number[] | number | null,
+    titles: string[] | null
+  ) => {
+    if (!subject || !quizIds || !externalIds || !titles) return;
+    
+    setListTitles(titles);
+    setListSubject(subject);
+    setShowQuizCards(false);
   };
 
   const handleBackToDashboard = () => {
@@ -141,7 +180,7 @@ function Dashboard({ categories, dashboard_stats, url_params }: DashboardProps) 
           <Divider />
 
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mt-7 gap-y-8">
-            {quiz_preview && quiz_preview
+            {showQuizCards && quiz_preview && quiz_preview
             .filter(
               (quiz: QuizPreview) =>
                 quiz?.topic &&
@@ -161,6 +200,15 @@ function Dashboard({ categories, dashboard_stats, url_params }: DashboardProps) 
                   editStatus={editStatus}
                 />))}
           </div>
+
+          {showQuizCards == false && listTitles && listTitles?.length > 0 && listSubject &&
+            <QuizListPage
+              ids={quiz_preview?.find((q) => q.subject === listSubject)?.quiz_details?.map((d) => d.id).filter((id): id is number => typeof id === 'number') || []}
+              titles={listTitles}
+              subject={listSubject}
+              img={quiz_preview?.find(q => q.subject === listSubject)?.img || null}
+              getQuizData={getQuizData}
+            />}
 
           {quiz_preview && quiz_preview.filter((quiz: QuizPreview) => quiz.topic === selectedTopic).length === 0 && (
             <div className="text-center py-8">

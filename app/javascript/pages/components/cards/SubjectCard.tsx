@@ -12,12 +12,10 @@ function SubjectCards(
     subject, 
     onSubjectClick, 
     subjectImg, 
-    // description,
     tag, 
     topic,
     quiz_details,
     editStatus,
-    // deleteQuizData,
   }: SubjectCardProps) {
 
   const { externalIds } = useExternalIDs(quiz_details, topic);
@@ -33,12 +31,16 @@ function SubjectCards(
 
   const handleDelete = (ids: (number | undefined)[] | null, e: React.MouseEvent<HTMLButtonElement, MouseEvent>) => {
     e.stopPropagation();
+    e.preventDefault();
     deleteQuizData(ids, e);
     window.location.reload();
   };
 
   const deleteConfirmation = (ids: (number | undefined)[] | null, e: React.MouseEvent<HTMLButtonElement, MouseEvent>) => {
-    return window.confirm("Are you sure you want to delete this quiz? This action cannot be undone.") ? handleDelete(ids, e) : null;
+    e.preventDefault();
+
+    return window.confirm("Are you sure you want to delete this quiz? This action cannot be undone.") ? 
+    handleDelete(ids, e) : setShowEditForm(false);
   }
 
   const EditQuizCard: React.FC<{ subject: string | null; topic: string | null, show: boolean, ids: number[] }> = 
@@ -50,7 +52,6 @@ function SubjectCards(
       e.preventDefault();
       e.stopPropagation();
       setLoading(true);
-
       try {
         const csrfToken = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content');
         const response = await fetch(`/dashboard/update_quiz`, {   
@@ -153,7 +154,7 @@ function SubjectCards(
     <div className="bg-white rounded-xl overflow-hidden shadow-sm flex flex-col cursor-pointer w-full max-w-[300px]" 
       onClick={() => {
         const validIds = ids ? ids.filter((id): id is number => id !== undefined) : null;
-        onSubjectClick(subject, externalIds, validIds);
+        onSubjectClick(subject, externalIds, validIds, titles);
       }}
     >
     <div className=" bg-white rounded-xl overflow-hidden shadow-lg h-[100%] border border-gray-100 w-full max-w-[300px]">
