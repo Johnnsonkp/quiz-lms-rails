@@ -2,7 +2,7 @@ import { QuizPreview } from "../../../types/dashboard"
 
 function TableOfContents({ quiz_preview }: { quiz_preview: QuizPreview[] | null }) {
   return (
-    <div className="border-2 border-[#E5E7EB] rounded-md w-[230px] bg-[#F9FAFB]">
+    <div className="border-2 border-[#E5E7EB] rounded-md w-[230px] bg-[#F9FAFB] shadow-sm">
       <h3 className="font-semibold border-b border-[#F3F4F6] py-2 px-2">Table of Contents</h3>
       <ul className="flex flex-col gap-0 max-w-[280px] mx-auto mt-0 bg-white">
 

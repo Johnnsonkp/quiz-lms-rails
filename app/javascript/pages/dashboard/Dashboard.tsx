@@ -169,7 +169,7 @@ function Dashboard({ categories, dashboard_stats, url_params }: DashboardProps) 
               </div>
               
               {/* Table of Contents - take 1/4th space, on right */}
-              <div className="lg:col-span-1">
+              <div className="lg:col-span-1 fixed right-[25px]">
                 {showQuizCards && quiz_preview && (
                   <TableOfContents quiz_preview={quiz_preview} />
                 )}
