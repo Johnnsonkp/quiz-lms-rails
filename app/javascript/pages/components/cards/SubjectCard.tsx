@@ -178,17 +178,17 @@ function SubjectCards(
             <img
               src={subjectImg}
               alt={ subject ? subject : 'Quiz Image'}
-              className="card-image !h-40"
+              className="card-image !h-40 blur-[1px]"
             />
             <div className={imgOverlaySelector()}></div>
             <div className="card-content">
-              <span style={{width: '100%'}} className="text-white font-semibold text-lg">
+              <span style={{width: '100%'}} className="text-white font-semibold text-md">
                 {subject && subject?.trim().substring(0, 14)}
               </span>
-              <span style={{width: '100%'}} className="text-white font-semibold text-lg">
+              <span style={{width: '100%'}} className="text-white font-semibold text-md">
                 {subject && subject.length > 14 && subject.trim().substring(14, 30)}
               </span>
-              <span style={{width: '100%'}} className="text-white font-semibold text-lg">
+              <span style={{width: '100%'}} className="text-white font-semibold text-md">
                 {subject && subject.length > 30 && subject.trim().substring(30, 46)}
               </span>
             </div>

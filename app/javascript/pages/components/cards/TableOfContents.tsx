@@ -13,7 +13,7 @@ function TableOfContents({ quiz_preview }: { quiz_preview: QuizPreview[] | null 
                   <span className="flex gap-2">
                       <h3>{index + 1}.</h3>
                       <span>
-                          {quiz.subject?.trim().substring(0, 35)}
+                          {quiz.subject?.trim().substring(0, 40)}
                       </span>
                   </span>
                   <svg className="w-2 h-4 text-gray-500 transition group-open:rotate-90" xmlns="http://www.w3.org/2000/svg"
