@@ -183,13 +183,13 @@ function SubjectCards(
             <div className={imgOverlaySelector()}></div>
             <div className="card-content">
               <span style={{width: '100%'}} className="text-white font-semibold text-md">
-                {subject && subject?.trim().substring(0, 14)}
+                {subject && subject?.trim().substring(0, 20)}
               </span>
               <span style={{width: '100%'}} className="text-white font-semibold text-md">
-                {subject && subject.length > 14 && subject.trim().substring(14, 30)}
+                {subject && subject.length > 20 && subject.trim().substring(20, 40)}
               </span>
               <span style={{width: '100%'}} className="text-white font-semibold text-md">
-                {subject && subject.length > 30 && subject.trim().substring(30, 46)}
+                {subject && subject.length > 40 && subject.trim().substring(40, 60)}
               </span>
             </div>
           </>
@@ -263,8 +263,9 @@ function SubjectCards(
         <div>
           <p className="text-[11px] text-gray-500 mb-2">{updatedTopic || topic}</p>
           <h3 className="text-base font-semibold text-gray-800 mb-3 leading-tight">
-            {updatedSubject.length > 0 && updatedSubject?.slice(0, 15) || subject && subject?.slice(0, 15)}
-            <span>{updatedSubject.length > 15 && updatedSubject?.slice(15, 30) || subject && subject?.slice(15, 30)}</span>
+            {updatedSubject.length > 0 && updatedSubject?.slice(0, 20) || subject && subject?.slice(0, 20)}
+            <span>{updatedSubject.length > 20 && updatedSubject?.slice(20, 30) || subject && subject?.slice(20, 30)}</span>
+            <span>{updatedSubject.length > 30 && updatedSubject?.slice(30, 40) || subject && subject?.slice(30, 40)}</span>
           </h3>
         </div>
 
