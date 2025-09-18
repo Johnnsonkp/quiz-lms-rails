@@ -29,19 +29,28 @@ function SubjectCards(
   }
   const [showEditForm, setShowEditForm] = React.useState(false);
 
-  const handleDelete = (ids: (number | undefined)[] | null, e: React.MouseEvent<HTMLButtonElement, MouseEvent>) => {
-    e.stopPropagation();
+
+  const deleteConfirmation = (ids: (number | undefined)[] | null, e: React.MouseEvent<HTMLButtonElement, MouseEvent>): boolean => {
     e.preventDefault();
-    deleteQuizData(ids, e);
-    window.location.reload();
+    return window.confirm("Are you sure you want to delete this quiz? This action cannot be undone.");
+  }
+
+  const handleDelete = (ids: (number | undefined)[] | null, e: React.MouseEvent<HTMLButtonElement, MouseEvent>) => {
+    if (deleteConfirmation(ids, e)) {
+      e.stopPropagation();
+      e.preventDefault();
+      deleteQuizData(ids, e);
+      window.location.reload();
+    } else {
+      setShowEditForm(false);
+    }
   };
 
-  const deleteConfirmation = (ids: (number | undefined)[] | null, e: React.MouseEvent<HTMLButtonElement, MouseEvent>) => {
-    e.preventDefault();
-
-    return window.confirm("Are you sure you want to delete this quiz? This action cannot be undone.") ? 
-    handleDelete(ids, e) : setShowEditForm(false);
-  }
+  // const deleteConfirmation = (ids: (number | undefined)[] | null, e: React.MouseEvent<HTMLButtonElement, MouseEvent>) => {
+  //   e.preventDefault();
+  //   return window.confirm("Are you sure you want to delete this quiz? This action cannot be undone.") ? 
+  //   handleDelete(ids, e) : setShowEditForm(false);
+  // }
 
   const EditQuizCard: React.FC<{ subject: string | null; topic: string | null, show: boolean, ids: number[] }> = 
   ({ subject, topic, show, ids }) => {
@@ -151,7 +160,7 @@ function SubjectCards(
 
   return (
     <>
-    <div className="bg-white rounded-xl overflow-hidden shadow-sm flex flex-col cursor-pointer w-full max-w-[300px]" 
+    <div className="bg-white rounded-xl overflow-hidden shadow-sm flex flex-col cursor-pointer w-full max-w-[240px]" 
       onClick={() => {
         const validIds = ids ? ids.filter((id): id is number => id !== undefined) : null;
         onSubjectClick(subject, externalIds, validIds, titles);
@@ -173,8 +182,14 @@ function SubjectCards(
             />
             <div className={imgOverlaySelector()}></div>
             <div className="card-content">
-              <span className="text-white font-semibold text-lg">
-                {subject && subject?.trim().substring(0, 20)}
+              <span style={{width: '100%'}} className="text-white font-semibold text-lg">
+                {subject && subject?.trim().substring(0, 14)}
+              </span>
+              <span style={{width: '100%'}} className="text-white font-semibold text-lg">
+                {subject && subject.length > 14 && subject.trim().substring(14, 30)}
+              </span>
+              <span style={{width: '100%'}} className="text-white font-semibold text-lg">
+                {subject && subject.length > 30 && subject.trim().substring(30, 46)}
               </span>
             </div>
           </>
@@ -220,7 +235,8 @@ function SubjectCards(
           </button>
           
           <button
-            onClick={(e) => deleteConfirmation(ids, e)}
+            // onClick={(e) => deleteConfirmation(ids, e)}
+            onClick={(e) => handleDelete(ids, e) }
             className="absolute top-11 right-1 text-red-500 hover:text-red-700 z-22 cursor-pointer"
           >
             <svg className="w-7 h-7 bg-white rounded-full text-red-500 hover:bg-red-500 hover:text-white p-0 border border-red-500" 
@@ -245,9 +261,10 @@ function SubjectCards(
     <div className="p-4">
       <div className='flex justify-between'>
         <div>
-          <p className="text-xs text-gray-500 mb-1">{updatedTopic || topic}</p>
+          <p className="text-[11px] text-gray-500 mb-2">{updatedTopic || topic}</p>
           <h3 className="text-base font-semibold text-gray-800 mb-3 leading-tight">
             {updatedSubject.length > 0 && updatedSubject?.slice(0, 15) || subject && subject?.slice(0, 15)}
+            <span>{updatedSubject.length > 15 && updatedSubject?.slice(15, 30) || subject && subject?.slice(15, 30)}</span>
           </h3>
         </div>
 
@@ -299,7 +316,7 @@ function SubjectCards(
           </div>)}
       </div>
 
-      <div className="flex items-center justify-between text-sm text-gray-600 mb-0 mt-4">
+      <div className="flex items-end justify-between text-sm text-gray-600 mb-0 mt-4">
         <div className="flex items-center gap-1">
           <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth="1.5"
             stroke="currentColor" className="w-4 h-4">
