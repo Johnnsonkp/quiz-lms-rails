@@ -1,13 +1,29 @@
-function QuizListPage({ titles, subject, img, getQuizData, ids }: 
+function QuizListPage({ titles, subject, img, getQuizData, ids, quizList }: 
   { 
     titles: string[], 
     subject: string | null, 
     img: string | null, 
     getQuizData?: any,
-    ids?: number[] | [] 
+    ids?: number[] | []
+    quizList?: {id: number, title: string}[] | [] | any 
   }) {
 
-  const ListTable: React.FC<{titles: string[], subject: string | null, img: string | null}> = ({titles, subject, img, }) => {
+  const handleGetQuizData = (subject: string | null, title: string, quizList: {id: number, title: string}[]) => {
+    if(!subject || !title || !quizList) return;
+    
+    const id = quizList?.find(q => q.title === title)?.id;
+    if(!id) return;
+
+    getQuizData(subject, id);
+  }
+
+  const ListTable: React.FC<{titles: string[], subject: string | null, img: string | null, quizList: {id: number, title: string}[]}> = 
+  ({
+      titles, 
+      subject, 
+      img,
+      quizList
+  }) => {
     return (
       <table className="min-w-full divide-y divide-gray-200 overflow-x-auto border-2 border-gray-200 rounded-lg">
         <thead className="bg-gray-50">
@@ -23,9 +39,10 @@ function QuizListPage({ titles, subject, img, getQuizData, ids }:
 
       <tbody className="bg-white divide-y divide-gray-200">
         {titles.map((title, index) => (
-          <tr 
-            key={index}
-            onClick={() => getQuizData(subject, ids)}  
+          // const id = 
+          <tr key={index}
+            // onClick={() => getQuizData(subject, ids)}  
+            onClick={() => handleGetQuizData(subject, title, quizList)}  
             className="hover:bg-gray-100 cursor-pointer"
           >
             <td className="px-4 py-4 whitespace-nowrap w-2">
@@ -60,7 +77,8 @@ function QuizListPage({ titles, subject, img, getQuizData, ids }:
         <ListTable 
           titles={titles} 
           subject={subject} 
-          img={img} 
+          img={img}
+          quizList={quizList || []}
         />}
     </div>
   )

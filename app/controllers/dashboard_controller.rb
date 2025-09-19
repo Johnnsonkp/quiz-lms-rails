@@ -274,12 +274,21 @@ class DashboardController < ApplicationController
   end
 
   def dashboard_stats
-    @dashboard_stats = { 
-      total_quizzes: Quiz.count,
-      total_questions: Question.count,
-      total_topics: Quiz.distinct.count(:topic),
-      total_subjects: Quiz.distinct.count
-    }
+    if user_signed_in?
+      @dashboard_stats = {
+        total_quizzes: Quiz.where(user_id: current_user.id).count,
+        total_questions: Question.joins(:quiz_questions).where(quiz_questions: { quiz_id: Quiz.where(user_id: current_user.id).select(:id) }).count,
+        total_topics: Quiz.where(user_id: current_user.id).distinct.count(:topic),
+        total_subjects: Quiz.where(user_id: current_user.id).distinct.count(:subject)
+      }
+    else
+      @dashboard_stats = {
+        total_quizzes: Quiz.public_quizzes.count,
+        total_questions: Question.joins(:quiz_questions).where(quiz_questions: { quiz_id: Quiz.public_quizzes.select(:id) }).count,
+        total_topics: Quiz.public_quizzes.distinct.count(:topic),
+        total_subjects: Quiz.public_quizzes.distinct.count(:subject)
+      }
+    end
   end
 
   def render_quiz_data
@@ -506,8 +515,10 @@ class DashboardController < ApplicationController
   # end
 
   def categories
-    @categories = Quiz.distinct.order(:topic).pluck(:topic).map do |topic|
-      { topic: topic }
+    if user_signed_in?
+      @categories = Quiz.where(user_id: current_user.id).distinct.order(:topic).pluck(:topic).map { |topic| { topic: topic } }
+    else
+      @categories = Quiz.public_quizzes.distinct.order(:topic).pluck(:topic).map { |topic| { topic: topic } }
     end
   rescue => e
     Rails.logger.error "Error loading categories: #{e.message}"

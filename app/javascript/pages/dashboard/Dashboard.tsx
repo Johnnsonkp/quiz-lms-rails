@@ -68,6 +68,7 @@ function Dashboard({ user, categories, dashboard_stats, url_params }: DashboardP
     
     // Normalize quizIds to always be an array
     const normalizedQuizIds = Array.isArray(quizIds) ? quizIds : [quizIds];
+    console.log("Quiz IDs:", normalizedQuizIds);
     // setEIDs(externalIds);
     setSelectedSubject(subject);
     setActiveSection('quiz');
@@ -179,6 +180,7 @@ function Dashboard({ user, categories, dashboard_stats, url_params }: DashboardP
             {showQuizCards == false && listTitles && listTitles?.length > 0 && listSubject &&
               <QuizListPage
                 ids={quiz_preview?.find((q) => q.subject === listSubject)?.quiz_details?.map((d) => d.id).filter((id): id is number => typeof id === 'number') || []}
+                quizList={quiz_preview?.find((q) => q.subject === listSubject)?.quiz_details}
                 titles={listTitles}
                 subject={listSubject}
                 img={quiz_preview?.find(q => q.subject === listSubject)?.img || null}
