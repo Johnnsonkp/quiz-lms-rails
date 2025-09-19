@@ -18,7 +18,7 @@ import useInitialRouting from '../../hooks/useInitialRouting';
 import { useQuizData } from '../../hooks/useQuizData';
 import { useState } from 'react';
 
-function Dashboard({ categories, dashboard_stats, url_params }: DashboardProps) {
+function Dashboard({ user, categories, dashboard_stats, url_params }: DashboardProps) {
   const [activeSection, setActiveSection] = useState('dashboard');
   const [selectedTopic, setSelectedTopic] = useState<string | null>(null);
   const [selectedSubject, setSelectedSubject] = useState<string | null>(null);
@@ -117,7 +117,7 @@ function Dashboard({ categories, dashboard_stats, url_params }: DashboardProps) 
         className="flex-1 p-4 !pt-3 !mt-0 md:p-6 overflow-y-auto w-[100%] bg-[#F9FAFB] transition-opacity duration-300"
       >
         {!selectedTopic && activeSection === 'dashboard' && (
-          <DashboardHome dashboard_stats={dashboard_stats}/>)}
+          <DashboardHome user={user} dashboard_stats={dashboard_stats}/>)}
 
         {/* Quiz View - Show quiz component for selected subject */}
         {loading && <SimpleLoadScreen />}

@@ -18,9 +18,6 @@ function QuizListPage({ titles, subject, img, getQuizData, ids }:
             <th scope="col" className="px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
               Quiz Titles
             </th>
-          {/* <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-              Produto
-          </th> */}
         </tr>
       </thead>
 
@@ -50,8 +47,6 @@ function QuizListPage({ titles, subject, img, getQuizData, ids }:
                   </div>
               </div>
             </td>
-
-            {/* <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">{title}</td> */}
           </tr>
         ))}
       </tbody>
@@ -61,7 +56,12 @@ function QuizListPage({ titles, subject, img, getQuizData, ids }:
   
   return (
     <div>
-      {titles && titles?.length > 0 && <ListTable titles={titles} subject={subject} img={img} />}
+      {titles && titles?.length > 0 && 
+        <ListTable 
+          titles={titles} 
+          subject={subject} 
+          img={img} 
+        />}
     </div>
   )
 }

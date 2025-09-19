@@ -36,6 +36,7 @@ export interface DashboardProps {
   quiz_preview: QuizPreview[];
   dashboard_stats: DashboardStats;
   url_params: string | null;
+  user: { id: number; email: string, name: string | null } | null;
 }
 
 // Question props

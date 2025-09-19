@@ -56,6 +56,7 @@ function SubjectCards(
   ({ subject, topic, show, ids }) => {
     const [onSubjectChange, setOnSubjectChange] = React.useState(subject || '');
     const [onTopicChange, setOnTopicChange] = React.useState(topic || '');
+    const [onUserIdChange, setOnUserIdChange] = React.useState('');
 
     const UpdateQuizCardEdit = async (e: React.MouseEvent<HTMLButtonElement, MouseEvent>) => {
       e.preventDefault();
@@ -73,7 +74,8 @@ function SubjectCards(
           body: JSON.stringify({
             subject: onSubjectChange,
             topic: onTopicChange,
-            quiz_ids: ids
+            quiz_ids: ids,
+            user_id: onUserIdChange
           })
         });
 
@@ -130,6 +132,20 @@ function SubjectCards(
                   placeholder="Enter subject name"
                 />
             </div>
+
+            <div className="mb-4">
+              <label className="block text-gray-700 text-sm font-bold mb-2" htmlFor="subject">
+                  User ID:
+                </label>
+                <input
+                  type="text"
+                  id="user_id"
+                  value={onUserIdChange}
+                  onChange={(e) => setOnUserIdChange(e.target.value)}
+                  className="shadow border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+                  placeholder="Enter user ID"
+                />
+            </div>
         </div>
 
         
@@ -160,7 +176,7 @@ function SubjectCards(
 
   return (
     <>
-    <div className="bg-white rounded-xl overflow-hidden shadow-sm flex flex-col cursor-pointer w-full max-w-[240px]" 
+    <div className="bg-white rounded-xl overflow-hidden shadow-sm flex flex-col cursor-pointer w-full max-w-[245px]" 
       onClick={() => {
         const validIds = ids ? ids.filter((id): id is number => id !== undefined) : null;
         onSubjectClick(subject, externalIds, validIds, titles);

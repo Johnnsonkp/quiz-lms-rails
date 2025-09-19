@@ -2,9 +2,10 @@ require "pdf-reader"
 
 class DashboardController < ApplicationController
   skip_before_action :authenticate_user! # Allow unauthenticated access to dashboard
-  before_action :categories, :dashboard_stats
+  before_action :categories, :dashboard_stats, :get_user
   before_action :get_quizzes_preview, only: [:index]
   skip_before_action :verify_authenticity_token, only: [:file_upload_extract, :delete]
+
 
   def index
     @categories = [] if @categories.nil?
@@ -12,8 +13,10 @@ class DashboardController < ApplicationController
     @dashboard_stats = [] if @dashboard_stats.nil?
 
     puts "Dashboard stats: #{@dashboard_stats.inspect}" if Rails.env.development?
+    puts "user info: #{@user.inspect}" if Rails.env.development?
 
-    render inertia: 'dashboard/Dashboard', props: { 
+    render inertia: 'dashboard/Dashboard', props: {
+      user: unless @user.nil? then { id: @user.id, email: @user.email, name: @user.name } else nil end,
       categories: @categories,
       dashboard_stats: @dashboard_stats,
       url_params: "/dashboard"
@@ -28,6 +31,7 @@ class DashboardController < ApplicationController
       quizzes = Quiz.where(id: params[:quiz_ids])
       topic = params[:topic].strip if params[:topic].present?
       subject = params[:subject].strip if params[:subject].present?
+      user_id = params[:user_id] if params[:user_id].present?
 
       if quizzes.exists?
         puts "Found #{quizzes.count} quizzes to update" if Rails.env.development?
@@ -35,6 +39,7 @@ class DashboardController < ApplicationController
 
         quizzes.update_all(topic: topic) if topic.present?
         quizzes.update_all(subject: subject) if subject.present?
+        quizzes.update_all(user_id: user_id) if user_id.present?
 
         render json: {
           updated_subject: subject, 
@@ -117,10 +122,6 @@ class DashboardController < ApplicationController
 
   def page_refresh
     if params[:topic].present?
-      puts "Page refresh for topic: #{params[:topic]}" if Rails.env.development?
-      puts "Current categories: #{@categories.inspect}" if Rails.env.development?
-      puts "Current dashboard stats: #{@dashboard_stats.inspect}" if Rails.env.development?
-
       render inertia: 'dashboard/Dashboard', props: { 
         categories: @categories,
         dashboard_stats: @dashboard_stats,
@@ -261,6 +262,14 @@ class DashboardController < ApplicationController
 
   private
 
+  def get_user 
+    if user_signed_in?
+      @user = current_user
+    else
+      @user = nil
+    end 
+  end
+
   def check_score
   end
 
@@ -323,13 +332,15 @@ class DashboardController < ApplicationController
   def save_quiz_to_database(quiz_data)
     return nil unless quiz_data.present?
 
+    # Ensure required fields are present
       begin
         # Create the Quiz record
         quiz = Quiz.create!(
           topic: quiz_data['topic'],
           subject: quiz_data['subject'], 
           title: quiz_data['title'],
-          description: quiz_data['description']
+          description: quiz_data['description'],
+          user_id: unless @user.nil? then @user.id else nil end
         )
 
         # Create Question records and associate them with the quiz
