@@ -1,7 +1,5 @@
 import React, { useCallback, useState } from 'react';
 
-import {deleteSingleQuizData} from '../../api/quiz';
-
 // Types
 interface Quiz {
   id: number;
@@ -14,7 +12,7 @@ interface QuizListPageProps {
   img: string | null;
   getQuizData?: (subject: string, id: number) => void;
   ids?: number[];
-  quizList?: Quiz[] | any;
+  quizList?: Quiz[];
 }
 
 interface EditFormData {
@@ -64,7 +62,7 @@ const EditForm: React.FC<EditFormProps> = ({ isOpen, formData, onClose, onSubmit
   if (!isOpen) return null;
 
   return (
-    <div className={`fixed inset-0 z-50 flex items-center justify-center bg-[rgba(0,0,0,0.7)] bg-opacity-50`}>
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-[#777] bg-opacity-100">
       <div className="bg-white rounded-lg shadow-lg p-6 w-full max-w-md">
         <div className="flex justify-between items-center mb-4">
           <h3 className="font-bold text-lg">Update Quiz</h3>
@@ -150,9 +148,9 @@ function QuizListPage({ titles, subject, img, getQuizData, quizList = [] }: Quiz
   });
 
   const handleGetQuizData = useCallback((subject: string | null, title: string, quizList: Quiz[]) => {
-    if (!subject || !title || !quizList?.length) return;
+    if (!subject || !title || !quizList.length) return;
     
-    const quiz = quizList.find((q: Quiz) => q.title === title);
+    const quiz = quizList.find(q => q.title === title);
     if (!quiz?.id) return;
 
     getQuizData?.(subject, quiz.id);
@@ -211,22 +209,8 @@ function QuizListPage({ titles, subject, img, getQuizData, quizList = [] }: Quiz
     }
   }, [editFormData.id, closeEditForm]);
 
-
-  const deleteConfirmation = (): boolean => {
-    return window.confirm("Are you sure you want to delete this quiz? This action cannot be undone.");
-  }
-  
-  const handleDelete = (id: number | undefined | null) => {
-    if (deleteConfirmation()) {
-      deleteSingleQuizData(id || null);
-      window.location.reload();
-    } 
-  };
-
-
-
   const getQuizId = useCallback((title: string): number | null => {
-    const quiz = quizList?.find((q: Quiz) => q.title === title);
+    const quiz = quizList.find(q => q.title === title);
     return quiz?.id || null;
   }, [quizList]);
 
@@ -258,10 +242,10 @@ function QuizListPage({ titles, subject, img, getQuizData, quizList = [] }: Quiz
             <th className="w-16 px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
               No.
             </th>
-            <th className="w-[75%] px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+            <th className="px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
               Quiz Titles
             </th>
-            <th className="w-[20%] px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+            <th className="px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
               Actions
             </th>
           </tr>
@@ -299,18 +283,13 @@ function QuizListPage({ titles, subject, img, getQuizData, quizList = [] }: Quiz
                 <div className="flex gap-2 items-center text-sm text-gray-500">
                   <button
                     onClick={(e) => handleEditClick(e, title)}
-                    className="flex items-center gap-1 border border-gray-300 rounded-md px-2 py-1 text-sm text-gray-700 hover:bg-gray-100 hover:border-blue-500 transition-colors cursor-pointer"
+                    className="flex items-center gap-1 border border-gray-300 rounded-md px-2 py-1 text-sm text-gray-700 hover:bg-gray-100 hover:border-blue-500 transition-colors"
                   >
                     <EditIcon />
                     Edit
                   </button>
                   <span className="text-gray-300">|</span>
-                  <button 
-                    onClick={(e) => {
-                      e.preventDefault();
-                      handleDelete(getQuizId(title))
-                    }}
-                    className="cursor-pointer text-red-600 hover:text-red-800 flex items-center gap-1 border border-gray-300 rounded-md px-2 py-1 text-sm hover:border-red-500 transition-colors">
+                  <button className="text-red-600 hover:text-red-800 transition-colors">
                     Delete
                   </button>
                 </div>

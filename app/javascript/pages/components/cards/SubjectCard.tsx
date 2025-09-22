@@ -46,6 +46,13 @@ function SubjectCards(
     }
   };
 
+  const EditIcon: React.FC = () => (
+    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
+      <path d="M19 13.66V19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5.34" />
+      <path d="m17 1 4 4-10 10H7v-4z" />
+    </svg>
+  );
+
   // const deleteConfirmation = (ids: (number | undefined)[] | null, e: React.MouseEvent<HTMLButtonElement, MouseEvent>) => {
   //   e.preventDefault();
   //   return window.confirm("Are you sure you want to delete this quiz? This action cannot be undone.") ? 
@@ -176,7 +183,7 @@ function SubjectCards(
 
   return (
     <>
-    <div className="bg-white rounded-xl overflow-hidden shadow-sm flex flex-col cursor-pointer w-full max-w-[245px]" 
+    <div className="bg-white rounded-xl overflow-hidden shadow-sm flex flex-col cursor-pointer w-full max-w-[250px]" 
       onClick={() => {
         const validIds = ids ? ids.filter((id): id is number => id !== undefined) : null;
         onSubjectClick(subject, externalIds, validIds, titles);
@@ -237,16 +244,18 @@ function SubjectCards(
               e.preventDefault()
               setShowEditForm(true)
             }}
-            className="z-22 bg-white text-white w-7 border-2 border-blue-500 absolute top-2 right-1 flex items-center justify-center gap-1 cursor-pointer"
+            className="z-22 bg-white text-black w-7 border-2 border-blue-500 absolute top-2 right-1 flex items-center justify-center gap-1 cursor-pointer"
           >
 
-            <svg className="w-5 h-5 text-blue-500" 
+            {/* <svg className="w-5 h-5 text-blue-500" 
               fill="none" 
               stroke="currentColor" 
               strokeWidth="2" 
               viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" d="M16.862 4.487a2.25 2.25 0 1 1 3.182 3.182l-11.25 11.25a2.25 2.25 0 0 1-1.012.573l-4.125 1.031a.375.375 0 0 1-.456-.456l1.03-4.125a2.25 2.25 0 0 1 .574-1.012l11.25-11.25z" />
-            </svg>
+            </svg> */}
+
+            <EditIcon />
 
           </button>
           

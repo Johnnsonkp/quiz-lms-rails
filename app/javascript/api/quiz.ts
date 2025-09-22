@@ -57,3 +57,29 @@ export const deleteQuizData = async (
       console.error("Error deleting quiz:", error);
     }
   }
+
+export const deleteSingleQuizData = async (id: number | null) => {
+    if (!id) return;
+
+    try {
+      const csrfToken = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content');
+      const response = await fetch(`/dashboard/delete_single_quiz`, {
+        method: 'DELETE',
+        headers: {
+          'Content-Type': 'application/json',
+          'Accept': 'application/json',
+          'X-CSRF-Token': csrfToken || ''
+        },
+        body: JSON.stringify({ quiz_id: id }),
+      });
+
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+      const data = await response.json();
+      console.log("Quiz deleted successfully:", data);
+
+    } catch (error) {
+      console.error("Error deleting quiz:", error);
+    }
+  }

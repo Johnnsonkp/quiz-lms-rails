@@ -38,7 +38,7 @@ export default function SingleQuestionComponent({ quizData, selectedSubject, onB
         </div>
         
         <div className="text-center py-12">
-          <h1 className="text-2xl font-bold text-gray-800 mb-2">{selectedSubject?.subject || 'Quiz'}</h1>
+          <h1 className="text-lg font-bold text-gray-800 mb-1">{selectedSubject?.subject || 'Quiz'}</h1>
           <p className="text-gray-600 mb-4">{quizData?.topic || 'Loading...'}</p>
           <div className="text-gray-500">
             {!quizData ? 'Loading quiz data...' : `No questions available for ${selectedSubject?.subject || 'this topic'}.`}

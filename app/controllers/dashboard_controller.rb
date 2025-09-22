@@ -26,7 +26,6 @@ class DashboardController < ApplicationController
 
   def update 
     if params[:quiz_ids].present?
-      puts "Attempting to update quiz with ID: #{params[:quiz_ids]}" if Rails.env.development?
 
       quizzes = Quiz.where(id: params[:quiz_ids])
       topic = params[:topic].strip if params[:topic].present?
@@ -34,9 +33,6 @@ class DashboardController < ApplicationController
       user_id = params[:user_id] if params[:user_id].present?
 
       if quizzes.exists?
-        puts "Found #{quizzes.count} quizzes to update" if Rails.env.development?
-        puts "Quiz details: #{quizzes}" if Rails.env.development?
-
         quizzes.update_all(topic: topic) if topic.present?
         quizzes.update_all(subject: subject) if subject.present?
         quizzes.update_all(user_id: user_id) if user_id.present?
@@ -53,11 +49,37 @@ class DashboardController < ApplicationController
     end
   end 
 
+
+
+  def update_quiz_list 
+    if params[:quiz_id].present?
+      id = params[:quiz_id]
+
+      quizzes = Quiz.where(id: id)
+      quiz_title = params[:quiz_title].strip if params[:quiz_title].present?
+      quiz_subject = params[:quiz_subject].strip if params[:quiz_subject].present?
+
+      if quizzes.exists?
+        quizzes.update_all(title: quiz_title) if quiz_title.present?
+        quizzes.update_all(subject: quiz_subject) if quiz_subject.present?
+
+        render json: {
+          updated_subject: quiz_subject, 
+          updated_title: quiz_title,
+          status: 200
+        }, status: 200
+      else
+        render json: { error: "Quizzes not found" }, status: 404
+      end
+    end
+  end
+
+
+
   def delete
     if params[:quiz_ids].present?
       
       puts "Attempting to delete quiz with ID: #{params[:quiz_ids]}" if Rails.env.development?
-
       quizzes = Quiz.where(id: params[:quiz_ids])
       quizzes.each do |quiz|
         # Destroy associated quiz_questions and questions if needed
@@ -75,8 +97,32 @@ class DashboardController < ApplicationController
     else
       render json: { error: "Missing quiz_ids parameter" }, status: 400
     end
-
   end
+
+
+
+  def delete_single_quiz
+    if params[:quiz_id].present?
+
+      single_quiz = Quiz.where(id: params[:quiz_id])
+
+      if single_quiz.exists?
+        single_quiz.each do |quiz|
+          quiz.quiz_questions.destroy_all if quiz.respond_to?(:quiz_questions)
+          quiz.questions.destroy_all if quiz.respond_to?(:questions)
+        end
+
+        single_quiz.destroy_all
+        render json: { message: "Quiz deleted successfully" }
+      else
+        render json: { error: "Quiz not found" }, status: 404
+      end
+    else
+      render json: { error: "Missing quiz_id parameter" }, status: 400
+    end
+  end
+
+
 
   def get_all_quizzes_from_subject
     if params[:subject].present?
@@ -485,7 +531,7 @@ class DashboardController < ApplicationController
     - Each long response question must provide:
         1. A structured guideline for how to approach the answer
         2. A clear, accurate solution
-    - Use meaningful `external_id` values like: quiz_subject_001, quiz_subject_002, etc.
+    - Use meaningful `external_id` values like: subject_001, subject_002, etc.
     - Assign difficulty levels: mostly advanced, with a few intermediate questions for variety.
     - Include relevant tags describing the topic of each question.
     - Set realistic time estimates per question (30–120 seconds).

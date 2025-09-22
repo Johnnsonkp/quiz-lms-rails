@@ -20,15 +20,15 @@ Rails.application.routes.draw do
   get 'dashboard', to: 'dashboard#index'
   get 'dashboard/:topic/get', to: 'dashboard#get_topic_quizzes'
   get 'dashboard/:topic', to: 'dashboard#page_refresh'
+  get 'dashboard/:topic/:subject/:quiz_ids', to: 'dashboard#show'
+  get 'dashboard/get_all_quizzes_from_subject', to: 'dashboard#get_all_quizzes_from_subject'
   # get 'dashboard/:topic/:subject/:quiz_ids', to: 'dashboard#show'
 
   patch 'dashboard/update_quiz', to: 'dashboard#update'
+  patch 'dashboard/update_quiz_list', to: 'dashboard#update_quiz_list'
   
   delete 'dashboard/delete_quiz', to: 'dashboard#delete'
-
-  get 'dashboard/:topic/:subject/:quiz_ids', to: 'dashboard#show'
-
-  get 'dashboard/get_all_quizzes_from_subject', to: 'dashboard#get_all_quizzes_from_subject'
+  delete 'dashboard/delete_single_quiz', to: 'dashboard#delete_single_quiz'
 
   post 'dashboard/file_upload', to: 'dashboard#file_upload_extract'
   # Define your application routes per the DSL in https://guides.rubyonrails.org/routing.html

@@ -1,5 +1,6 @@
 import { DashboardProps, QuizPreview } from '../../types/dashboard';
 
+import BadgeCarousel from '../components/carousel/BadgeCarousel';
 import DashboardBanner from '../components/header/dashboardHeader/DashboardBanner';
 import { DashboardHome } from './DashboardHome';
 import Divider from '../components/divider/Divider';
@@ -97,10 +98,12 @@ function Dashboard({ user, categories, dashboard_stats, url_params }: DashboardP
   };
 
 
+
+
   if(error){ return <div className="text-center py-8 text-red-500">{error}</div>}
 
   return (
-    <div className="flex flex-col md:flex-row min-h-screen w-full">
+    <div className="flex flex-col md:flex-row min-h-screen w-full overflow-y-hidden">
       <Head title="QLearn.ai" />
 
       {/* Sidebar Toggle Button */}
@@ -144,9 +147,14 @@ function Dashboard({ user, categories, dashboard_stats, url_params }: DashboardP
 
             <Divider />
 
+            <BadgeCarousel 
+              titles={quiz_preview?.filter((quiz: QuizPreview) => quiz.topic?.toLowerCase() == selectedTopic?.toLowerCase()).flatMap((quiz) => quiz?.quiz_details?.map(detail => detail?.title).filter(Boolean) || []) || null} 
+            />
+
+              
             <div className="grid grid-cols-1 md:grid-cols-4 lg:grid-cols-4 gap-4 mt-7 gap-y-8">
               {/* Subject Cards - take 3/4th space */}
-              <div className="md:col-span-3 lg:col-span-3 flex flex-row flex-wrap gap-3">
+              <div className="md:col-span-3 lg:col-span-3 flex flex-row flex-wrap gap-4">
                 {showQuizCards && quiz_preview && quiz_preview
                   .filter(
                     (quiz: QuizPreview) =>
@@ -170,17 +178,18 @@ function Dashboard({ user, categories, dashboard_stats, url_params }: DashboardP
               </div>
               
               {/* Table of Contents - take 1/4th space, on right */}
-              <div className="lg:col-span-1 fixed right-[25px]">
-                {showQuizCards && quiz_preview && (
-                  <TableOfContents quiz_preview={quiz_preview} />
-                )}
-              </div>
+              { showQuizCards == true &&
+                <div className="lg:col-span-1 fixed right-[25px] border-gray-300 border-2 w-[250px] rounded-md">
+                  {showQuizCards && quiz_preview && (
+                    <TableOfContents quiz_preview={quiz_preview} />
+                  )}
+                </div>}
             </div>
 
             {showQuizCards == false && listTitles && listTitles?.length > 0 && listSubject &&
               <QuizListPage
                 ids={quiz_preview?.find((q) => q.subject === listSubject)?.quiz_details?.map((d) => d.id).filter((id): id is number => typeof id === 'number') || []}
-                quizList={quiz_preview?.find((q) => q.subject === listSubject)?.quiz_details}
+                quizList={quiz_preview?.find((q) => q.subject === listSubject)?.quiz_details }
                 titles={listTitles}
                 subject={listSubject}
                 img={quiz_preview?.find(q => q.subject === listSubject)?.img || null}

@@ -12,10 +12,10 @@ function SideNav({categories, handleTopicClick, activeSection, showSidebar}:
   }) {
   return (
     <aside
-      className={`md:static md:translate-x-0 md:block
-        fixed top-0 left-0 h-[calc(100vh-64px)] transition-transform duration-300 shadow-lg
+      className={`md:static md:translate-x-0 
+        fixed top-0 left-0 transition-transform duration-300 shadow-lg h-screen 
         ${showSidebar ? 'translate-x-0' : '-translate-x-full'} w-64 z-30`}
-        style={{ background: '#fff', height: '100vh' }}
+        style={{ background: '#fff', height: '120vh', overflowY: 'scroll' }}
     >
       <a href="/" className="p-4 flex items-center justify-between">
         <h1 className={`!text-1xl font-bold text-black-500 transition-opacity duration-300`}>
