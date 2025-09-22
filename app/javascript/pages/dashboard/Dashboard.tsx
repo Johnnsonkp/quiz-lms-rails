@@ -16,6 +16,7 @@ import { getSelectedTopic } from '../../api/quiz';
 import { handleURLParams } from '../../utils/urlParams';
 import { slugify } from '../../utils/slugify';
 import useInitialRouting from '../../hooks/useInitialRouting';
+import { usePage } from '@inertiajs/react'
 import { useQuizData } from '../../hooks/useQuizData';
 import { useState } from 'react';
 
@@ -31,6 +32,7 @@ function Dashboard({ user, categories, dashboard_stats, url_params }: DashboardP
   const [listTitles, setListTitles] = useState<string[] | null>(null);
   const [listSubject, setListSubject] = useState<string | null>(null);
   const [showQuizCards, setShowQuizCards] = useState(true);
+  const { current_user } = usePage().props
 
   useInitialRouting({
     url_params,
@@ -97,16 +99,12 @@ function Dashboard({ user, categories, dashboard_stats, url_params }: DashboardP
     setActiveSection('dashboard');
   };
 
-
-
-
   if(error){ return <div className="text-center py-8 text-red-500">{error}</div>}
 
   return (
     <div className="flex flex-col md:flex-row min-h-screen w-full overflow-y-hidden">
       <Head title="QLearn.ai" />
 
-      {/* Sidebar Toggle Button */}
       <SideButton showSidebar={showSidebar} setShowSidebar={setShowSidebar} />
 
       <SideNav 
@@ -151,9 +149,7 @@ function Dashboard({ user, categories, dashboard_stats, url_params }: DashboardP
               titles={quiz_preview?.filter((quiz: QuizPreview) => quiz.topic?.toLowerCase() == selectedTopic?.toLowerCase()).flatMap((quiz) => quiz?.quiz_details?.map(detail => detail?.title).filter(Boolean) || []) || null} 
             />
 
-              
             <div className="grid grid-cols-1 md:grid-cols-4 lg:grid-cols-4 gap-4 mt-7 gap-y-8">
-              {/* Subject Cards - take 3/4th space */}
               <div className="md:col-span-3 lg:col-span-3 flex flex-row flex-wrap gap-4">
                 {showQuizCards && quiz_preview && quiz_preview
                   .filter(

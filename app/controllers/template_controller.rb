@@ -4,12 +4,15 @@ class TemplateController < ApplicationController
   before_action :set_devise_variables, only: [:login, :signup]
   
   def home
+    # redirect_to root_path
   end
 
   def login
+    # redirect_to login_path
   end
 
   def signup
+    # redirect_to signup_path
   end
 
   private

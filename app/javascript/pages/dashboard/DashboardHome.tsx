@@ -16,6 +16,7 @@ type DashboardHomeProps = {
 };
 
 export const DashboardHome = memo(({ user, dashboard_stats }: DashboardHomeProps) => {
+
   return (
     <section className="space-y-6">
       <header className="flex justify-between items-center">
@@ -34,13 +35,6 @@ export const DashboardHome = memo(({ user, dashboard_stats }: DashboardHomeProps
             {dashboard_stats?.total_subjects ?? 0}
           </p>
         </div>
-
-        {/* <div className="bg-white p-4 rounded-lg shadow-md">
-          <h2 className="text-lg font-semibold text-gray-700">Total Subjects</h2>
-          <p className="text-2xl font-bold text-blue-600">
-            {dashboard_stats?.total_questions ?? 0}
-          </p>
-        </div> */}
 
         <div className="bg-white p-4 rounded-lg shadow-md">
           <h2 className="text-lg font-semibold text-gray-700">Total Questions</h2>

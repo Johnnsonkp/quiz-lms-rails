@@ -3,7 +3,8 @@ import './header.css';
 import React from 'react';
 
 function DashboardBanner({setEditStatus, handleBackToDashboard, selectedTopic, titles}: any) {
-  const [startIndex, setStartIndex] = React.useState(0);
+
+  const urlParams = new URLSearchParams(window.location.pathname);
 
   const EditIcon: React.FC = () => (
     <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
@@ -31,20 +32,6 @@ function DashboardBanner({setEditStatus, handleBackToDashboard, selectedTopic, t
         aria-label="Edit"
         type="button"
       >
-        {/* <svg
-          className="w-4 h-4 text-gray-700"
-          fill="none"
-          stroke="currentColor"
-          strokeWidth="2"
-          viewBox="0 0 24 24"
-          aria-hidden="true"
-        >
-          <path
-        d="M15.232 5.232l3.536 3.536M9 13l6.586-6.586a2 2 0 112.828 2.828L11.828 15.828a2 2 0 01-1.414.586H7v-3a2 2 0 01.586-1.414z"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-          />
-        </svg> */}
         <EditIcon />
         <span className="text-sm font-medium text-gray-700">Edit</span>
       </button>
@@ -53,50 +40,11 @@ function DashboardBanner({setEditStatus, handleBackToDashboard, selectedTopic, t
       <div className="bg-card">
         <div className="bg-card-content">
 
-          <h2 className="text-3xl text-black/80 font-medium font-roboto drop-shadow-lg mt-7 mb-3">
-            {selectedTopic}
+          <h2 className="text-2xl text-black/80 font-medium font-roboto drop-shadow-lg mt-7 mb-3">
+            {selectedTopic} / 
+            <span className="text-black/70 font-medium text-[14px] mx-2">{urlParams.get('title') || titles?.[0] || 'All Topics'}</span>
           </h2>
           
-            {/* <div className="flex items-center pt-3 w-full">
-            {titles && titles?.length > 1? 
-              (<>
-                <button
-                  className="p-1 px-1 rounded-full bg-gray-200 hover:bg-gray-300 text-gray-700 mr-2 disabled:opacity-50 cursor-pointer"
-                  onClick={() => setStartIndex((prev: number) => Math.max(prev - 1, 0))}
-                  disabled={startIndex === 0}
-                  aria-label="Previous"
-                  type="button"
-                >
-                  &#8592;
-                </button>
-
-            <div className="flex flex-wrap gap-2 flex-1">
-              {titles && titles
-                .filter(Boolean)
-                .slice(startIndex, startIndex + 4)
-                .map((title: string, index: number) => (
-
-                <span key={startIndex + index}
-                  className="inline-block bg-gray-200 rounded-full px-3 py-1 text-md font-medium text-gray-800 cursor-pointer"
-                >
-                  {title}
-                </span>))}
-            </div>
-
-            <button
-              className="p-1 px-2 rounded-full bg-gray-200 hover:bg-gray-300 text-gray-700 ml-2 disabled:opacity-50 cursor-pointer"
-              onClick={() => setStartIndex((prev: number) => Math.min(prev + 1, Math.max(0, titles.filter(Boolean).length - 4)))}
-              disabled={titles && startIndex + 4 >= titles.filter(Boolean).length}
-              aria-label="Next"
-              type="button"
-            >
-              &#8594;
-            </button></>) : 
-                <span className="inline-block bg-gray-200 rounded-full px-3 py-1 text-md font-medium text-gray-800 cursor-pointer">
-                  {titles}
-                </span>
-            }
-            </div> */}
         </div>
       </div>
     </header>
