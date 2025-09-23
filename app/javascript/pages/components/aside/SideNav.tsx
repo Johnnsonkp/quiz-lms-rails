@@ -13,9 +13,10 @@ function SideNav({categories, handleTopicClick, activeSection, showSidebar}:
   return (
     <aside
       className={`md:static md:translate-x-0 
-        fixed top-0 left-0 transition-transform duration-300 shadow-lg h-screen 
-        ${showSidebar ? 'translate-x-0' : '-translate-x-full'} w-64 z-30`}
-        style={{ background: '#fff', height: '120vh', overflowY: 'scroll' }}
+      fixed top-0 left-0 transition-transform duration-300 shadow-lg 
+      h-screen w-64 z-30
+      ${showSidebar ? 'translate-x-0' : '-translate-x-full'}`}
+      style={{ background: '#fff', height: '100vh', overflowY: 'auto' }}
     >
       <a href="/" className="p-4 flex items-center justify-between">
         <h1 className={`!text-1xl font-bold text-black-500 transition-opacity duration-300`}>
@@ -28,7 +29,6 @@ function SideNav({categories, handleTopicClick, activeSection, showSidebar}:
 
       <nav className="py-4">
         <ul className="space-y-2">
-          {/* Quiz Topics Section */}
           <li className="pt-1">
             <ul className="space-y-1">
               {categories.map((topic: Category) => (

@@ -9,12 +9,13 @@ interface Quiz {
 }
 
 interface QuizListPageProps {
-  titles: string[];
+  titles: string[] | null;
   subject: string | null;
   img: string | null;
   getQuizData?: (subject: string, id: number) => void;
   ids?: number[];
   quizList?: Quiz[] | any;
+  showList?: boolean | false | undefined | any;
 }
 
 interface EditFormData {
@@ -140,14 +141,10 @@ const EditIcon: React.FC = () => (
 );
 
 // Main Component
-function QuizListPage({ titles, subject, img, getQuizData, quizList = [] }: QuizListPageProps) {
+function QuizListPage({ titles, subject, img, getQuizData, quizList = [], showList }: QuizListPageProps) {
   const [showEditForm, setShowEditForm] = useState(false);
   const [loading, setLoading] = useState(false);
-  const [editFormData, setEditFormData] = useState<EditFormData>({
-    id: null,
-    title: '',
-    subject: ''
-  });
+  const [editFormData, setEditFormData] = useState<EditFormData>({id: null, title: '', subject: ''});
 
   const handleGetQuizData = useCallback((subject: string | null, title: string, quizList: Quiz[]) => {
     if (!subject || !title || !quizList?.length) return;
@@ -161,11 +158,7 @@ function QuizListPage({ titles, subject, img, getQuizData, quizList = [] }: Quiz
   const handleQuizEdit = useCallback((title: string, subject: string | null, id: number | null) => {
     if (!id || !title || !subject) return;
     
-    setEditFormData({
-      id,
-      title,
-      subject
-    });
+    setEditFormData({id, title, subject});
     setShowEditForm(true);
   }, []);
 
@@ -178,7 +171,6 @@ function QuizListPage({ titles, subject, img, getQuizData, quizList = [] }: Quiz
     if (!editFormData.id) return;
 
     setLoading(true);
-
     try {
       const csrfToken = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content');
       const response = await fetch('/dashboard/update_quiz_list', {
@@ -238,12 +230,12 @@ function QuizListPage({ titles, subject, img, getQuizData, quizList = [] }: Quiz
     }
   }, [getQuizId, subject, handleQuizEdit]);
 
-  if (!titles || titles.length === 0) {
+  if (showList && (!titles || titles.length === 0)) {
     return <div>No quizzes available</div>;
   }
 
   return (
-    <div>
+    <div className={`${showList ? '' : 'hidden'}`}>
       <EditForm
         isOpen={showEditForm}
         formData={editFormData}
@@ -267,7 +259,7 @@ function QuizListPage({ titles, subject, img, getQuizData, quizList = [] }: Quiz
           </tr>
         </thead>
         <tbody className="bg-white divide-y divide-gray-200">
-          {titles.map((title, index) => (
+          {titles && titles.map((title, index) => (
             <tr
               key={`${title}-${index}`}
               onClick={() => handleGetQuizData(subject, title, quizList)}
