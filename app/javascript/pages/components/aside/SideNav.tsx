@@ -12,7 +12,8 @@ function SideNav({categories, handleTopicClick, activeSection, showSidebar}:
   }) {
   return (
     <aside
-      className={`md:static md:translate-x-0 
+      // className={`md:static md:translate-x-0
+      className={`md:fixed md:translate-x-0 
       fixed top-0 left-0 transition-transform duration-300 shadow-lg 
       h-screen w-64 z-30
       ${showSidebar ? 'translate-x-0' : '-translate-x-full'}`}

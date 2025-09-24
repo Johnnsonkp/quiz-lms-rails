@@ -208,19 +208,21 @@ function DashboardLayout({ children, user, categories, dashboard_stats, url_para
   };
 
   return (
-    <div className="flex flex-col md:flex-row min-h-screen w-full overflow-y-hidden">
+    <div className="flex flex-col md:flex-row min-h-screen w-full overflow-y-hidden bg-[#F9FAFB]">
       <SideButton showSidebar={showSidebar} setShowSidebar={setShowSidebar} />
 
-      <SideNav 
-        categories={finalCategories}
-        handleTopicClick={handleTopicClick}
-        activeSection={activeSection}
-        showSidebar={showSidebar}
-      />
+      <div className='flex-[0.23]'>
+        <SideNav 
+          categories={finalCategories}
+          handleTopicClick={handleTopicClick}
+          activeSection={activeSection}
+          showSidebar={showSidebar}
+        />
+      </div>
 
       <main 
         style={{ opacity: loading || loadingQuizPreview ? 0 : 1 }}
-        className="flex-1 p-4 !pt-3 !mt-0 md:p-6 overflow-y-auto w-[100%] bg-[#F9FAFB] transition-opacity duration-300"
+        className="flex-[1] p-4 !pt-3 !mt-0 md:p-6 overflow-y-auto w-[100%] bg-[#F9FAFB] transition-opacity duration-300"
       >
         {renderContent()}
       </main>
