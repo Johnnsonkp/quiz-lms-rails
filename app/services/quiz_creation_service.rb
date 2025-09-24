@@ -1,11 +1,12 @@
 class QuizCreationService
-  def self.call(quiz_data, user = nil)
-    new(quiz_data, user).call
+  def self.call(quiz_data, user = nil, note = nil)
+    new(quiz_data, user, note).call
   end
 
-  def initialize(quiz_data, user)
+  def initialize(quiz_data, user, note = nil)
     @quiz_data = quiz_data
     @user = user
+    @note = note
   end
 
   def call
@@ -18,7 +19,8 @@ class QuizCreationService
         subject: @quiz_data['subject'], 
         title: @quiz_data['title'],
         description: @quiz_data['description'],
-        user_id: @user&.id
+        user_id: @user&.id,
+        note_id: @note&.id
       )
 
       # Create Question records and associate them with the quiz

@@ -4,6 +4,11 @@ git_source(:github) { |repo| "https://github.com/#{repo}.git" }
 # ruby "3.1.2"
 ruby "3.4.5"
 
+
+# Image processing gems for PDF handling and Active Storage
+gem 'mini_magick'
+gem 'image_processing', '~> 1.2'
+
 gem 'devise'
 gem 'omniauth'
 gem 'omniauth-google-oauth2'
@@ -61,7 +66,7 @@ gem "bootsnap", require: false
 # gem "sassc-rails"
 
 # Use Active Storage variants [https://guides.rubyonrails.org/active_storage_overview.html#transforming-images]
-# gem "image_processing", "~> 1.2"
+gem "image_processing", "~> 1.2"
 
 group :development, :test do
   # See https://guides.rubyonrails.org/debugging_rails_applications.html#debugging-with-the-debug-gem

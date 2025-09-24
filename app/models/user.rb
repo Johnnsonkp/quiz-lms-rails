@@ -16,4 +16,7 @@ class User < ApplicationRecord
   
   # Quiz associations
   has_many :quizzes, dependent: :destroy
+
+  # Notes associations
+  has_many :notes, dependent: :destroy
 end

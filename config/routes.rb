@@ -1,4 +1,11 @@
 Rails.application.routes.draw do
+  get "notes/index"
+  get "notes/show"
+  get "notes/new"
+  get "notes/create"
+  get "notes/edit"
+  get "notes/update"
+  get "notes/destroy"
   # get "errors/not_found"
   # get "errors/internal_server_error"
 

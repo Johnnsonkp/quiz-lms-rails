@@ -216,7 +216,6 @@ function QuizListPage({ titles, subject, img, getQuizData, quizList = [], showLi
   };
 
 
-
   const getQuizId = useCallback((title: string): number | null => {
     const quiz = quizList?.find((q: Quiz) => q.title === title);
     return quiz?.id || null;
@@ -250,8 +249,11 @@ function QuizListPage({ titles, subject, img, getQuizData, quizList = [], showLi
             <th className="w-16 px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
               No.
             </th>
-            <th className="w-[75%] px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+            <th className="w-[70%] px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
               Quiz Titles
+            </th>
+            <th className="w-[10%] px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+              Note
             </th>
             <th className="w-[20%] px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
               Actions
@@ -286,6 +288,13 @@ function QuizListPage({ titles, subject, img, getQuizData, quizList = [], showLi
                     </div>
                   </div>
                 </div>
+              </td>
+              <td className="px-3 py-4 whitespace-nowrap">
+                {quizList?.find((q: Quiz) => q.title === title)?.note ? (
+                    <button className="flex items-center gap-1 border border-gray-300 rounded-md px-2 py-1 text-sm text-gray-700 hover:bg-gray-100 hover:border-blue-500 transition-colors cursor-pointer">Note</button>
+                  ) : (
+                    <button className="text-gray-400 cursor-not-allowed text-sm" disabled>No Note</button>
+                  )}
               </td>
               <td className="px-3 py-4 whitespace-nowrap">
                 <div className="flex gap-2 items-center text-sm text-gray-500">

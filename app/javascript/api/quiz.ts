@@ -1,6 +1,4 @@
 export const getSelectedTopic = async (topic: string) => {
-    // setLoadingQuizPreview(true);
-
     try {
       const response = await fetch(`/dashboard/${encodeURIComponent(topic)}/get`, {
         method: 'GET',
@@ -15,6 +13,7 @@ export const getSelectedTopic = async (topic: string) => {
       }
 
       const data = await response.json();
+      console.log("Fetched topic data successfully", data);
       return data;
       
     } catch (error) {

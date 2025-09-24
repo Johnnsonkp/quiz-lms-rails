@@ -19,14 +19,20 @@ class OpenaiService
       return nil
     end
 
-    quiz_data = OpenAI::Client.new(access_token: api_key).chat(
+    client = OpenAI::Client.new(
+      access_token: api_key,
+      request_timeout: 120 # 2 minutes timeout instead of default 30 seconds
+    )
+    
+    quiz_data = client.chat(
       parameters: {
         model: "gpt-4o",
         messages: [
           { role: "system", content: system_prompt},
           { role: "user", content: prompt}
         ],
-        temperature: 0.7, max_tokens: 2000,
+        temperature: 0.7, 
+        max_tokens: 8000, # Increased from 2000 to 8000 tokens
         response_format: { type: "json_object" }
       }
     ).dig("choices", 0, "message", "content")

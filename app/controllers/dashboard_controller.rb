@@ -18,13 +18,6 @@ class DashboardController < ApplicationController
       dashboard_stats: @dashboard_stats,
       url_params: "/dashboard"
     }
-
-    # render inertia: 'layout/DashboardLayout', props: {
-    #   user: unless @user.nil? then { id: @user.id, email: @user.email, name: @user.name } else nil end,
-    #   categories: @categories,
-    #   dashboard_stats: @dashboard_stats,
-    #   url_params: "/dashboard"
-    # }
   end
 
 
@@ -185,7 +178,8 @@ class DashboardController < ApplicationController
 
   def create
     if params[:quiz].present?
-      created_quiz = create_quiz(params[:quiz])
+      # created_quiz = create_quiz(params[:quiz])
+      created_quiz = Quiz.create!(params[:quiz])
       render json: { message: "Quiz created successfully", quiz: created_quiz.to_json }
     end
   end
@@ -272,7 +266,10 @@ class DashboardController < ApplicationController
 
     begin
       file_text = extract_text(uploaded_file)
-      uploaded_original_file_name = uploaded_file.original_filename, 
+
+      puts "Extracted text length: #{file_text.length} characters" if Rails.env.development?
+      uploaded_original_file_name = uploaded_file.original_filename
+      
       # Generate quiz with optional parameters
       quiz_data = OpenaiService.generate_quiz_from_uploaded_file(
         @categories,
@@ -283,11 +280,31 @@ class DashboardController < ApplicationController
         subject
       )
 
+      note = nil
+      saved_quiz = nil
+
       if quiz_data.present?
-        # saved_quiz = save_quiz_to_database(quiz_data)
-        saved_quiz = QuizCreationService.call(quiz_data, @user)
+        # 1. Create note for all users (authenticated and unauthenticated) with PDF attached
+        note = Note.new(
+          title: title || "Note from #{uploaded_original_file_name}",
+          content: file_text,
+          pdf_images: extract_pdf_images(uploaded_file),
+          user: @user # Will be nil for unauthenticated users, which is fine
+        )
+        
+        # 2. Attach the PDF file before saving to pass validation
+        note.pdf_file.attach(uploaded_file)
+        note.save!
+        
+        puts "Successfully created note: #{note.title}" if Rails.env.development?
+        puts "Note created for user: #{@user&.email || 'anonymous'}" if Rails.env.development?
+        
+        # 3. Create quiz and associate with the note
+        saved_quiz = QuizCreationService.call(quiz_data, @user, note)
+        
         if saved_quiz
           puts "Successfully saved quiz: #{saved_quiz.title}" if Rails.env.development?
+          puts "Associated with note: #{note.title}" if Rails.env.development? && note.present?
         else
           Rails.logger.error "Failed to save quiz to database"
         end
@@ -299,8 +316,9 @@ class DashboardController < ApplicationController
         message: "File uploaded and processed successfully", 
         filename: uploaded_file.original_filename,
         content_type: uploaded_file.content_type,
+        note_created: note.present?,
         quiz_generated: quiz_data.present?,
-        quiz_saved: quiz_data.present? && saved_quiz.present?
+        quiz_saved: saved_quiz.present?
       }
       
     rescue => e
@@ -349,11 +367,10 @@ class DashboardController < ApplicationController
   end
 
 
-  def create_quiz(quiz_params)
-    # Create a new quiz record
-    created_q = Quiz.create!(quiz_params)
-    return created_q
-  end
+  # def create_quiz(quiz_params)
+  #   created_q = Quiz.create!(quiz_params)
+  #   return created_q
+  # end
 
   def categories
     if user_signed_in?
@@ -375,23 +392,61 @@ class DashboardController < ApplicationController
       file.read
     end
   end
+
+  def extract_pdf_images(uploaded_file)
+    return {} unless uploaded_file.content_type == 'application/pdf'
+    
+    begin
+      # Extract basic PDF metadata for now
+      # Future enhancement: Use mini_magick to extract actual images
+      reader = PDF::Reader.new(uploaded_file.tempfile)
+      
+      {
+        total_pages: reader.page_count,
+        extracted_at: Time.current,
+        file_size: uploaded_file.size,
+        original_filename: uploaded_file.original_filename,
+        content_type: uploaded_file.content_type
+      }
+    rescue => e
+      Rails.logger.error "PDF metadata extraction failed: #{e.message}"
+      {
+        error: e.message,
+        extracted_at: Time.current,
+        file_size: uploaded_file.size,
+        original_filename: uploaded_file.original_filename
+      }
+    end
+  end
   
 
   def get_topic_quizzes_preview(topic)
     quizzes = if user_signed_in?
-      current_user.quizzes.includes(:questions).where(topic: topic)
+      current_user.quizzes.includes(:questions, :note).where(topic: topic)
     else
-      Quiz.public_quizzes.includes(:questions).where(topic: topic)
+      Quiz.public_quizzes.includes(:questions, :note).where(topic: topic)
     end
     # Group quizzes by subject
     subjects = quizzes.group_by(&:subject).map do |subject, subject_quizzes|
       quiz_details = subject_quizzes.map do |quiz|
-        {
+        quiz_data = {
           id: quiz.id,
           title: quiz.title,
           description: quiz.description,
           external_ids: quiz.questions.pluck(:external_id)
         }
+        
+        # Add note information if quiz has an associated note
+        if quiz.note.present?
+          quiz_data[:note] = {
+            id: quiz.note.id,
+            title: quiz.note.title,
+            has_pdf: quiz.note.pdf_file.attached?,
+            created_at: quiz.note.created_at
+          }
+        end
+        
+        quiz_data
       end
       {
         subject: subject,
@@ -409,18 +464,29 @@ class DashboardController < ApplicationController
 
   def get_quizzes_preview
     user_quizzes = if user_signed_in?
-      current_user.quizzes.includes(:questions)
+      current_user.quizzes.includes(:questions, :note)
     else
-      Quiz.public_quizzes.includes(:questions)  # Show quizzes without users for non-logged in users
+      Quiz.public_quizzes.includes(:questions, :note)  # Show quizzes without users for non-logged in users
     end
 
     @quiz_preview = user_quizzes.group_by(&:topic).map do |topic, topic_quizzes|
       subjects = topic_quizzes.group_by(&:subject).map do |subject, subject_quizzes|
         quiz_external_ids = subject_quizzes.map do |quiz|
-          {
+          quiz_data = {
             title: quiz.title,
             external_ids: quiz.questions.pluck(:external_id)
           }
+          
+          # Add note information if available
+          if quiz.note.present?
+            quiz_data[:note] = {
+              id: quiz.note.id,
+              title: quiz.note.title,
+              has_pdf: quiz.note.pdf_file.attached?
+            }
+          end
+          
+          quiz_data
         end
         {
           ids: subject_quizzes.map(&:id),
