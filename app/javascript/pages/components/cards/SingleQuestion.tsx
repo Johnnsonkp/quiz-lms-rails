@@ -1,5 +1,6 @@
 import HintButton from '../buttons/HintButton';
 import QuestionOptions from './QuestionOptions';
+import SingleCardControls2 from '../controls/SingleCardControls2';
 import { SingleQuestionCardProps } from '../../../types/dashboard';
 
 export function SingleQuestionCard({ 
@@ -9,14 +10,22 @@ export function SingleQuestionCard({
   showResult,
   questionNumber,
   totalQuestions,
-  hint 
+  hint,
+  answers,
+  showResults,
+  currentQuestionIndex,
+  handlePrevious,
+  handleNext,
+  handleShowResult,
+  handleReset,
+  currentQuestion 
 }: SingleQuestionCardProps) {
 
   return (
     <div className="flex bg-white rounded-lg shadow-lg overflow-hidden mx-auto max-w-sm lg:max-w-4xl">
 
       {/* Image section */}
-      <div className="hidden lg:block lg:w-1/2 bg-cover"
+      <div className="hidden lg:block lg:w-1/4 bg-cover"
           style={{ 
             // backgroundImage: "url('https://images.unsplash.com/photo-1546514714-df0ccc50d7bf?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=crop&w=667&q=80')" 
             backgroundImage: `url(${question?.image})` 
@@ -25,7 +34,7 @@ export function SingleQuestionCard({
       </div>
 
       {/* Quiz card */}
-      <div className="bg-white p-4 rounded-lg shadow-lg border-none max-w-4xl mx-auto">
+      <div className="bg-white p-4 rounded-lg shadow-lg border-none max-w-4xl mx-auto lg:w-3/4">
         {/* Question Header */}
         <div className="mb-6">
           <div className="flex justify-between items-center mb-4">
@@ -47,7 +56,22 @@ export function SingleQuestionCard({
           onAnswerSelect={onAnswerSelect}
         />
 
-        {hint && (<HintButton hint={hint}/>)}
+        <div className=''>
+          {hint && (<HintButton hint={hint}/>)}
+
+          <SingleCardControls2 
+            currentQuestionIndex={currentQuestionIndex}
+            totalQuestions={totalQuestions}
+            answers={answers}
+            showResults={showResults}
+            handlePrevious={handlePrevious}
+            handleNext={handleNext}
+            handleShowResult={handleShowResult}
+            handleReset={handleReset}
+            currentQuestion={currentQuestion}
+          />
+        </div>
+
 
         {/* Question Details */}
         {showResult && (

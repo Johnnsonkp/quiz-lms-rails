@@ -23,7 +23,6 @@ class DashboardController < ApplicationController
 
   def update 
     if params[:quiz_ids].present?
-
       quizzes = Quiz.where(id: params[:quiz_ids])
       topic = params[:topic].strip if params[:topic].present?
       subject = params[:subject].strip if params[:subject].present?
@@ -72,6 +71,30 @@ class DashboardController < ApplicationController
   end
 
 
+  
+  def edit_quiz_question_by_id
+    if params[:question_id].present?
+      question = Question.find_by(external_id: params[:question_id])
+
+      if question
+        question.question = params[:question] if params[:question].present?
+        question.answer = params[:answer] if params[:answer].present?
+        question.incorrect_answers = params[:incorrect_answers] if params[:incorrect_answers].present?
+
+        if question.save
+          render json: { message: "Question updated successfully", question: question }, status: 200
+        else
+          render json: { error: "Failed to update question", details: question.errors.full_messages }, status: 422
+        end
+      else
+        render json: { error: "Question not found" }, status: 404
+      end
+    else
+      render json: { error: "Missing question_id parameter" }, status: 400
+    end
+  end
+
+
 
   def delete
     if params[:quiz_ids].present?
@@ -79,7 +102,6 @@ class DashboardController < ApplicationController
       puts "Attempting to delete quiz with ID: #{params[:quiz_ids]}" if Rails.env.development?
       quizzes = Quiz.where(id: params[:quiz_ids])
       quizzes.each do |quiz|
-        # Destroy associated quiz_questions and questions if needed
         quiz.quiz_questions.destroy_all if quiz.respond_to?(:quiz_questions)
         quiz.questions.destroy_all if quiz.respond_to?(:questions)
       end
@@ -187,7 +209,6 @@ class DashboardController < ApplicationController
 
   def show
     if params[:topic].present?
-
     quiz_conditions = { topic: params[:topic] }
     quiz_conditions[:subject] = params[:subject] if params[:subject].present?
         
@@ -197,35 +218,17 @@ class DashboardController < ApplicationController
     end
 
     filtered_quizzes = Quiz.includes(:questions).where(quiz_conditions)
-    
-    questions_only = []
-    filtered_quizzes.each do |quiz|
-      quiz.questions.each do |question|
-        questions_only << {
-            id: question.external_id,
-            type: question.question_format,
-            question: question.question,
-            answer: question.answer,
-            incorrect_answers: question.incorrect_answers,
-            hint: question.hint,
-            explanation: question.explanation,
-            difficulty: question.difficulty,
-            estimated_time_seconds: question.estimated_time_seconds,
-            tags: question.tags,
-            path: question.path,
-            quiz_title: quiz.title,
-            subject: quiz.subject,
-            # image: get_pic_from_unsplash(quiz.subject)
-            image: UnsplashService.get_image(quiz.subject)
-          }
-        end
-      end
+    quiz_obj = quiz_object(filtered_quizzes)
+
+    # puts "quiz_obj: #{quiz_obj}" if Rails.env.development?
+    puts "quiz_obj.first: #{quiz_obj.first[:quiz_title]}" if Rails.env.development?
       
-      render json: { 
-        topic: params[:topic], 
-        total_questions: questions_only.length,
-        questions: questions_only 
-      }
+    render json: { 
+      topic: params[:topic], 
+      total_questions: quiz_obj.length,
+      questions: quiz_obj,
+      quiz_title: quiz_obj.first ? quiz_obj.first[:quiz_title] : ''
+    }
 
     else
       render json: { error: "Missing topic parameter" }, status: 400
@@ -235,7 +238,6 @@ class DashboardController < ApplicationController
   
 
   def file_upload_extract
-    # Safely extract and validate parameters
     uploaded_file = params[:file]
     title = params[:title]&.strip&.presence
     topic = params[:topic]&.strip&.presence
@@ -282,6 +284,14 @@ class DashboardController < ApplicationController
 
       note = nil
       saved_quiz = nil
+
+      # Check if quiz_data contains an error
+      if quiz_data.is_a?(Hash) && quiz_data[:error]
+        render json: { 
+          error: "Quiz generation failed: #{quiz_data[:error]}" 
+        }, status: :unprocessable_entity
+        return
+      end
 
       if quiz_data.present?
         # 1. Create note for all users (authenticated and unauthenticated) with PDF attached
@@ -331,7 +341,35 @@ class DashboardController < ApplicationController
 
 
 
-  private
+  private 
+
+
+  def quiz_object(filtered_quizzes)
+    quiz_obj = []
+
+    filtered_quizzes.each do |quiz|
+      quiz.questions.each do |question|
+        quiz_obj << {
+            id: question.external_id,
+            type: question.question_format,
+            question: question.question,
+            answer: question.answer,
+            incorrect_answers: question.incorrect_answers,
+            hint: question.hint,
+            explanation: question.explanation,
+            difficulty: question.difficulty,
+            estimated_time_seconds: question.estimated_time_seconds,
+            tags: question.tags,
+            path: question.path,
+            quiz_title: quiz.title,
+            subject: quiz.subject,
+            # image: get_pic_from_unsplash(quiz.subject)
+            image: UnsplashService.get_image(quiz.subject)
+          }
+      end
+    end
+    return quiz_obj
+  end
 
   def get_subjects_for_topic(topic)
     Quiz.where(topic: topic).distinct.pluck(:subject)

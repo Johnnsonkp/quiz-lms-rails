@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 
-import SingleCardControls from '../controls/SingleCardControls';
+// import SingleCardControls from '../controls/SingleCardControls';
 import SingleComponentHeader from '../header/SingleComponentHeader';
 import { SingleQuestionCard } from './SingleQuestion';
 
@@ -8,9 +8,17 @@ export default function SingleQuestionComponent({ quizData, selectedSubject, onB
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
   const [answers, setAnswers] = useState<Record<string, string>>({});
   const [showResults, setShowResults] = useState<Record<string, boolean>>({});
+  const [questions, setQuestions] = useState(quizData?.questions || []);
 
-  // Get questions directly from quizData.questions (flattened array from Rails)
-  const allQuestions = quizData?.questions || [];
+  // Update questions when quizData changes
+  useEffect(() => {
+    if (quizData?.questions) {
+      setQuestions(quizData.questions);
+    }
+  }, [quizData]);
+
+  // Get questions directly from local state (to handle updates)
+  const allQuestions = questions;
   
   // Filter questions by selected subject if needed, or use all questions
   const subjectQuestions = selectedSubject 
@@ -20,6 +28,16 @@ export default function SingleQuestionComponent({ quizData, selectedSubject, onB
   const currentQuestion = allQuestions[currentQuestionIndex];
   const currentQuestionHint = allQuestions[currentQuestionIndex]?.hint || null;
   const totalQuestions = allQuestions.length;
+
+  const handleQuestionUpdate = (updatedQuestion: any) => {
+    // Optimistic update: immediately update local state with server data
+    setQuestions((prevQuestions: any[]) => 
+      prevQuestions.map((q: any) => 
+        q.id === updatedQuestion.id ? { ...q, ...updatedQuestion } : q
+      )
+    );
+    console.log('Question updated successfully with data:', updatedQuestion);
+  };
 
   // If no questions are available, show loading or empty state
   if (!quizData || totalQuestions === 0) {
@@ -107,8 +125,10 @@ export default function SingleQuestionComponent({ quizData, selectedSubject, onB
         calculateProgress={calculateProgress} 
         answers={answers} 
         setCurrentQuestionIndex={setCurrentQuestionIndex}
-        quizData={quizData}
         selectedSubject={selectedSubject}
+        quizTitle={quizData?.quiz_title || ''}
+        currentQuestion={currentQuestion}
+        onQuestionUpdate={handleQuestionUpdate}
       />
 
       <div className=''>
@@ -146,22 +166,18 @@ export default function SingleQuestionComponent({ quizData, selectedSubject, onB
           questionNumber={currentQuestionIndex + 1}
           totalQuestions={totalQuestions}
           hint={currentQuestionHint}
+          answers={answers}
+          showResults={showResults}
+          currentQuestionIndex={currentQuestionIndex}
+          handlePrevious={handlePrevious}
+          handleNext={handleNext}
+          handleShowResult={handleShowResult}
+          handleReset={handleReset}
+          currentQuestion={currentQuestion}
         />
 
       </div>
 
-      {/* Navigation Controls */}
-      <SingleCardControls 
-        currentQuestionIndex={currentQuestionIndex}
-        totalQuestions={totalQuestions}
-        answers={answers}
-        showResults={showResults}
-        handlePrevious={handlePrevious}
-        handleNext={handleNext}
-        handleShowResult={handleShowResult}
-        handleReset={handleReset}
-        currentQuestion={currentQuestion}
-      />
       
     </div>
   );

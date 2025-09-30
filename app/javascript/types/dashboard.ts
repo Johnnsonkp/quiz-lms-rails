@@ -68,6 +68,22 @@ export interface SingleQuestionCardProps {
   questionNumber: number;
   totalQuestions: number;
   hint: string;
+  answers: { [key: number]: string };
+  showResults: { [key: number]: boolean };
+  currentQuestionIndex: number;
+  handlePrevious: () => void;
+  handleNext: () => void;
+  handleShowResult: () => void;
+  handleReset: () => void;
+  currentQuestion: {
+    id: number;
+    question: string;
+    answer: string;
+    explanation: string | null;
+    tags: string[] | null;
+    incorrect_answers: string[];
+    image: string | null;
+  };
 }
 
 export interface SubjectCardProps {
@@ -81,4 +97,28 @@ export interface SubjectCardProps {
   topic: string | null;
   quiz_details: QuizDetails[] | null;
   editStatus: boolean;
+}
+
+export interface DashboardLayoutProps {
+  children?: React.ReactNode;
+  user?: any;
+  categories?: any;
+  dashboard_stats?: any;
+  url_params?: string;
+}
+
+// Edit form interfaces
+export interface EditableQuestion {
+  id: number;
+  question: string;
+  answer: string;
+  incorrect_answers?: string[];
+  explanation?: string | null;
+}
+
+export interface EditQuizQuestionFormProps {
+  question: EditableQuestion;
+  isOpen: boolean;
+  onClose: () => void;
+  onSuccess?: (updatedQuestion: EditableQuestion) => void;
 }

@@ -33,6 +33,8 @@ Rails.application.routes.draw do
 
   patch 'dashboard/update_quiz', to: 'dashboard#update'
   patch 'dashboard/update_quiz_list', to: 'dashboard#update_quiz_list'
+
+  patch 'dashboard/edit_quiz_question', to: 'dashboard#edit_quiz_question_by_id'
   
   delete 'dashboard/delete_quiz', to: 'dashboard#delete'
   delete 'dashboard/delete_single_quiz', to: 'dashboard#delete_single_quiz'

@@ -1,8 +1,7 @@
-import React, { useState } from 'react';
-
 import BadgeCarousel from '../components/carousel/BadgeCarousel';
 import DashboardBanner from '../components/header/dashboardHeader/DashboardBanner';
 import { DashboardHome } from '../dashboard/DashboardHome';
+import { DashboardLayoutProps } from '../../types/dashboard';
 import Divider from '../components/divider/Divider';
 import NoAvailableTopics from '../dashboard/NoAvailableTopics';
 import QuizListPage from '../dashboard/QuizListPage';
@@ -19,14 +18,7 @@ import { slugify } from '../../utils/slugify';
 import useInitialRouting from '../../hooks/useInitialRouting';
 import { usePage } from "@inertiajs/react"
 import { useQuizData } from '../../hooks/useQuizData';
-
-interface DashboardLayoutProps {
-  children?: React.ReactNode;
-  user?: any;
-  categories?: any;
-  dashboard_stats?: any;
-  url_params?: string;
-}
+import { useState } from 'react';
 
 function DashboardLayout({ children, user, categories, dashboard_stats, url_params }: DashboardLayoutProps) {
   // Get props from Inertia if not passed directly
@@ -129,6 +121,7 @@ function DashboardLayout({ children, user, categories, dashboard_stats, url_para
           quizData={quizData}
           selectedSubject={selectedSubject}
           onBack={handleBackToDashboard}
+          quizTitle={quizData?.quiz_title || ''}
         />
       );
     }
@@ -150,11 +143,12 @@ function DashboardLayout({ children, user, categories, dashboard_stats, url_para
           />
 
           <Divider />
-
-          <BadgeCarousel 
-            quiz_preview={quiz_preview}
-            selectedTopic={selectedTopic}
-          />
+          
+          {showQuizCards == true &&
+            <BadgeCarousel 
+              quiz_preview={quiz_preview}
+              selectedTopic={selectedTopic}
+            />}
 
           <div className="grid grid-cols-1 md:grid-cols-4 lg:grid-cols-4 gap-4 mt-3 gap-y-8">
             <div className="md:col-span-3 lg:col-span-3 flex flex-row flex-wrap gap-4">
@@ -217,6 +211,8 @@ function DashboardLayout({ children, user, categories, dashboard_stats, url_para
           handleTopicClick={handleTopicClick}
           activeSection={activeSection}
           showSidebar={showSidebar}
+          quizData={quizData}
+          selectedSubject={selectedSubject}
         />
       </div>
 

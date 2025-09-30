@@ -5,6 +5,7 @@
 .bg-card {
   position: relative;
   height: 120px;
+  height: 105px;
   width: 100%;
   border-radius: 1rem;
   overflow: hidden;
