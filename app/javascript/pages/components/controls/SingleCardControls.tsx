@@ -1,5 +1,3 @@
-import React from 'react'
-
 function SingleCardControls(
   { 
     currentQuestionIndex, 
@@ -10,10 +8,11 @@ function SingleCardControls(
     handleNext, 
     handleShowResult, 
     handleReset, 
-    currentQuestion 
+    currentQuestion,
+    
   }: any) {
   return (
-    <div className="flex justify-between items-center mt-8 max-w-2xl mx-auto">
+    <div className="flex justify-between items-center mt-8 max-w-lg mx-auto">
       <button
         onClick={handlePrevious}
         disabled={currentQuestionIndex === 0}
@@ -46,7 +45,7 @@ function SingleCardControls(
       <button
         onClick={handleNext}
         disabled={currentQuestionIndex === totalQuestions - 1}
-        className="flex items-center px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+        className="flex items-center px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors cursor-pointer"
       >
         Next
         <svg className="w-4 h-4 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">

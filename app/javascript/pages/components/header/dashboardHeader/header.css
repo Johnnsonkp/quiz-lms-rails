@@ -4,7 +4,8 @@
 
 .bg-card {
   position: relative;
-  height: 180px;
+  height: 120px;
+  height: 105px;
   width: 100%;
   border-radius: 1rem;
   overflow: hidden;
@@ -37,6 +38,8 @@
   flex-direction: column;
   justify-content: center;
   padding: 2.5rem;
+  padding-top: 1rem;
+  padding-bottom: 0.6rem;
   width: 100%;
 }
 

@@ -21,4 +21,5 @@ export interface QuizData {
   questions: Question[];
   subject?: string;
   quiz_ids?: string;
+  quiz_title?: string;
 }

@@ -1,0 +1,114 @@
+export const getSelectedTopic = async (topic: string) => {
+    try {
+      const response = await fetch(`/dashboard/${encodeURIComponent(topic)}/get`, {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+          'Accept': 'application/json'
+        },
+      });
+      
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+
+      const data = await response.json();
+      console.log("Fetched topic data successfully", data);
+      return data;
+      
+    } catch (error) {
+      console.error("Error fetching topic data:", error);
+    } 
+}
+
+
+export const deleteQuizData = async (
+    ids: (number | undefined)[] | null,
+    e: React.MouseEvent<HTMLButtonElement, MouseEvent>
+  ) => {
+    e.preventDefault();
+    if (!ids || ids.length === 0) return;
+
+    // Filter out undefined and convert to string
+    const quizIds = ids.filter((id): id is number => id !== undefined);
+    if (quizIds.length === 0) return;
+    console.log("Deleting quiz with IDs:", quizIds);
+
+    try {
+      const csrfToken = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content');
+      const response = await fetch(`/dashboard/delete_quiz`, {
+        method: 'DELETE',
+        headers: {
+          'Content-Type': 'application/json',
+          'Accept': 'application/json',
+          'X-CSRF-Token': csrfToken || ''
+        },
+        body: JSON.stringify({ quiz_ids: quizIds }),
+      });
+
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+      const data = await response.json();
+      console.log("Quiz deleted successfully:", data);
+
+    } catch (error) {
+      console.error("Error deleting quiz:", error);
+    }
+  }
+
+export const deleteSingleQuizData = async (id: number | null) => {
+    if (!id) return;
+
+    try {
+      const csrfToken = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content');
+      const response = await fetch(`/dashboard/delete_single_quiz`, {
+        method: 'DELETE',
+        headers: {
+          'Content-Type': 'application/json',
+          'Accept': 'application/json',
+          'X-CSRF-Token': csrfToken || ''
+        },
+        body: JSON.stringify({ quiz_id: id }),
+      });
+
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+      const data = await response.json();
+      console.log("Quiz deleted successfully:", data);
+
+    } catch (error) {
+      console.error("Error deleting quiz:", error);
+    }
+  }
+
+export const completeQuiz = async (quizId: number, answers: Record<string, string>) => {
+  try {
+    const csrfToken = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content');
+    const response = await fetch('/dashboard/complete_quiz', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Accept': 'application/json',
+        'X-CSRF-Token': csrfToken || ''
+      },
+      body: JSON.stringify({ 
+        quiz_id: quizId,
+        answers: answers 
+      }),
+    });
+
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`);
+    }
+
+    const data = await response.json();
+    console.log("Quiz completed successfully:", data);
+    return data;
+
+  } catch (error) {
+    console.error("Error completing quiz:", error);
+    throw error;
+  }
+}

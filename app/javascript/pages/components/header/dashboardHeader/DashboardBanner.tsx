@@ -1,31 +1,33 @@
 import './header.css';
 
-function DashboardBanner({handleBackToDashboard, selectedTopic, titles}: any) {
+import BackButton from '../../buttons/BackButton';
+import { EditIcon } from '../../buttons/EditIcon';
+
+function DashboardBanner({setEditStatus, handleBackToDashboard, selectedTopic, titles}: any) {
+  // const urlParams = new URLSearchParams(window.location.pathname);
+
   return (
-    <header className="p-0 mx-auto relative h-[180px] w-[100%] mb-5 mt-0 shadow-md rounded-lg bg-[#D1D7E3]">
+    <header className="p-0 mx-auto relative h-[100px] w-[100%] mb-5 mt-0 shadow-md rounded-lg bg-[#D1D7E3]">
+      <BackButton onClick={handleBackToDashboard} />
+
       <button
-        onClick={handleBackToDashboard}
-        className="p-2 rounded-full hover:bg-white/20 transition-colors absolute top-3 left-5 flex align-middle items-center cursor-pointer text-bold z-30 text-white backdrop-blur-sm bg-black/20 text-sm px-3 hover:text-black/80"
+        className="absolute top-3 right-10 z-20 flex items-center gap-1 px-2 py-1 rounded-md bg-white/80 hover:bg-white transition-colors shadow cursor-pointer"
+        onClick={() => setEditStatus((prev: boolean) => !prev)}
+        aria-label="Edit"
+        type="button"
       >
-        <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 19l-7-7 7-7" />
-        </svg>
-        <span className="ml-1 font-medium">Back to Dashboard</span>
+        <EditIcon />
+        <span className="text-sm font-medium text-gray-700">Edit</span>
       </button>
 
-      {/* Main Card with Blurred Background */}
       <div className="bg-card">
         <div className="bg-card-content">
-          <h2 className="text-3xl text-black/80 font-medium font-roboto drop-shadow-lg mt-10">
-            {selectedTopic}
+
+          <h2 className="text-2xl text-black/80 font-medium font-roboto drop-shadow-lg mt-10 mb-3">
+            Dashboard / 
+            <span className="text-black/70 font-medium text-[14px] mx-2">{selectedTopic}</span>
           </h2>
-          <p className="text-md text-black/50 font-medium pt-2 w-[100%] font-roboto drop-shadow-sm">
-            {titles && titles.map((title: string, index: number) => (
-                <span key={index} className="inline-block bg-gray-200 rounded-full px-3 py-1 text-sm font-medium text-gray-800 mr-2 mt-2 mb-2">
-                  {title}
-                </span>
-              ))}
-          </p>
+          
         </div>
       </div>
     </header>

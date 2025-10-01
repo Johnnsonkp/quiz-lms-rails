@@ -10,6 +10,17 @@
 # QuizQuestion.destroy_all 
 # Question.destroy_all      
 # Quiz.destroy_all          
+# User.destroy_all
+
+# Create a demo user for testing
+demo_user = User.create!(
+  email: 'demo@example.com',
+  password: 'password123',
+  password_confirmation: 'password123',
+  name: 'Demo User'
+)
+
+puts "Created demo user: #{demo_user.email}"
 
 
 # quiz_1 = Quiz.create!(

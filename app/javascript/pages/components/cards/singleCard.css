@@ -22,6 +22,36 @@
   background: linear-gradient(rgba(29, 38, 113, 0.6), rgba(195, 55, 100, 0.6)); /* The least supported option. */
 }
 
+.image-overlay-2 {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 1;
+  /* background: #c0c0aa;
+  background: -webkit-linear-gradient(to right, rgba(28, 239, 255, 0.6), rgba(192, 192, 170, 0.6));  
+  background: linear-gradient(to right, rgba(28, 239, 255, 0.6), rgba(192, 192, 170, 0.6));  */
+
+  background: rgba(58, 123, 213, 0.6);
+  background: -webkit-linear-gradient(to right, rgba(58, 96, 115, 0.6), rgba(58, 123, 213, 0.6)); 
+  background: linear-gradient(to right, rgba(58, 96, 115, 0.6), rgba(58, 123, 213, 0.6)); 
+
+}
+
+.image-overlay-3 {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 1;
+  background: #11998e;  /* fallback for old browsers */
+  background: -webkit-linear-gradient(to right, rgba(56, 239, 125, 0.4), rgba(17, 153, 142, 0.6));  /* Chrome 10-25, Safari 5.1-6 */
+  background: linear-gradient(to right, rgba(56, 239, 125, 0.4), rgba(17, 153, 142, 0.6)); /* W3C, IE 10+/ Edge, Firefox 16+, Chrome 26+, Opera 12+, Safari 7+ */
+
+}
+
 .card-content {
   position: absolute;
   top: 0;

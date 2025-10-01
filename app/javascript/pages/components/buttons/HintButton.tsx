@@ -4,7 +4,7 @@ function HintButton({hint}: {hint: string}) {
   const [showHint, setShowHint] = useState<boolean>(false);
 
   return (
-    <div className="mb-6">
+    <div className="mb-6 mt-4">
       <button
         onClick={() => setShowHint(!showHint)}
         className={`inline-flex items-center px-4 py-2 rounded-lg font-medium text-sm transition-all duration-200 cursor-pointer ${

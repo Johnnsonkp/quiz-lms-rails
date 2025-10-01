@@ -1,16 +1,25 @@
 import { useEffect, useState } from 'react';
 
-import SingleCardControls from '../controls/SingleCardControls';
+// import SingleCardControls from '../controls/SingleCardControls';
 import SingleComponentHeader from '../header/SingleComponentHeader';
 import { SingleQuestionCard } from './SingleQuestion';
+import { completeQuiz } from '../../../api/quiz';
 
 export default function SingleQuestionComponent({ quizData, selectedSubject, onBack }: any) {
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
   const [answers, setAnswers] = useState<Record<string, string>>({});
   const [showResults, setShowResults] = useState<Record<string, boolean>>({});
+  const [questions, setQuestions] = useState(quizData?.questions || []);
 
-  // Get questions directly from quizData.questions (flattened array from Rails)
-  const allQuestions = quizData?.questions || [];
+  // Update questions when quizData changes
+  useEffect(() => {
+    if (quizData?.questions) {
+      setQuestions(quizData.questions);
+    }
+  }, [quizData]);
+
+  // Get questions directly from local state (to handle updates)
+  const allQuestions = questions;
   
   // Filter questions by selected subject if needed, or use all questions
   const subjectQuestions = selectedSubject 
@@ -20,6 +29,16 @@ export default function SingleQuestionComponent({ quizData, selectedSubject, onB
   const currentQuestion = allQuestions[currentQuestionIndex];
   const currentQuestionHint = allQuestions[currentQuestionIndex]?.hint || null;
   const totalQuestions = allQuestions.length;
+
+  const handleQuestionUpdate = (updatedQuestion: any) => {
+    // Optimistic update: immediately update local state with server data
+    setQuestions((prevQuestions: any[]) => 
+      prevQuestions.map((q: any) => 
+        q.id === updatedQuestion.id ? { ...q, ...updatedQuestion } : q
+      )
+    );
+    console.log('Question updated successfully with data:', updatedQuestion);
+  };
 
   // If no questions are available, show loading or empty state
   if (!quizData || totalQuestions === 0) {
@@ -38,7 +57,7 @@ export default function SingleQuestionComponent({ quizData, selectedSubject, onB
         </div>
         
         <div className="text-center py-12">
-          <h1 className="text-2xl font-bold text-gray-800 mb-2">{selectedSubject?.subject || 'Quiz'}</h1>
+          <h1 className="text-lg font-bold text-gray-800 mb-1">{selectedSubject?.subject || 'Quiz'}</h1>
           <p className="text-gray-600 mb-4">{quizData?.topic || 'Loading...'}</p>
           <div className="text-gray-500">
             {!quizData ? 'Loading quiz data...' : `No questions available for ${selectedSubject?.subject || 'this topic'}.`}
@@ -85,11 +104,24 @@ export default function SingleQuestionComponent({ quizData, selectedSubject, onB
     return Math.round((answeredQuestions / totalQuestions) * 100);
   };
 
-  const handleCompletion = () => {
+  const handleCompletion = async () => {
     if(calculateProgress() === 100) {
-      setTimeout(() => {
-        alert('Quiz completed!');
-      }, 3000)
+      try {
+
+        console.log('Quiz data', quizData );
+        console.log('Quiz completed! Saving progress...', quizData.id, answers  );
+        // Call the quiz completion API
+        await completeQuiz(quizData.id, answers);
+        
+        setTimeout(() => {
+          alert('Quiz completed! Your progress has been saved.');
+        }, 1000);
+      } catch (error) {
+        console.error('Failed to save quiz completion:', error);
+        setTimeout(() => {
+          alert('Quiz completed! However, there was an error saving your progress.');
+        }, 1000);
+      }
     }
   }
 
@@ -107,10 +139,14 @@ export default function SingleQuestionComponent({ quizData, selectedSubject, onB
         calculateProgress={calculateProgress} 
         answers={answers} 
         setCurrentQuestionIndex={setCurrentQuestionIndex}
+        selectedSubject={selectedSubject}
+        quizTitle={quizData?.quiz_title || ''}
+        currentQuestion={currentQuestion}
+        onQuestionUpdate={handleQuestionUpdate}
       />
 
       <div className=''>
-        <div className="mt-0 mb-4 max-w-2xl mx-auto">
+        <div className="mt-0 mb-2 max-w-2xl mx-auto">
           <div className="grid grid-cols-8 sm:grid-cols-10 md:grid-cols-12 gap-2">
             {subjectQuestions.map((_: any, index: number) => {
               const isAnswered = answers[subjectQuestions[index].id];
@@ -144,22 +180,18 @@ export default function SingleQuestionComponent({ quizData, selectedSubject, onB
           questionNumber={currentQuestionIndex + 1}
           totalQuestions={totalQuestions}
           hint={currentQuestionHint}
+          answers={answers}
+          showResults={showResults}
+          currentQuestionIndex={currentQuestionIndex}
+          handlePrevious={handlePrevious}
+          handleNext={handleNext}
+          handleShowResult={handleShowResult}
+          handleReset={handleReset}
+          currentQuestion={currentQuestion}
         />
 
       </div>
 
-      {/* Navigation Controls */}
-      <SingleCardControls 
-        currentQuestionIndex={currentQuestionIndex}
-        totalQuestions={totalQuestions}
-        answers={answers}
-        showResults={showResults}
-        handlePrevious={handlePrevious}
-        handleNext={handleNext}
-        handleShowResult={handleShowResult}
-        handleReset={handleReset}
-        currentQuestion={currentQuestion}
-      />
       
     </div>
   );
