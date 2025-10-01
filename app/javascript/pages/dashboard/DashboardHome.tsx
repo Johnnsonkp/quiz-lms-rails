@@ -17,7 +17,6 @@ type DashboardHomeProps = {
 };
 
 export const DashboardHome = memo(({ user, dashboard_stats }: DashboardHomeProps) => {
-  console.log('user', user);
 
   return (
     <section className="space-y-6">

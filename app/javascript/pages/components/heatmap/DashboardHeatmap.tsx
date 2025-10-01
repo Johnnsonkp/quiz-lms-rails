@@ -121,6 +121,10 @@ const DashboardHeatmap: React.FC<DashboardHeatmapProps> = ({
 
   // Generate tooltip content
   const getTooltipDataAttrs = (value: any) => {
+    if (!value || !value.date || !(value.date instanceof Date)) {
+      return { 'data-tip': 'No date: No activity' };
+    }
+
     if (!value || value.count === 0) {
       return {
         'data-tip': `${value?.date?.toISOString().slice(0, 10) || 'No date'}: No activity`
@@ -170,11 +174,13 @@ const DashboardHeatmap: React.FC<DashboardHeatmapProps> = ({
   };
 
   const handleClick = (value: any) => {
+    if (!value || !value?.date || !(value?.date instanceof Date)) return;
+    
     if (onDateClick) {
       onDateClick(value);
     } else if (value && value.count > 0) {
       // Default behavior: show alert with details
-      const dateStr = value.date.toISOString().slice(0, 10);
+      const dateStr = value.date?.toISOString().slice(0, 10);
       if (activityType === 'quiz') {
         alert(`${dateStr}: ${value.count} quiz(es) completed, ${value.attempted} attempted`);
       } else if (activityType === 'question') {
