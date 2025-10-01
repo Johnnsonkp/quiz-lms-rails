@@ -97,7 +97,6 @@ const DashboardHeatmap: React.FC<DashboardHeatmapProps> = ({
     };
 
     fetchActivityData();
-  // }, [user, activityType, startDate, endDate, defaultStartDate, defaultEndDate]);
   }, []);
 
   // Transform the quiz activities data for the heatmap
@@ -234,27 +233,27 @@ const DashboardHeatmap: React.FC<DashboardHeatmapProps> = ({
 
   return (
     <div className="dashboard-heatmap">
-      <div className="mb-4">
-        <h3 className="text-lg font-semibold text-gray-900 mb-2">
+      <div className="mb-2">
+        <h3 className="text-md font-semibold text-gray-900 mb-2">
           Study Activity Heatmap
           {activityType === 'quiz' && ' - Quiz Completions'}
           {activityType === 'question' && ' - Questions Answered'}
           {activityType === 'combined' && ' - All Activities'}
         </h3>
         <div className="flex justify-between items-center">
-          <p className="text-sm text-gray-600">
+          {/* <p className="text-sm text-gray-600">
             Track your study patterns over time. Darker squares indicate more activity.
-          </p>
+          </p> */}
           {summary && (
             <div className="text-sm text-gray-500">
-              <div className="flex flex-col space-y-1">
+              <div className="flex space-y-1">
                 <div>
                   <span className="mr-4">Period Completed: {summary.total_completed}</span>
                   <span>Period Attempted: {summary.total_attempted}</span>
                 </div>
                 {summary.all_time_completed !== undefined && (
-                  <div className="text-xs text-gray-400">
-                    <span className="mr-4">All-time Completed: {summary.all_time_completed}</span>
+                  <div className=" text-gray-400">
+                    <span className="mr-4 ml-4">All-time Completed: {summary.all_time_completed}</span>
                     <span>All-time Attempted: {summary.all_time_attempted}</span>
                   </div>
                 )}
@@ -264,7 +263,7 @@ const DashboardHeatmap: React.FC<DashboardHeatmapProps> = ({
         </div>
       </div>
       
-      <div className="heatmap-container bg-white p-4 rounded-lg border">
+      <div className="heatmap-container bg-white p-2 rounded-lg border-2 border-gray-200 flex">
         <CalendarHeatmap
           startDate={startDate || defaultStartDate}
           endDate={endDate || defaultEndDate}
@@ -277,19 +276,32 @@ const DashboardHeatmap: React.FC<DashboardHeatmapProps> = ({
           gutterSize={2}
           horizontal={true}
         />
+        {/* <CalendarHeatmap
+          startDate={startDate || defaultStartDate}
+          endDate={endDate || defaultEndDate}
+          values={heatmapValues}
+          classForValue={getClassForValue}
+          tooltipDataAttrs={getTooltipDataAttrs}
+          showWeekdayLabels={true}
+          showMonthLabels={true}
+          onClick={handleClick}
+          gutterSize={2}
+          horizontal={true}
+        /> */}
       </div>
       
       {/* Legend */}
-      <div className="mt-3 flex items-center justify-between text-xs text-gray-500">
-        <span>Less</span>
-        <div className="flex items-center space-x-1">
-          <div className="w-3 h-3 rounded-sm bg-gray-100 border color-empty"></div>
-          <div className="w-3 h-3 rounded-sm color-github-1"></div>
-          <div className="w-3 h-3 rounded-sm color-github-2"></div>
-          <div className="w-3 h-3 rounded-sm color-github-3"></div>
-          <div className="w-3 h-3 rounded-sm color-github-4"></div>
-        </div>
-        <span>More</span>
+      <div className="mt-3 flex items-center justify-between text-xs text-gray-500 h-3">
+        <div>Less</div>
+        <svg className="flex items-center space-x-1 react-calendar-heatmap">
+          <g className="flex w-3 h-3 rounded-sm ">
+            <rect width="4" height="4" x="0" y="70" className="w-4 h-4 rounded-sm border color-github-1"></rect>
+            <rect width="4" height="4" x="20" y="70" className="w-4 h-4 rounded-sm border color-github-2"></rect>
+            <rect width="4" height="4" x="40" y="70" className="w-4 h-4 rounded-sm border color-github-3"></rect>
+            <rect width="4" height="4" x="60" y="70" className="w-4 h-4 rounded-sm border color-github-4"></rect>
+          </g>
+        </svg>
+        <div>More</div>
       </div>
     </div>
   );
