@@ -20,6 +20,67 @@ class DashboardController < ApplicationController
     }
   end
 
+  # API endpoint for heatmap data
+  def study_activity
+    if @user.nil?
+      render json: { error: "User not authenticated" }, status: 401
+      return
+    end
+
+    activity_type = params[:type] || 'quiz' # 'quiz' or 'question'
+    start_date = params[:start_date] ? Date.parse(params[:start_date]) : 365.days.ago
+    end_date = params[:end_date] ? Date.parse(params[:end_date]) : Date.current
+
+    case activity_type
+    when 'quiz'
+      activity_data = @user.daily_quiz_activity(start_date: start_date, end_date: end_date)
+    when 'question'
+      activity_data = @user.daily_question_activity(start_date: start_date, end_date: end_date)
+    else
+      # Combined activity (quizzes + questions)
+      quiz_data = @user.daily_quiz_activity(start_date: start_date, end_date: end_date)
+      question_data = @user.daily_question_activity(start_date: start_date, end_date: end_date)
+      
+      # Merge the data by date
+      activity_data = merge_activity_data(quiz_data, question_data)
+    end
+
+
+    # puts "Activity data for user #{@user.id} from #{start_date} to #{end_date}: #{activity_data}" if Rails.env.development?
+    puts "Summary: completed_quizzes_count - #{@user.completed_quizzes_count}, attempted_quizzes_count - #{@user.attempted_quizzes_count}" if Rails.env.development?
+    puts "Date range: #{start_date} to #{end_date}" if Rails.env.development?
+    puts "Timezone: #{Time.zone.name}" if Rails.env.development?
+
+    # Calculate summary data for the same date range as activity data
+    date_range_completed = @user.user_quiz_progresses
+      .where(completed: true)
+      .where(created_at: start_date.beginning_of_day..end_date.end_of_day)
+      .count
+    
+    date_range_attempted = @user.user_quiz_progresses
+      .where(created_at: start_date.beginning_of_day..end_date.end_of_day)
+      .count
+
+    puts "Date range completed: #{date_range_completed}, attempted: #{date_range_attempted}" if Rails.env.development?
+    puts "Recent progresses: #{@user.user_quiz_progresses.where('created_at > ?', 1.day.ago).pluck(:created_at, :completed)}" if Rails.env.development?
+
+    render json: {
+      activity_data: activity_data,
+      summary: {
+        total_completed: date_range_completed,
+        total_attempted: date_range_attempted,
+        all_time_completed: @user.completed_quizzes_count,
+        all_time_attempted: @user.attempted_quizzes_count,
+        date_range: {
+          start: start_date.iso8601,
+          end: end_date.iso8601
+        }
+      }
+    }
+  rescue Date::Error
+    render json: { error: "Invalid date format" }, status: 400
+  end
+
 
   def update 
     if params[:quiz_ids].present?
@@ -94,6 +155,68 @@ class DashboardController < ApplicationController
     end
   end
 
+  def complete_quiz
+    if @user.nil?
+      render json: { error: "User not authenticated" }, status: 401
+      return
+    end
+
+    quiz_id = params[:quiz_id]
+    quiz = Quiz.find_by(id: quiz_id)
+
+    unless quiz
+      render json: { error: "Quiz not found" }, status: 404
+      return
+    end
+
+    # Calculate quiz statistics
+    answers = params[:answers] || {}
+    total_questions = quiz.questions.count
+    questions_answered = answers.keys.count
+    questions_correct = 0
+    total_points = 0
+
+    # Calculate correct answers
+    quiz.questions.each do |question|
+      user_answer = answers[question.id.to_s]
+      if user_answer && user_answer == question.answer
+        questions_correct += 1
+        total_points += 1 # You can adjust point values as needed
+      end
+    end
+
+    # Create or update UserQuizProgress
+    progress = UserQuizProgress.find_or_initialize_by(
+      user: @user,
+      quiz: quiz
+    )
+
+    progress.assign_attributes(
+      questions_answered: questions_answered,
+      questions_correct: questions_correct,
+      total_points: total_points,
+      completed: true
+    )
+
+    if progress.save
+      render json: {
+        message: "Quiz completed successfully",
+        progress: {
+          id: progress.id,
+          questions_answered: progress.questions_answered,
+          questions_correct: progress.questions_correct,
+          total_points: progress.total_points,
+          score_percentage: total_questions > 0 ? (questions_correct.to_f / total_questions * 100).round(2) : 0,
+          completed: progress.completed
+        }
+      }, status: 200
+    else
+      render json: { 
+        error: "Failed to save quiz completion", 
+        details: progress.errors.full_messages 
+      }, status: 422
+    end
+  end
 
 
   def delete
@@ -221,13 +344,15 @@ class DashboardController < ApplicationController
     quiz_obj = quiz_object(filtered_quizzes)
 
     # puts "quiz_obj: #{quiz_obj}" if Rails.env.development?
+    puts "filtered_quizzes count: #{filtered_quizzes}" if Rails.env.development?
     puts "quiz_obj.first: #{quiz_obj.first[:quiz_title]}" if Rails.env.development?
       
     render json: { 
       topic: params[:topic], 
       total_questions: quiz_obj.length,
       questions: quiz_obj,
-      quiz_title: quiz_obj.first ? quiz_obj.first[:quiz_title] : ''
+      quiz_title: quiz_obj.first ? quiz_obj.first[:quiz_title] : '',
+      id: quiz_obj.first ? quiz_obj.first[:quiz_id] : nil
     }
 
     else
@@ -348,8 +473,11 @@ class DashboardController < ApplicationController
     quiz_obj = []
 
     filtered_quizzes.each do |quiz|
+
+      puts "Processing quiz: #{quiz.id}" if Rails.env.development?
       quiz.questions.each do |question|
         quiz_obj << {
+            quiz_id: quiz.id,
             id: question.external_id,
             type: question.question_format,
             question: question.question,
@@ -543,5 +671,41 @@ class DashboardController < ApplicationController
     @quiz_preview = []
   end
 
+  # Helper method to merge quiz and question activity data
+  def merge_activity_data(quiz_data, question_data)
+    merged_data = {}
+    
+    # Process quiz data
+    quiz_data.each do |data|
+      date = data[:date]
+      merged_data[date] = {
+        date: date,
+        count: data[:count], # completed quizzes
+        attempted: data[:attempted], # attempted quizzes
+        questions_answered: 0,
+        activity_type: 'combined'
+      }
+    end
+    
+    # Add question data
+    question_data.each do |data|
+      date = data[:date]
+      if merged_data[date]
+        merged_data[date][:questions_answered] = data[:count]
+        # Combine counts (completed quizzes + questions answered)
+        merged_data[date][:count] += data[:count]
+      else
+        merged_data[date] = {
+          date: date,
+          count: data[:count], # questions answered
+          attempted: 0,
+          questions_answered: data[:count],
+          activity_type: 'combined'
+        }
+      end
+    end
+    
+    merged_data.values.sort_by { |data| data[:date] }
+  end
 
 end

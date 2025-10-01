@@ -246,17 +246,7 @@ function SubjectCards(
             }}
             className="z-22 bg-white text-black w-7 border-2 border-blue-500 absolute top-2 right-1 flex items-center justify-center gap-1 cursor-pointer"
           >
-
-            {/* <svg className="w-5 h-5 text-blue-500" 
-              fill="none" 
-              stroke="currentColor" 
-              strokeWidth="2" 
-              viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" d="M16.862 4.487a2.25 2.25 0 1 1 3.182 3.182l-11.25 11.25a2.25 2.25 0 0 1-1.012.573l-4.125 1.031a.375.375 0 0 1-.456-.456l1.03-4.125a2.25 2.25 0 0 1 .574-1.012l11.25-11.25z" />
-            </svg> */}
-
             <EditIcon />
-
           </button>
           
           <button

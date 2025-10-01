@@ -82,3 +82,33 @@ export const deleteSingleQuizData = async (id: number | null) => {
       console.error("Error deleting quiz:", error);
     }
   }
+
+export const completeQuiz = async (quizId: number, answers: Record<string, string>) => {
+  try {
+    const csrfToken = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content');
+    const response = await fetch('/dashboard/complete_quiz', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Accept': 'application/json',
+        'X-CSRF-Token': csrfToken || ''
+      },
+      body: JSON.stringify({ 
+        quiz_id: quizId,
+        answers: answers 
+      }),
+    });
+
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`);
+    }
+
+    const data = await response.json();
+    console.log("Quiz completed successfully:", data);
+    return data;
+
+  } catch (error) {
+    console.error("Error completing quiz:", error);
+    throw error;
+  }
+}

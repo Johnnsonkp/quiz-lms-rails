@@ -25,6 +25,7 @@ Rails.application.routes.draw do
 
   # dashboard routes
   get 'dashboard', to: 'dashboard#index'
+  get 'dashboard/study_activity', to: 'dashboard#study_activity'
   get 'dashboard/:topic/get', to: 'dashboard#get_topic_quizzes'
   get 'dashboard/:topic', to: 'dashboard#page_refresh'
   get 'dashboard/:topic/:subject/:quiz_ids', to: 'dashboard#show'
@@ -35,6 +36,8 @@ Rails.application.routes.draw do
   patch 'dashboard/update_quiz_list', to: 'dashboard#update_quiz_list'
 
   patch 'dashboard/edit_quiz_question', to: 'dashboard#edit_quiz_question_by_id'
+  
+  post 'dashboard/complete_quiz', to: 'dashboard#complete_quiz'
   
   delete 'dashboard/delete_quiz', to: 'dashboard#delete'
   delete 'dashboard/delete_single_quiz', to: 'dashboard#delete_single_quiz'

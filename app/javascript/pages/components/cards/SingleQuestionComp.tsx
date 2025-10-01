@@ -3,6 +3,7 @@ import { useEffect, useState } from 'react';
 // import SingleCardControls from '../controls/SingleCardControls';
 import SingleComponentHeader from '../header/SingleComponentHeader';
 import { SingleQuestionCard } from './SingleQuestion';
+import { completeQuiz } from '../../../api/quiz';
 
 export default function SingleQuestionComponent({ quizData, selectedSubject, onBack }: any) {
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
@@ -103,11 +104,24 @@ export default function SingleQuestionComponent({ quizData, selectedSubject, onB
     return Math.round((answeredQuestions / totalQuestions) * 100);
   };
 
-  const handleCompletion = () => {
+  const handleCompletion = async () => {
     if(calculateProgress() === 100) {
-      setTimeout(() => {
-        alert('Quiz completed!');
-      }, 3000)
+      try {
+
+        console.log('Quiz data', quizData );
+        console.log('Quiz completed! Saving progress...', quizData.id, answers  );
+        // Call the quiz completion API
+        await completeQuiz(quizData.id, answers);
+        
+        setTimeout(() => {
+          alert('Quiz completed! Your progress has been saved.');
+        }, 1000);
+      } catch (error) {
+        console.error('Failed to save quiz completion:', error);
+        setTimeout(() => {
+          alert('Quiz completed! However, there was an error saving your progress.');
+        }, 1000);
+      }
     }
   }
 
@@ -132,7 +146,7 @@ export default function SingleQuestionComponent({ quizData, selectedSubject, onB
       />
 
       <div className=''>
-        <div className="mt-0 mb-4 max-w-2xl mx-auto">
+        <div className="mt-0 mb-2 max-w-2xl mx-auto">
           <div className="grid grid-cols-8 sm:grid-cols-10 md:grid-cols-12 gap-2">
             {subjectQuestions.map((_: any, index: number) => {
               const isAnswered = answers[subjectQuestions[index].id];

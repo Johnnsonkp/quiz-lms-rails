@@ -12,7 +12,7 @@ function SingleCardControls(
     
   }: any) {
   return (
-    <div className="flex justify-between items-center max-w-lg w-[75%] mb-1 mt-10">
+    <div className="flex justify-between items-center max-w-lg w-[75%] mb-0 mt-5">
       <button
         onClick={handlePrevious}
         disabled={currentQuestionIndex === 0}

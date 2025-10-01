@@ -10,17 +10,38 @@
   fill: #aaa;
 }
 
-.react-calendar-heatmap svg {
-  object-view-box: 0 0 721 110 !important;
+
+/* Custom class for modified viewBox */
+.react-calendar-heatmap.custom-viewbox svg {
+  width: 352px;
+  height: 100px;
 }
 
 .react-calendar-heatmap .react-calendar-heatmap-small-text {
   font-size: 5px;
 }
+/* .react-calendar-heatmap{
+  scale: 0.8;
+} */
 
+.react-calendar-heatmap-week{
+  margin: -20px !important;
+  padding: -20px !important;
+}
+
+.react-calendar-heatmap rect{
+  shape-rendering: crispEdges;
+  rx: 2px;
+  ry: 2px;
+  /* width: 8px;
+  height: 8px;
+  padding: 0px;
+  margin: 0px; */
+}
 .react-calendar-heatmap rect:hover {
   stroke: #555;
   stroke-width: 1px;
+  cursor: pointer;
 }
 
 /*

@@ -59,6 +59,8 @@ export function SingleQuestionCard({
         <div className=''>
           {hint && (<HintButton hint={hint}/>)}
 
+          <hr className='border-gray-200'></hr>
+
           <SingleCardControls2 
             currentQuestionIndex={currentQuestionIndex}
             totalQuestions={totalQuestions}
