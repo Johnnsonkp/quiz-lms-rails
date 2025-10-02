@@ -48,9 +48,14 @@ class User < ApplicationRecord
       .where(created_at: start_date.beginning_of_day..end_date.end_of_day)
       .select(:created_at)
 
-    # Group by date using Ruby (timezone-aware)
-    completed_counts = completed_progresses.group_by { |p| p.created_at.in_time_zone.to_date.to_s }.transform_values(&:count)
-    attempted_counts = all_progresses.group_by { |p| p.created_at.in_time_zone.to_date.to_s }.transform_values(&:count)
+    # Group by date using Ruby (AEST timezone-aware)
+    completed_counts = completed_progresses.group_by { |p| p.created_at.in_time_zone('Australia/Sydney').to_date.to_s }.transform_values(&:count)
+    attempted_counts = all_progresses.group_by { |p| p.created_at.in_time_zone('Australia/Sydney').to_date.to_s }.transform_values(&:count)
+
+    puts "DEBUG - completed_counts: #{completed_counts}" if Rails.env.development?
+    puts "DEBUG - attempted_counts: #{attempted_counts}" if Rails.env.development?
+    puts "DEBUG - start_date: #{start_date}, end_date: #{end_date}" if Rails.env.development?
+    puts "DEBUG - using timezone: Australia/Sydney (AEST)" if Rails.env.development?
 
     # Generate heatmap data
     generate_heatmap_data(start_date, end_date, completed_counts, attempted_counts)
@@ -66,8 +71,8 @@ class User < ApplicationRecord
       .where(created_at: start_date.beginning_of_day..end_date.end_of_day)
       .select(:created_at)
 
-    # Group by date using Ruby (timezone-aware)
-    question_counts = question_attempts.group_by { |p| p.created_at.in_time_zone.to_date.to_s }.transform_values(&:count)
+    # Group by date using Ruby (AEST timezone-aware)
+    question_counts = question_attempts.group_by { |p| p.created_at.in_time_zone('Australia/Sydney').to_date.to_s }.transform_values(&:count)
 
     # Generate heatmap data for questions
     generate_question_heatmap_data(start_date, end_date, question_counts)

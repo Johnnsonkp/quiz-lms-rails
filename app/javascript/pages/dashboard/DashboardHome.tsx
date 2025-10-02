@@ -43,13 +43,13 @@ export const DashboardHome = memo(({ user, dashboard_stats }: DashboardHomeProps
         </div>
 
         <div className="flex justify-between bg-white p-4 rounded-lg shadow-md">
-          <div class="w-15 h-15 bg-indigo-600 rounded-full flex items-center justify-center">
-            <h3 class="text-white font-semibold text-2xl">
-              {user && user?.name[0]}
+          <div className="w-15 h-15 bg-indigo-600 rounded-full flex items-center justify-center">
+            <h3 className="text-white font-semibold text-2xl">
+              {user && user?.name ? user.name[0] : ''}
             </h3>
           </div>
           <hr></hr>
-          <div class="flex-col">
+          <div className="flex-col">
             <h2 className="text-sm font-semibold text-gray-700 pb-1">{user && user?.email}</h2>
             <h2 className="text-sm font-normal text-gray-700">Active Streak:</h2>
             <h2 className="text-sm font-normal text-gray-700">Level: 1</h2>
@@ -58,7 +58,7 @@ export const DashboardHome = memo(({ user, dashboard_stats }: DashboardHomeProps
         </div>
       </div>
 
-      <hr class="border-gray-200"></hr>
+      <hr className="border-gray-200"></hr>
       <DashboardHeatmap 
         user={user}
         activityType="quiz"
