@@ -1,0 +1,125 @@
+<header class="absolute inset-x-0 top-0 z-40 px-10">
+    <nav aria-label="Global" class="flex items-center justify-between p-6 px-17">
+      <div class="flex lg:flex-1">
+        <%# <div class="flex-shrink-0"> %>
+            <a href="/" title="" class="flex text-2xl font-semibold rounded outline-none focus:ring-1 focus:ring-gray-900 focus:ring-offset-2">
+              <%= image_tag "quiz-icon.png", alt: "Quiz Logo", class: "w-9 h-9" %>
+              QLearn
+            </a>
+        <%# </div> %>
+      </div>
+      <div class="lg:hidden sm:block">
+        <button type="button" command="show-modal" commandfor="mobile-menu" class="-m-2.5 inline-flex items-center justify-center rounded-md p-2.5 text-gray-700">
+          <span class="sr-only">Open main menu</span>
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" data-slot="icon" aria-hidden="true" class="size-6">
+            <path d="M3.75 6.75h16.5M3.75 12h16.5m-16.5 5.25h16.5" stroke-linecap="round" stroke-linejoin="round" />
+          </svg>
+        </button>
+      </div>
+      <%# <div class="lg:flex lg:gap-x-12 sm:hidden">
+        <a href="#" class="text-sm/6 font-semibold text-gray-900">Product</a>
+        <a href="#" class="text-sm/6 font-semibold text-gray-900">Features</a>
+        <a href="#" class="text-sm/6 font-semibold text-gray-900">Marketplace</a>
+        <a href="#" class="text-sm/6 font-semibold text-gray-900">Company</a>
+      </div> %>
+      <%# <div class="lg:flex lg:flex-1 lg:justify-end sm:hidden"> %>
+        <%# <a href="#" class="text-sm/6 font-semibold text-gray-900">Log in <span aria-hidden="true">&rarr;</span></a> %>
+
+        <div class="lg:flex lg:ml-8 lg:items-center lg:justify-center lg:space-x-10">
+        <%# <div class="lg:flex lg:flex-1 lg:justify-end sm:hidden"> %>
+          <% if user_signed_in? %>
+            <!-- User Avatar and Menu -->
+            <div class="flex items-center space-x-4">
+
+              <!-- Dashboard Link -->
+              <%= link_to dashboard_path,
+                  class: "inline-block px-6 py-2 text-sm font-semibold text-white transition-all duration-200 bg-indigo-600 rounded-lg hover:bg-indigo-700 hover:shadow-lg transform hover:-translate-y-0.2" do %>
+                Dashboard
+              <% end %>
+
+              <!-- Logout Button -->
+              <%= button_to destroy_user_session_path, 
+                  method: :delete, 
+                  data: { confirm: "Are you sure you want to log out?" },
+                  class: "inline-flex items-center px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition-all duration-200 cursor-pointer" do %>
+                <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"></path>
+                </svg>
+                Logout
+              <% end %>
+
+                <!-- User Avatar with Initial -->
+              <div class="flex items-center space-x-3">
+                <div class="w-10 h-10 bg-indigo-600 rounded-full flex items-center justify-center">
+                  <span class="text-white font-semibold text-lg">
+                    <%= current_user.name&.first&.upcase || current_user.email&.first&.upcase || "U" %>
+                  </span>
+                </div>
+                <div class="hidden md:block">
+                  <p class="text-sm font-medium text-gray-900">
+                    <%= current_user.name || current_user.email&.split('@')&.first&.titleize || "User" %>
+                  </p>
+                  <% if current_user.provider.present? %>
+                    <p class="text-xs text-gray-500">
+                      via <%= current_user.provider.titleize %>
+                    </p>
+                  <% end %>
+                </div>
+              </div>
+            </div>
+          <% else %>
+            <!-- Guest User Links -->
+
+            <!-- <%= link_to signup_path,
+                class: "text-base font-medium text-gray-900 transition-all duration-200 rounded focus:outline-none font-pj hover:text-opacity-50 focus:ring-1 focus:ring-gray-900 focus:ring-offset-2" do %>
+                  Create an account
+              <% end %> -->
+
+            <%= link_to login_path,
+                class: "text-base font-medium text-gray-900 transition-all duration-200 rounded focus:outline-none font-pj hover:text-opacity-50 focus:ring-1 focus:ring-gray-900 focus:ring-offset-2" do %>
+                  Sign In <span aria-hidden="true">&rarr;</span>
+              <% end %>
+
+            <%= link_to dashboard_path,
+                class: "inline-block px-8 py-2 text-md font-semibold text-white transition-all duration-200 bg-indigo-600 rounded-xl hover:bg-indigo-700 hover:shadow-lg transform hover:-translate-y-0.2" do %>
+                  Go to Dashboard
+              <% end %>
+          <% end %>
+        </div>
+      </div>
+
+    </nav>
+    <el-dialog>
+      <%# <dialog id="mobile-menu" class="backdrop:bg-transparent lg:hidden">
+        <div tabindex="0" class="fixed inset-0 focus:outline-none">
+          <el-dialog-panel class="fixed inset-y-0 right-0 z-50 w-full overflow-y-auto bg-white p-6 sm:max-w-sm sm:ring-1 sm:ring-gray-900/10">
+            <div class="flex items-center justify-between">
+              <a href="#" class="-m-1.5 p-1.5">
+                <span class="sr-only">Your Company</span>
+                <img src="https://tailwindcss.com/plus-assets/img/logos/mark.svg?color=indigo&shade=600" alt="" class="h-8 w-auto" />
+              </a>
+              <button type="button" command="close" commandfor="mobile-menu" class="-m-2.5 rounded-md p-2.5 text-gray-700">
+                <span class="sr-only">Close menu</span>
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" data-slot="icon" aria-hidden="true" class="size-6">
+                  <path d="M6 18 18 6M6 6l12 12" stroke-linecap="round" stroke-linejoin="round" />
+                </svg>
+              </button>
+            </div>
+            <div class="mt-6 flow-root">
+              <div class="-my-6 divide-y divide-gray-500/10">
+                <div class="space-y-2 py-6">
+                  <a href="#" class="-mx-3 block rounded-lg px-3 py-2 text-base/7 font-semibold text-gray-900 hover:bg-gray-50">Product</a>
+                  <a href="#" class="-mx-3 block rounded-lg px-3 py-2 text-base/7 font-semibold text-gray-900 hover:bg-gray-50">Features</a>
+                  <a href="#" class="-mx-3 block rounded-lg px-3 py-2 text-base/7 font-semibold text-gray-900 hover:bg-gray-50">Marketplace</a>
+                  <a href="#" class="-mx-3 block rounded-lg px-3 py-2 text-base/7 font-semibold text-gray-900 hover:bg-gray-50">Company</a>
+                </div>
+                <div class="py-6">
+                  <a href="#" class="-mx-3 block rounded-lg px-3 py-2.5 text-base/7 font-semibold text-gray-900 hover:bg-gray-50">Log in</a>
+                </div>
+              </div>
+            </div>
+          </el-dialog-panel>
+        </div>
+      </dialog> %>
+    </el-dialog>
+  </header>

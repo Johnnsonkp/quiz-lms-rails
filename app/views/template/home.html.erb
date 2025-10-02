@@ -1,311 +1,48 @@
-<div class="relative bg-gray-50 overflow-x-hidden">
-    <div class="absolute bottom-0 right-0 overflow-hidden lg:inset-y-0 h-full">
-        <img class="w-auto h-full" src="https://d33wubrfki0l68.cloudfront.net/1e0fc04f38f5896d10ff66824a62e466839567f8/699b5/images/hero/3/background-pattern.png" alt="" />
+<div class="bg-white max-h-[100px]">
+
+  <div class="z-50 absolute bottom-0 right-0 overflow-hidden lg:inset-y-0 h-full">
+    <img 
+      class="w-auto h-full" 
+      src="https://d33wubrfki0l68.cloudfront.net/1e0fc04f38f5896d10ff66824a62e466839567f8/699b5/images/hero/3/background-pattern.png" 
+      alt="" 
+    />
+  </div>
+
+  <%= render 'shared/header-2' %> 
+  <%# <%= render 'shared/header' %> 
+
+  <div class="relative isolate px-6 lg:px-8">
+    <div aria-hidden="true" class="absolute inset-x-0 -top-40 -z-10 transform-gpu overflow-hidden blur-3xl sm:-top-80">
+      <div style="clip-path: polygon(74.1% 44.1%, 100% 61.6%, 97.5% 26.9%, 85.5% 0.1%, 80.7% 2%, 72.5% 32.5%, 60.2% 62.4%, 52.4% 68.1%, 47.5% 58.3%, 45.2% 34.5%, 27.5% 76.7%, 0.1% 64.9%, 17.9% 100%, 27.6% 76.8%, 76.1% 97.7%, 74.1% 44.1%)" class="relative left-[calc(50%-11rem)] aspect-1155/678 w-144.5 -translate-x-1/2 rotate-30 bg-linear-to-tr from-[#ff80b5] to-[#9089fc] opacity-30 sm:left-[calc(50%-30rem)] sm:w-288.75"></div>
     </div>
 
-    <%= render 'shared/header' %>
+    <div class="mx-auto max-w-1xl py-14 sm:py-48 lg:py-25">
+      <%= render 'shared/landing_text_bubble' %>
 
-    <%# <section class="relative py-0 sm:py-16 lg:pt-2 lg:pb-36"> %>
-    <section class="relative py-0 sm:py-16 lg:pt-2">
-        <div class="px-4 mx-auto sm:px-6 lg:px-8 max-w-7xl">
-            <div class="grid grid-cols-1 gap-y-8 lg:items-center lg:grid-cols-2 sm:gap-y-10 xl:grid-cols-5">
-            <%# <div class="grid grid-cols-2 gap-y-8 lg:items-center lg:grid-cols-2 sm:gap-y-10 xl:grid-cols-5"> %>
+      <div class="text-center max-w-3xl mx-auto sm:max-w-md md:max-w-full mb-15">
+        <h1 class="text-4xl font-semibold leading-[4rem] text-gray-900 sm:text-5xl sm:leading-tight lg:text-[3.6rem] lg:leading-[4rem] font-pj mb-0">
+          Stop Rereading, Start Remembering
+        </h1>
+        <h1 class="text-center text-4xl font-semibold leading-[4rem] text-gray-900 sm:text-5xl sm:leading-tight lg:text-[3.6rem] lg:leading-[4rem] font-pj mb-0"> Transform Your
+          <span class="bg-gradient-to-r from-indigo-400 to-pink-600 bg-clip-text text-transparent">
+            Study Notes
+          </span>
+          
+          <div class="mt-0">
+            into
+            <span class="relative mt-3 whitespace-nowrap text-blue-600">
+              <%= render 'shared/svg_hero_icon' %>
+              <span class="relative">Quizzes</span>
+            </span>
+            in Seconds.
+          </div>
+        </h1>
+      </div>
+      <%= render 'shared/upload_form' %>
+    </div>
 
-                <div class="text-center xl:col-span-2 lg:text-left md:px-16 lg:px-0 mb-0 mt-4">
-                    <%# # Hero badge %>
-                    <div class="animate-reveal [animation-delay:0.2s] flex justify-center lg:justify-start mb-3">
-                        <div class="inline-flex items-center px-3 py-1.5 border border-black/10 rounded-full bg-white/5 backdrop-blur-lg transform transition-transform">
-                            <div class="w-2 h-2 rounded-full bg-violet-500 animate-pulse"></div>
-                            <span class="ml-2 text-sm sm:text-sm text-black/70 font-semibold tracking-wider">A Simple Learning Management System</span>
-                        </div>
-                    </div>
-
-                    <div class="max-w-xl mx-auto sm:max-w-md md:max-w-full">
-                        <h1 class="text-5xl font-semibold leading-[4rem] text-gray-900 sm:text-5xl sm:leading-tight lg:text-6xl lg:leading-[4rem] font-pj mb-0">
-                          Stop re-reading, Start remembering
-                        </h1>
-                        <h1 class="text-5xl font-semibold leading-[4rem] text-gray-900 sm:text-5xl sm:leading-tight lg:text-6xl lg:leading-[4rem] font-pj mb-0"> Transform Your
-                          <span class="bg-gradient-to-r from-indigo-400 to-pink-600 bg-clip-text text-transparent">
-                              Study Notes
-                          </span>
-                          
-                          <div class="mt-0">
-                            into
-                              <span class="relative mt-3 whitespace-nowrap text-blue-600"><svg aria-hidden="true" viewBox="0 0 418 42"
-                                  class="absolute top-3/4 left-0 right-0 m-auto h-[0.58em] w-fit fill-pink-400/50"
-                                  preserveAspectRatio="none">
-                                  <path
-                                      d="M203.371.916c-26.013-2.078-76.686 1.963-124.73 9.946L67.3 12.749C35.421 18.062 18.2 21.766 6.004 25.934 1.244 27.561.828 27.778.874 28.61c.07 1.214.828 1.121 9.595-1.176 9.072-2.377 17.15-3.92 39.246-7.496C123.565 7.986 157.869 4.492 195.942 5.046c7.461.108 19.25 1.696 19.17 2.582-.107 1.183-7.874 4.31-25.75 10.366-21.992 7.45-35.43 12.534-36.701 13.884-2.173 2.308-.202 4.407 4.442 4.734 2.654.187 3.263.157 15.593-.78 35.401-2.686 57.944-3.488 88.365-3.143 46.327.526 75.721 2.23 130.788 7.584 19.787 1.924 20.814 1.98 24.557 1.332l.066-.011c1.201-.203 1.53-1.825.399-2.335-2.911-1.31-4.893-1.604-22.048-3.261-57.509-5.556-87.871-7.36-132.059-7.842-23.239-.254-33.617-.116-50.627.674-11.629.54-42.371 2.494-46.696 2.967-2.359.259 8.133-3.625 26.504-9.81 23.239-7.825 27.934-10.149 28.304-14.005.417-4.348-3.529-6-16.878-7.066Z">
-                                  </path>
-                              </svg>
-                              <span class="relative">Quizzes</span>
-                              </span>
-                              in Seconds.
-                          </div>
-                        </h1>
-                        <p class="text-2xl w-xl mx-auto mt-7 text-black/60">Turn your study notes into personalised quizzes.</p>
-                    </div>
-                </div>
-
-                <div class="xl:col-span-3 relative">
-                    <%# <img class="w-full mx-auto scale-110 blur-xs" src="https://d33wubrfki0l68.cloudfront.net/29c501c64b21014b3f2e225abe02fe31fd8f3a5c/f866d/images/hero/3/illustration.png" alt="" /> %>
-                    <img class="transform scale-110 h-[510px] w-[100%] m-auto blur-xs" src="https://cdn.rareblocks.xyz/collection/clarity/images/hero/2/illustration.png" alt="" />
-
-                    <div class="mx-auto w-[80%] h-[450px] bg-white absolute inset-0 flex items-start justify-center shadow-lg rounded-lg py-6 px-7 border-1">
-                      <%= form_with url: dashboard_file_upload_path, method: :post, multipart: true, local: false, id: "quiz-upload-form", class: "py-0 px-6 w-full flex justify-between" do |form| %>
-                          
-                          <!-- Drag & Drop File Upload -->
-                          <div class="mb-6 flex-[0.6]">
-                              <label class="block text-sm font-medium text-gray-700 mb-2">
-                                  Upload File *
-                              </label>
-                              <div id="drop-zone" class="relative flex flex-col items-center justify-center w-full h-55 border-2 border-gray-300 border-dashed rounded-lg cursor-pointer bg-gray-50 hover:bg-gray-100 transition-colors duration-200">
-                                  <%= form.file_field :file, 
-                                      id: "file-input",
-                                      accept: ".pdf,.txt,.docx",
-                                      class: "absolute inset-0 w-full h-full opacity-0 cursor-pointer" %>
-                                  <div class="flex flex-col items-center justify-center pt-5 pb-6" id="drop-zone-content">
-                                      <svg class="w-8 h-8 mb-2 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"></path>
-                                      </svg>
-                                      <p class="mb-1 text-sm text-gray-500 font-medium">
-                                          <span class="font-semibold">Click to upload</span> or drag and drop
-                                      </p>
-                                      <p class="text-xs text-gray-500">PDF, TXT, or DOCX (MAX. 10MB)</p>
-                                  </div>
-                                  <div id="file-info" class="hidden items-center justify-center pt-5 pb-6">
-                                      <svg class="w-8 h-8 mr-2 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
-                                      </svg>
-                                      <div>
-                                          <p class="text-sm font-medium text-gray-700" id="file-name"></p>
-                                          <p class="text-xs text-gray-500" id="file-size"></p>
-                                      </div>
-                                  </div>
-                              </div>
-
-                              <!-- Submit Button -->
-                              <div class="mt-4">
-                                  <button type="submit" id="submit-btn"
-                                      class="w-full rounded-md bg-blue-500 py-3 px-8 text-center text-sm font-semibold text-white outline-none cursor-pointer transition-all duration-200">
-                                      Generate Quiz
-                                  </button>
-                              </div>
-                          </div>
-
-
-                          <%# input fields %>
-                          <div class="flex-[0.35]">
-                            <h4>Optional fields</h4>
-                            <!-- Title Field -->
-                            <div class="mb-4 mt-3">
-                                <label for="quiz_title" class="block text-sm font-medium text-gray-700 mb-2">
-                                    Quiz Title *
-                                </label>
-                                <%= form.text_field :title, 
-                                    placeholder: "Enter quiz title", 
-                                    id: "quiz_title",
-                                    class: "w-full rounded-md border border-gray-300 bg-white py-2 px-3 text-sm text-gray-700 outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-200 transition-all duration-200" %>
-                            </div>
-
-                            <!-- Subject Field -->
-                            <div class="mb-4">
-                                <label for="quiz_subject" class="block text-sm font-medium text-gray-700 mb-2">
-                                    Subject *
-                                </label>
-                                <%= form.text_field :subject, 
-                                    placeholder: "e.g., JavaScript, Biology, World War II", 
-                                    id: "quiz_subject",
-                                    class: "w-full rounded-md border border-gray-300 bg-white py-2 px-3 text-sm text-gray-700 outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-200 transition-all duration-200" %>
-                            </div>
-
-
-                            <!-- Topic Field -->
-                            <div class="mb-4">
-                                <label for="quiz_topic" class="block text-sm font-medium text-gray-700 mb-2">
-                                    Category (Topic) *
-                                </label>
-                                <%= form.text_field :topic, 
-                                    placeholder: "e.g., Programming, Science, History", 
-                                    id: "quiz_topic",
-                                    class: "w-full rounded-md border border-gray-300 bg-white py-2 px-3 text-sm text-gray-700 outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-200 transition-all duration-200" %>
-                            </div>
-                          </div>
-
-
-                          <%# <!-- Submit Button -->
-                          <div>
-                              <button type="submit" id="submit-btn" disabled
-                                  class="w-full rounded-md bg-gray-400 py-3 px-8 text-center text-sm font-semibold text-white outline-none cursor-not-allowed transition-all duration-200">
-                                  Generate Quiz
-                              </button>
-                          </div> %>
-                      <% end %>
-                  </div>
-                </div>
-            </div>
-        </div>
-    </section>
+    <div aria-hidden="true" class="absolute inset-x-0 top-[calc(100%-13rem)] -z-10 transform-gpu overflow-hidden blur-3xl sm:top-[calc(100%-30rem)]">
+      <div style="clip-path: polygon(74.1% 44.1%, 100% 61.6%, 97.5% 26.9%, 85.5% 0.1%, 80.7% 2%, 72.5% 32.5%, 60.2% 62.4%, 52.4% 68.1%, 47.5% 58.3%, 45.2% 34.5%, 27.5% 76.7%, 0.1% 64.9%, 17.9% 100%, 27.6% 76.8%, 76.1% 97.7%, 74.1% 44.1%)" class="relative left-[calc(50%+3rem)] aspect-1155/678 w-144.5 -translate-x-1/2 bg-linear-to-tr from-[#ff80b5] to-[#9089fc] opacity-30 sm:left-[calc(50%+36rem)] sm:w-288.75"></div>
+    </div>
+  </div>
 </div>
-
-<script>
-document.addEventListener('DOMContentLoaded', function() {
-    const dropZone = document.getElementById('drop-zone');
-    const fileInput = document.getElementById('file-input');
-    const dropZoneContent = document.getElementById('drop-zone-content');
-    const fileInfo = document.getElementById('file-info');
-    const fileName = document.getElementById('file-name');
-    const fileSize = document.getElementById('file-size');
-    const submitBtn = document.getElementById('submit-btn');
-    const form = document.getElementById('quiz-upload-form');
-    
-    // Form validation
-    function validateForm() {
-        const title = document.getElementById('quiz_title').value.trim();
-        const topic = document.getElementById('quiz_topic').value.trim();
-        const subject = document.getElementById('quiz_subject').value.trim();
-        const file = fileInput.files[0];
-
-        console.log("validateForm title", title)
-        console.log("validateForm topic", topic)
-        console.log("validateForm subject", subject)
-
-        if (title && topic && subject && file) {
-            submitBtn.disabled = false;
-            submitBtn.className = submitBtn.className.replace('bg-gray-400 cursor-not-allowed', 'bg-indigo-600 hover:bg-indigo-700 cursor-pointer');
-        } else {
-            submitBtn.disabled = true;
-            submitBtn.className = submitBtn.className.replace('bg-indigo-600 hover:bg-indigo-700 cursor-pointer', 'bg-gray-400 cursor-not-allowed');
-        }
-    }
-    
-    // Add event listeners for form validation
-    ['quiz_title', 'quiz_topic', 'quiz_subject'].forEach(id => {
-        document.getElementById(id).addEventListener('input', validateForm);
-    });
-    
-    // File upload functions
-    function handleFile(file) {
-        if (file && (file.type === 'application/pdf' || file.type === 'text/plain' || file.type === 'application/vnd.openxmlformats-officedocument.wordprocessingml.document')) {
-            if (file.size <= 10 * 1024 * 1024) { // 10MB limit
-                fileName.textContent = file.name;
-                fileSize.textContent = formatFileSize(file.size);
-                
-                dropZoneContent.classList.add('hidden');
-                fileInfo.classList.remove('hidden');
-                fileInfo.classList.add('flex');
-                
-                dropZone.classList.remove('border-gray-300', 'bg-gray-50');
-                dropZone.classList.add('border-green-400', 'bg-green-50');
-                
-                validateForm();
-            } else {
-                alert('File size must be less than 10MB');
-                resetFileUpload();
-            }
-        } else {
-            alert('Please upload a PDF, TXT, or DOCX file');
-            resetFileUpload();
-        }
-    }
-    
-    function resetFileUpload() {
-        fileInput.value = '';
-        dropZoneContent.classList.remove('hidden');
-        fileInfo.classList.add('hidden');
-        fileInfo.classList.remove('flex');
-        dropZone.classList.remove('border-green-400', 'bg-green-50');
-        dropZone.classList.add('border-gray-300', 'bg-gray-50');
-        validateForm();
-    }
-    
-    function formatFileSize(bytes) {
-        if (bytes === 0) return '0 Bytes';
-        const k = 1024;
-        const sizes = ['Bytes', 'KB', 'MB', 'GB'];
-        const i = Math.floor(Math.log(bytes) / Math.log(k));
-        return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
-    }
-    
-    // Drag and drop events
-    dropZone.addEventListener('dragover', function(e) {
-        e.preventDefault();
-        dropZone.classList.add('border-indigo-400', 'bg-indigo-50');
-    });
-    
-    dropZone.addEventListener('dragleave', function(e) {
-        e.preventDefault();
-        if (!fileInput.files[0]) {
-            dropZone.classList.remove('border-indigo-400', 'bg-indigo-50');
-        }
-    });
-    
-    dropZone.addEventListener('drop', function(e) {
-        e.preventDefault();
-        dropZone.classList.remove('border-indigo-400', 'bg-indigo-50');
-        
-        const files = e.dataTransfer.files;
-        if (files.length > 0) {
-            fileInput.files = files;
-            handleFile(files[0]);
-        }
-    });
-    
-    // File input change event
-    fileInput.addEventListener('change', function(e) {
-        const file = e.target.files[0];
-        if (file) {
-            handleFile(file);
-        } else {
-            resetFileUpload();
-        }
-    });
-    
-    // Form submission
-    form.addEventListener('submit', function(e) {
-        e.preventDefault();
-        
-        if (submitBtn.disabled) {
-            return;
-        }
-        
-        const formData = new FormData(form);
-
-        console.log("formData:", formData);
-        console.log("form:", form);
-        // console.log("form getAll title:", form.getAll('title');
-        // console.log("form get title:", form.get('title');
-        
-        // Change button to loading state
-        const originalText = submitBtn.textContent;
-        submitBtn.textContent = 'Generating Quiz...';
-        submitBtn.disabled = true;
-        
-        fetch(form.action, {
-            method: 'POST',
-            body: formData,
-            headers: {
-                'X-CSRF-Token': document.querySelector('[name="csrf-token"]').content
-            }
-        })
-        .then(response => response.json())
-        .then(data => {
-            if (data.message) {
-                alert('Quiz generated successfully! Redirecting to dashboard...');
-                window.location.href = '/dashboard';
-            } else if (data.error) {
-                alert('Error: ' + data.error);
-            }
-        })
-        .catch(error => {
-            console.error('Error:', error);
-            alert('An error occurred while generating the quiz. Please try again.');
-        })
-        .finally(() => {
-            submitBtn.textContent = originalText;
-            validateForm();
-        });
-    });
-});
-</script>
-

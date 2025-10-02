@@ -1,0 +1,246 @@
+<section class="xl:col-span-3 relative w-[95%] m-auto">
+    <img class="transform scale-110 h-[510px] w-[100%] m-auto blur-xs" src="https://cdn.rareblocks.xyz/collection/clarity/images/hero/2/illustration.png" alt="" />
+
+    <div class="mx-auto w-[80%] h-[450px] bg-white absolute inset-0 flex items-start justify-center shadow-lg rounded-lg py-6 px-2 border-3 border-gray-200">
+
+      <%= form_with url: dashboard_file_upload_path, method: :post, multipart: true, local: false, id: "quiz-upload-form", 
+        class: "py-0 px-6 w-full flex justify-between" do |form| %>
+          
+          <!-- Drag & Drop File Upload -->
+          <div class="mb-6 flex-[0.6]">
+              <label class="block text-sm font-medium text-gray-700 mb-2">
+                  Upload File *
+              </label>
+              <div id="drop-zone" class="relative flex flex-col items-center justify-center w-full h-55 border-2 border-gray-300 border-dashed rounded-lg cursor-pointer bg-gray-50 hover:bg-gray-100 transition-colors duration-200">
+                  <%= form.file_field :file, 
+                      id: "file-input",
+                      accept: ".pdf,.txt,.docx",
+                      class: "absolute inset-0 w-full h-full opacity-0 cursor-pointer" %>
+                  <div class="flex flex-col items-center justify-center pt-5 pb-6" id="drop-zone-content">
+                      <svg class="w-8 h-8 mb-2 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"></path>
+                      </svg>
+                      <p class="mb-1 text-sm text-gray-500 font-medium">
+                          <span class="font-semibold">Click to upload</span> or drag and drop
+                      </p>
+                      <p class="text-xs text-gray-500">PDF, TXT, or DOCX (MAX. 10MB)</p>
+                  </div>
+                  <div id="file-info" class="hidden items-center justify-center pt-5 pb-6">
+                      <svg class="w-8 h-8 mr-2 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                      </svg>
+                      <div>
+                          <p class="text-sm font-medium text-gray-700" id="file-name"></p>
+                          <p class="text-xs text-gray-500" id="file-size"></p>
+                      </div>
+                  </div>
+              </div>
+
+              <!-- Submit Button -->
+              <div class="mt-4">
+                  <button type="submit" id="submit-btn"
+                      class="w-full rounded-md bg-blue-500 py-3 px-8 text-center text-sm font-semibold text-white outline-none cursor-pointer transition-all duration-200">
+                      Generate Quiz
+                  </button>
+              </div>
+          </div>
+
+
+          <%# input fields %>
+          <div class="flex-[0.35]">
+            <h4>Optional fields</h4>
+            <!-- Title Field -->
+            <div class="mb-4 mt-3">
+                <label for="quiz_title" class="block text-sm font-medium text-gray-700 mb-2">
+                    Quiz Title *
+                </label>
+                <%= form.text_field :title, 
+                    placeholder: "Enter quiz title", 
+                    id: "quiz_title",
+                    class: "w-full rounded-md border border-gray-300 bg-white py-2 px-3 text-sm text-gray-700 outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-200 transition-all duration-200" %>
+            </div>
+
+            <!-- Subject Field -->
+            <div class="mb-4">
+                <label for="quiz_subject" class="block text-sm font-medium text-gray-700 mb-2">
+                    Subject *
+                </label>
+                <%= form.text_field :subject, 
+                    placeholder: "e.g., JavaScript, Biology, World War II", 
+                    id: "quiz_subject",
+                    class: "w-full rounded-md border border-gray-300 bg-white py-2 px-3 text-sm text-gray-700 outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-200 transition-all duration-200" %>
+            </div>
+
+
+            <!-- Topic Field -->
+            <div class="mb-4">
+                <label for="quiz_topic" class="block text-sm font-medium text-gray-700 mb-2">
+                    Category (Topic) *
+                </label>
+                <%= form.text_field :topic, 
+                    placeholder: "e.g., Programming, Science, History", 
+                    id: "quiz_topic",
+                    class: "w-full rounded-md border border-gray-300 bg-white py-2 px-3 text-sm text-gray-700 outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-200 transition-all duration-200" %>
+            </div>
+          </div>
+      <% end %>
+  </div>
+</section>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const dropZone = document.getElementById('drop-zone');
+    const fileInput = document.getElementById('file-input');
+    const dropZoneContent = document.getElementById('drop-zone-content');
+    const fileInfo = document.getElementById('file-info');
+    const fileName = document.getElementById('file-name');
+    const fileSize = document.getElementById('file-size');
+    const submitBtn = document.getElementById('submit-btn');
+    const form = document.getElementById('quiz-upload-form');
+    
+    // Form validation
+    function validateForm() {
+        const title = document.getElementById('quiz_title').value.trim();
+        const topic = document.getElementById('quiz_topic').value.trim();
+        const subject = document.getElementById('quiz_subject').value.trim();
+        const file = fileInput.files[0];
+
+        console.log("validateForm title", title)
+        console.log("validateForm topic", topic)
+        console.log("validateForm subject", subject)
+
+        if (title && topic && subject && file) {
+            submitBtn.disabled = false;
+            submitBtn.className = submitBtn.className.replace('bg-gray-400 cursor-not-allowed', 'bg-indigo-600 hover:bg-indigo-700 cursor-pointer');
+        } else {
+            submitBtn.disabled = true;
+            submitBtn.className = submitBtn.className.replace('bg-indigo-600 hover:bg-indigo-700 cursor-pointer', 'bg-gray-400 cursor-not-allowed');
+        }
+    }
+    
+    // Add event listeners for form validation
+    ['quiz_title', 'quiz_topic', 'quiz_subject'].forEach(id => {
+        document.getElementById(id).addEventListener('input', validateForm);
+    });
+    
+    // File upload functions
+    function handleFile(file) {
+        if (file && (file.type === 'application/pdf' || file.type === 'text/plain' || file.type === 'application/vnd.openxmlformats-officedocument.wordprocessingml.document')) {
+            if (file.size <= 10 * 1024 * 1024) { // 10MB limit
+                fileName.textContent = file.name;
+                fileSize.textContent = formatFileSize(file.size);
+                
+                dropZoneContent.classList.add('hidden');
+                fileInfo.classList.remove('hidden');
+                fileInfo.classList.add('flex');
+                
+                dropZone.classList.remove('border-gray-300', 'bg-gray-50');
+                dropZone.classList.add('border-green-400', 'bg-green-50');
+                
+                validateForm();
+            } else {
+                alert('File size must be less than 10MB');
+                resetFileUpload();
+            }
+        } else {
+            alert('Please upload a PDF, TXT, or DOCX file');
+            resetFileUpload();
+        }
+    }
+    
+    function resetFileUpload() {
+        fileInput.value = '';
+        dropZoneContent.classList.remove('hidden');
+        fileInfo.classList.add('hidden');
+        fileInfo.classList.remove('flex');
+        dropZone.classList.remove('border-green-400', 'bg-green-50');
+        dropZone.classList.add('border-gray-300', 'bg-gray-50');
+        validateForm();
+    }
+    
+    function formatFileSize(bytes) {
+        if (bytes === 0) return '0 Bytes';
+        const k = 1024;
+        const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+        const i = Math.floor(Math.log(bytes) / Math.log(k));
+        return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+    }
+    
+    // Drag and drop events
+    dropZone.addEventListener('dragover', function(e) {
+        e.preventDefault();
+        dropZone.classList.add('border-indigo-400', 'bg-indigo-50');
+    });
+    
+    dropZone.addEventListener('dragleave', function(e) {
+        e.preventDefault();
+        if (!fileInput.files[0]) {
+            dropZone.classList.remove('border-indigo-400', 'bg-indigo-50');
+        }
+    });
+    
+    dropZone.addEventListener('drop', function(e) {
+        e.preventDefault();
+        dropZone.classList.remove('border-indigo-400', 'bg-indigo-50');
+        
+        const files = e.dataTransfer.files;
+        if (files.length > 0) {
+            fileInput.files = files;
+            handleFile(files[0]);
+        }
+    });
+    
+    // File input change event
+    fileInput.addEventListener('change', function(e) {
+        const file = e.target.files[0];
+        if (file) {
+            handleFile(file);
+        } else {
+            resetFileUpload();
+        }
+    });
+    
+    // Form submission
+    form.addEventListener('submit', function(e) {
+        e.preventDefault();
+        
+        if (submitBtn.disabled) {
+            return;
+        }
+        
+        const formData = new FormData(form);
+        console.log("formData:", formData);
+        console.log("form:", form);
+        
+        // Change button to loading state
+        const originalText = submitBtn.textContent;
+        submitBtn.textContent = 'Generating Quiz...';
+        submitBtn.disabled = true;
+        
+        fetch(form.action, {
+            method: 'POST',
+            body: formData,
+            headers: {
+                'X-CSRF-Token': document.querySelector('[name="csrf-token"]').content
+            }
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.message) {
+                alert('Quiz generated successfully! Redirecting to dashboard...');
+                window.location.href = '/dashboard';
+            } else if (data.error) {
+                alert('Error: ' + data.error);
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            alert('An error occurred while generating the quiz. Please try again.');
+        })
+        .finally(() => {
+            submitBtn.textContent = originalText;
+            validateForm();
+        });
+    });
+});
+</script>
