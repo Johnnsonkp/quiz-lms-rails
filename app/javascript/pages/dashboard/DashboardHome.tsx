@@ -58,6 +58,7 @@ export const DashboardHome = memo(({ user, dashboard_stats }: DashboardHomeProps
         </div>
       </div>
 
+      <hr class="border-gray-200"></hr>
       <DashboardHeatmap 
         user={user}
         activityType="quiz"

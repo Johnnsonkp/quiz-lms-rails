@@ -306,10 +306,10 @@ const DashboardHeatmap: React.FC<DashboardHeatmapProps> = ({
       </div>
       
       {/* Legend */}
-      <div className="mt-3 flex items-center justify-between text-xs text-gray-500 h-3">
+      <div className="mt-3 w-[35%] flex items-center justify-between text-xs text-gray-500 h-3">
         <div>Less</div>
-        <svg className="flex items-center space-x-1 react-calendar-heatmap">
-          <g className="flex w-3 h-3 rounded-sm ">
+        <svg className="flex mx-auto items-center space-x-1 react-calendar-heatmap">
+          <g className="flex mx-auto items-center w-3 h-3 rounded-sm border-2 border-red-500">
             <rect width="4" height="4" x="0" y="70" className="w-4 h-4 rounded-sm border color-github-1"></rect>
             <rect width="4" height="4" x="20" y="70" className="w-4 h-4 rounded-sm border color-github-2"></rect>
             <rect width="4" height="4" x="40" y="70" className="w-4 h-4 rounded-sm border color-github-3"></rect>
