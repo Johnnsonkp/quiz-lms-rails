@@ -84,6 +84,9 @@ export const deleteSingleQuizData = async (id: number | null) => {
   }
 
 export const completeQuiz = async (quizId: number, answers: Record<string, string>) => {
+  console.log('Completing quiz with ID:', quizId, 'and answers:', answers);
+  console.log("answers length", Object.keys(answers).length);
+
   try {
     const csrfToken = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content');
     const response = await fetch('/dashboard/complete_quiz', {

@@ -47,11 +47,16 @@ const DashboardHeatmap: React.FC<DashboardHeatmapProps> = ({
   // Default to showing last 6 months if no dates provided
   const defaultStartDate = useMemo(() => {
     const date = new Date(today);
-    date.setMonth(date.getMonth() - 6);
+    date.setMonth(date.getMonth() - 4);
     return date;
   }, [today]);
 
-  const defaultEndDate = useMemo(() => today, [today]);
+  // const defaultEndDate = useMemo(() => today, [today]);
+  const defaultEndDate = useMemo(() => {
+    const date = new Date(today);
+    date.setMonth(date.getMonth() + 3);
+    return date;
+  }, [today]);
 
   // Fetch activity data from API
   useEffect(() => {
@@ -97,7 +102,7 @@ const DashboardHeatmap: React.FC<DashboardHeatmapProps> = ({
     };
 
     fetchActivityData();
-  }, []);
+  }, [user]);
 
   // Transform the quiz activities data for the heatmap
   const heatmapValues = useMemo(() => {
@@ -114,7 +119,8 @@ const DashboardHeatmap: React.FC<DashboardHeatmapProps> = ({
   useEffect(() => {
     const svg = document.querySelector('.heatmap-container svg');
     if (svg) {
-      svg.setAttribute('viewBox', '10 7 352 90');
+      // svg.setAttribute('viewBox', '10 7 552 90');
+      svg.setAttribute('viewBox', '10 7 400 90');
     }
   }, [heatmapValues]); 
 
@@ -161,14 +167,22 @@ const DashboardHeatmap: React.FC<DashboardHeatmapProps> = ({
     // Customize these thresholds based on activity type
     let thresholds;
     if (activityType === 'question') {
-      thresholds = [1, 5, 10, 20]; // Questions answered
+      thresholds = [1, 5, 10, 20, 30, 45, 55, 65, 75, 90]; // Questions answered
     } else {
-      thresholds = [1, 2, 3, 5]; // Quizzes completed
+      thresholds = [1, 2, 3, 5, 6, 7, 9, 15, 18, 21]; // Quizzes completed
     }
     
-    if (value.count >= thresholds[3]) return 'color-github-4'; // Very active
-    if (value.count >= thresholds[2]) return 'color-github-3'; // Active
-    if (value.count >= thresholds[1]) return 'color-github-2'; // Moderate
+    if (value.count >= thresholds[10]) return 'color-github-10'; // Very active
+    if (value.count >= thresholds[9]) return 'color-github-9'; // Active
+    if (value.count >= thresholds[8]) return 'color-github-8'; // Moderate
+    if (value.count >= thresholds[7]) return 'color-github-7'; // Very active
+
+    if (value.count >= thresholds[6]) return 'color-github-6'; // Very active
+    if (value.count >= thresholds[5]) return 'color-github-5'; // Active
+    if (value.count >= thresholds[4]) return 'color-github-4'; // Moderate
+    if (value.count >= thresholds[3]) return 'color-github-3'; // Very active
+    if (value.count >= thresholds[2]) return 'color-github-2'; // Active
+    if (value.count >= thresholds[1]) return 'color-github-1'; // Moderate
     return 'color-github-1'; // Light activity
   };
 
@@ -234,12 +248,12 @@ const DashboardHeatmap: React.FC<DashboardHeatmapProps> = ({
   return (
     <div className="dashboard-heatmap">
       <div className="mb-2">
-        <h3 className="text-md font-semibold text-gray-900 mb-2">
+        {/* <h3 className="text-md font-semibold text-gray-900 mb-2">
           Study Activity Heatmap
           {activityType === 'quiz' && ' - Quiz Completions'}
           {activityType === 'question' && ' - Questions Answered'}
           {activityType === 'combined' && ' - All Activities'}
-        </h3>
+        </h3> */}
         <div className="flex justify-between items-center">
           {/* <p className="text-sm text-gray-600">
             Track your study patterns over time. Darker squares indicate more activity.
@@ -273,7 +287,7 @@ const DashboardHeatmap: React.FC<DashboardHeatmapProps> = ({
           showWeekdayLabels={true}
           showMonthLabels={true}
           onClick={handleClick}
-          gutterSize={2}
+          gutterSize={1}
           horizontal={true}
         />
         {/* <CalendarHeatmap
@@ -291,14 +305,20 @@ const DashboardHeatmap: React.FC<DashboardHeatmapProps> = ({
       </div>
       
       {/* Legend */}
-      <div className="mt-3 flex items-center justify-between text-xs text-gray-500 h-3">
-        <div>Less</div>
-        <svg className="flex items-center space-x-1 react-calendar-heatmap">
-          <g className="flex w-3 h-3 rounded-sm ">
+      <div className="mt-3 w-[25%] flex items-center justify-between text-xs text-gray-500 h-3">
+        <div className='mr-2'>Less</div>
+        <svg className="flex mx-auto items-center space-x-1 react-calendar-heatmap">
+          <g className="flex mx-auto items-center w-3 h-3 rounded-sm border-2 border-red-500">
             <rect width="4" height="4" x="0" y="70" className="w-4 h-4 rounded-sm border color-github-1"></rect>
             <rect width="4" height="4" x="20" y="70" className="w-4 h-4 rounded-sm border color-github-2"></rect>
             <rect width="4" height="4" x="40" y="70" className="w-4 h-4 rounded-sm border color-github-3"></rect>
             <rect width="4" height="4" x="60" y="70" className="w-4 h-4 rounded-sm border color-github-4"></rect>
+            <rect width="4" height="4" x="80" y="70" className="w-4 h-4 rounded-sm border color-github-5"></rect>
+            <rect width="4" height="4" x="100" y="70" className="w-4 h-4 rounded-sm border color-github-6"></rect>
+            <rect width="4" height="4" x="120" y="70" className="w-4 h-4 rounded-sm border color-github-7"></rect>
+            <rect width="4" height="4" x="140" y="70" className="w-4 h-4 rounded-sm border color-github-8"></rect>
+            <rect width="4" height="4" x="160" y="70" className="w-4 h-4 rounded-sm border color-github-9"></rect>
+            <rect width="4" height="4" x="180" y="70" className="w-4 h-4 rounded-sm border color-github-10"></rect>
           </g>
         </svg>
         <div>More</div>

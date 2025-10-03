@@ -49,20 +49,24 @@ class DashboardController < ApplicationController
     # puts "Activity data for user #{@user.id} from #{start_date} to #{end_date}: #{activity_data}" if Rails.env.development?
     puts "Summary: completed_quizzes_count - #{@user.completed_quizzes_count}, attempted_quizzes_count - #{@user.attempted_quizzes_count}" if Rails.env.development?
     puts "Date range: #{start_date} to #{end_date}" if Rails.env.development?
-    puts "Timezone: #{Time.zone.name}" if Rails.env.development?
+    puts "Timezone: Australia/Sydney (AEST)" if Rails.env.development?
+    puts "Current time (AEST): #{Time.current.in_time_zone('Australia/Sydney')}" if Rails.env.development?
 
-    # Calculate summary data for the same date range as activity data
+    # Calculate summary data for the same date range as activity data (AEST timezone)
+    aest_start = start_date.in_time_zone('Australia/Sydney').beginning_of_day
+    aest_end = end_date.in_time_zone('Australia/Sydney').end_of_day
+    
     date_range_completed = @user.user_quiz_progresses
       .where(completed: true)
-      .where(created_at: start_date.beginning_of_day..end_date.end_of_day)
+      .where(created_at: aest_start..aest_end)
       .count
     
     date_range_attempted = @user.user_quiz_progresses
-      .where(created_at: start_date.beginning_of_day..end_date.end_of_day)
+      .where(created_at: aest_start..aest_end)
       .count
 
     puts "Date range completed: #{date_range_completed}, attempted: #{date_range_attempted}" if Rails.env.development?
-    puts "Recent progresses: #{@user.user_quiz_progresses.where('created_at > ?', 1.day.ago).pluck(:created_at, :completed)}" if Rails.env.development?
+    puts "Recent progresses (AEST): #{@user.user_quiz_progresses.where('created_at > ?', 1.day.ago).pluck(:created_at).map { |t| t.in_time_zone('Australia/Sydney') }}" if Rails.env.development?
 
     render json: {
       activity_data: activity_data,
@@ -156,49 +160,116 @@ class DashboardController < ApplicationController
   end
 
   def complete_quiz
+    puts "=== COMPLETE QUIZ ENDPOINT CALLED ===" if Rails.env.development?
+    
     if @user.nil?
+      puts "ERROR: User not authenticated" if Rails.env.development?
       render json: { error: "User not authenticated" }, status: 401
       return
     end
 
     quiz_id = params[:quiz_id]
+    puts "Quiz ID received: #{quiz_id}" if Rails.env.development?
+    
     quiz = Quiz.find_by(id: quiz_id)
 
     unless quiz
+      puts "ERROR: Quiz not found with ID: #{quiz_id}" if Rails.env.development?
       render json: { error: "Quiz not found" }, status: 404
       return
     end
 
+    puts "Quiz found: #{quiz.title}" if Rails.env.development?
+
     # Calculate quiz statistics
     answers = params[:answers] || {}
+    puts "Answers received: #{answers}" if Rails.env.development?
+    
     total_questions = quiz.questions.count
     questions_answered = answers.keys.count
     questions_correct = 0
     total_points = 0
 
+    puts "Total questions in quiz: #{total_questions}" if Rails.env.development?
+    puts "Questions answered: #{questions_answered}" if Rails.env.development?
+
     # Calculate correct answers
     quiz.questions.each do |question|
-      user_answer = answers[question.id.to_s]
+      puts "question ID: #{question.id}, external_id: #{question.external_id}" if Rails.env.development?
+      puts "answers hash: #{answers}" if Rails.env.development?
+
+      user_answer = answers[question.external_id.to_s]
+      puts "user_answer for question #{question.external_id}: #{user_answer}" if Rails.env.development?
+      puts "correct_answer: #{question.answer}" if Rails.env.development?
+      
       if user_answer && user_answer == question.answer
         questions_correct += 1
         total_points += 1 # You can adjust point values as needed
+        puts "Question #{question.id} answered correctly!" if Rails.env.development?
       end
     end
 
-    # Create or update UserQuizProgress
-    progress = UserQuizProgress.find_or_initialize_by(
+    # Create new UserQuizProgress record for each completion
+    puts "=== CREATING NEW USER QUIZ PROGRESS ===" if Rails.env.development?
+    puts "Creating new progress record for user #{@user.id} and quiz #{quiz.id}" if Rails.env.development?
+    
+    # Always create a new record for each quiz completion
+    progress = UserQuizProgress.new(
       user: @user,
-      quiz: quiz
-    )
-
-    progress.assign_attributes(
+      quiz: quiz,
       questions_answered: questions_answered,
       questions_correct: questions_correct,
       total_points: total_points,
       completed: true
     )
 
+    puts "New progress record: #{progress.inspect}" if Rails.env.development?
+
+    puts "About to save new progress with attributes:" if Rails.env.development?
+    puts "  questions_answered: #{questions_answered}" if Rails.env.development?
+    puts "  questions_correct: #{questions_correct}" if Rails.env.development?
+    puts "  total_points: #{total_points}" if Rails.env.development?
+    puts "  completed: true" if Rails.env.development?
+    
+    # Check current totals before save
+    current_completed = @user.user_quiz_progresses.where(completed: true).count
+    current_attempted = @user.user_quiz_progresses.count
+    puts "BEFORE SAVE - User totals: completed=#{current_completed}, attempted=#{current_attempted}" if Rails.env.development?
+
+    puts "=== Quiz Completion Debug ===" if Rails.env.development?
+    puts "User: #{@user.id}, Quiz: #{quiz_id}" if Rails.env.development?
+    puts "Total questions: #{total_questions}" if Rails.env.development?
+    puts "Questions answered: #{questions_answered}" if Rails.env.development?
+    puts "Questions correct: #{questions_correct}" if Rails.env.development?
+
     if progress.save
+      puts "✅ Progress saved successfully! ID: #{progress.id}" if Rails.env.development?
+      puts "Progress created_at: #{progress.created_at}" if Rails.env.development?
+      puts "Progress timezone (AEST): #{progress.created_at.in_time_zone('Australia/Sydney')}" if Rails.env.development?
+      puts "Current time (AEST): #{Time.current.in_time_zone('Australia/Sydney')}" if Rails.env.development?
+      puts "Application timezone: #{Time.zone.name}" if Rails.env.development?
+      
+      # Check totals after save
+      new_completed = @user.user_quiz_progresses.where(completed: true).count
+      new_attempted = @user.user_quiz_progresses.count
+      puts "AFTER SAVE - User totals: completed=#{new_completed}, attempted=#{new_attempted}" if Rails.env.development?
+      puts "Change in totals: completed +#{new_completed - current_completed}, attempted +#{new_attempted - current_attempted}" if Rails.env.development?
+      
+      # Check if today's records exist (AEST timezone)
+      today_start = Date.current.in_time_zone('Australia/Sydney').beginning_of_day
+      today_end = Date.current.in_time_zone('Australia/Sydney').end_of_day
+      puts "Today's date range (AEST): #{today_start} to #{today_end}" if Rails.env.development?
+      puts "Current time (AEST): #{Time.current.in_time_zone('Australia/Sydney')}" if Rails.env.development?
+      
+      today_completed = @user.user_quiz_progresses
+        .where(completed: true)
+        .where(created_at: today_start..today_end)
+        .count
+      today_attempted = @user.user_quiz_progresses
+        .where(created_at: today_start..today_end)
+        .count
+      puts "Today's totals (AEST): completed=#{today_completed}, attempted=#{today_attempted}" if Rails.env.development?
+      
       render json: {
         message: "Quiz completed successfully",
         progress: {
@@ -211,6 +282,10 @@ class DashboardController < ApplicationController
         }
       }, status: 200
     else
+      puts "❌ FAILED TO SAVE PROGRESS!" if Rails.env.development?
+      puts "Validation errors: #{progress.errors.full_messages}" if Rails.env.development?
+      puts "Progress object: #{progress.inspect}" if Rails.env.development?
+      
       render json: { 
         error: "Failed to save quiz completion", 
         details: progress.errors.full_messages 
