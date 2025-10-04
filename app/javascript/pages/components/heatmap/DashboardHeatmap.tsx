@@ -4,6 +4,8 @@ import './react-calendar-heatmap.css'
 import React, { useEffect, useMemo, useState } from 'react';
 
 import CalendarHeatmap from 'react-calendar-heatmap';
+import HeatmapLegend from './HeatmapLegend';
+import StudyTracker from '../study-tracker/StudyTracker';
 
 interface QuizActivity {
   date: string; // ISO date string (YYYY-MM-DD)
@@ -19,7 +21,7 @@ interface DashboardHeatmapProps {
     email: string;
     name?: string;
   } | null;
-  activityType?: 'quiz' | 'question' | 'combined';
+  activityType?: 'quiz' | 'study' | 'combined';
   startDate?: Date;
   endDate?: Date;
   onDateClick?: (value: any) => void;
@@ -41,6 +43,8 @@ const DashboardHeatmap: React.FC<DashboardHeatmapProps> = ({
     all_time_completed?: number;
     all_time_attempted?: number;
   } | null>(null);
+
+  const [activeTab, setActiveTab] = useState<'quiz' | 'study' | 'combined'>(activityType);
 
   const today = new Date();
   
@@ -101,7 +105,16 @@ const DashboardHeatmap: React.FC<DashboardHeatmapProps> = ({
       }
     };
 
+    const setViewBoxLayout = () => {
+      const svg = document.querySelector('.heatmap-container svg');
+      if (svg) {
+        // svg.setAttribute('viewBox', '10 7 552 90');
+        svg.setAttribute('viewBox', '10 7 400 90');
+      }
+    }
+
     fetchActivityData();
+    // setViewBoxLayout()
   }, [user]);
 
   // Transform the quiz activities data for the heatmap
@@ -122,7 +135,7 @@ const DashboardHeatmap: React.FC<DashboardHeatmapProps> = ({
       // svg.setAttribute('viewBox', '10 7 552 90');
       svg.setAttribute('viewBox', '10 7 400 90');
     }
-  }, [heatmapValues]); 
+  }, [quizActivities,]); 
 
   // Generate tooltip content
   const getTooltipDataAttrs = (value: any) => {
@@ -145,9 +158,9 @@ const DashboardHeatmap: React.FC<DashboardHeatmapProps> = ({
       if (value.attempted > value.count) {
         tooltip += `, ${value.attempted} attempted`;
       }
-    } else if (activityType === 'question') {
-      const questionText = value.count === 1 ? 'question' : 'questions';
-      tooltip = `${dateStr}: ${value.count} ${questionText} answered`;
+    } else if (activityType === 'study') {
+      const studyText = value.count === 1 ? 'study' : 'studies';
+      tooltip = `${dateStr}: ${value.count} ${studyText} completed`;
     } else {
       tooltip = `${dateStr}: ${value.count} total activities`;
       if (value.questions_answered > 0) {
@@ -166,8 +179,8 @@ const DashboardHeatmap: React.FC<DashboardHeatmapProps> = ({
     
     // Customize these thresholds based on activity type
     let thresholds;
-    if (activityType === 'question') {
-      thresholds = [1, 5, 10, 20, 30, 45, 55, 65, 75, 90]; // Questions answered
+    if (activityType === 'study') {
+      thresholds = [1, 5, 10, 20, 30, 45, 55, 65, 75, 90]; // Studies completed
     } else {
       thresholds = [1, 2, 3, 5, 6, 7, 9, 15, 18, 21]; // Quizzes completed
     }
@@ -196,7 +209,7 @@ const DashboardHeatmap: React.FC<DashboardHeatmapProps> = ({
       const dateStr = value.date?.toISOString().slice(0, 10);
       if (activityType === 'quiz') {
         alert(`${dateStr}: ${value.count} quiz(es) completed, ${value.attempted} attempted`);
-      } else if (activityType === 'question') {
+      } else if (activityType === 'study') {
         alert(`${dateStr}: ${value.count} question(s) answered`);
       } else {
         alert(`${dateStr}: ${value.count} total activities`);
@@ -247,6 +260,42 @@ const DashboardHeatmap: React.FC<DashboardHeatmapProps> = ({
 
   return (
     <div className="dashboard-heatmap">
+      
+     <div className="flex justify-start mb-2 mt-0">
+      <nav className="bg-gray-200 rounded-md px-1 py-1 w-[200px]">
+        <ul className="flex text-gray-600 gap-1 text-xs py-1.8">
+            <div className="relative flex w-[100%]">
+              {/* Slider background */}
+              <span
+                className="absolute cursor-pointer left-0 top-0 h-full w-1/3 bg-white rounded-md shadow transition-transform duration-300 ease-in-out"
+                style={{
+                transform: `translateX(${activeTab === 'quiz' ? '0%' : activeTab === 'study' ? '100%' : '200%'})`,
+                zIndex: 0,
+                }}
+              />
+              <li 
+                className="hover:bg-white cursor-pointer relative flex mx-auto z-10 w-1/3 rounded-md text-center justify-center align-middle items-center h-full" 
+                onClick={() => setActiveTab('quiz')}
+              >
+                Quiz
+              </li>
+              <li 
+                className="hover:bg-white cursor-pointer relative flex mx-auto z-10 w-1/3 rounded-md text-center justify-center align-middle items-center" 
+                onClick={() => setActiveTab('study')}
+              >
+                  Study
+              </li>
+              <li 
+                className="hover:bg-white cursor-pointer relative flex mx-auto z-10 w-1/3 rounded-md text-center justify-center align-middle items-center" 
+                onClick={() => setActiveTab('combined')}
+              >
+                All
+              </li>
+            </div>
+        </ul>
+      </nav>
+    </div>
+      
       <div className="mb-2">
         {/* <h3 className="text-md font-semibold text-gray-900 mb-2">
           Study Activity Heatmap
@@ -255,20 +304,17 @@ const DashboardHeatmap: React.FC<DashboardHeatmapProps> = ({
           {activityType === 'combined' && ' - All Activities'}
         </h3> */}
         <div className="flex justify-between items-center">
-          {/* <p className="text-sm text-gray-600">
-            Track your study patterns over time. Darker squares indicate more activity.
-          </p> */}
-          {summary && (
+          {summary && activeTab == 'quiz' && (
             <div className="text-sm text-gray-500">
               <div className="flex space-y-1">
-                <div>
-                  <span className="mr-4">Period Completed: {summary.total_completed}</span>
-                  <span>Period Attempted: {summary.total_attempted}</span>
+                <div className=''>
+                  <span className="mr-4 text-xs">Period Completed: {summary.total_completed}</span>
+                  <span className='text-xs'>Period Attempted: {summary.total_attempted}</span>
                 </div>
                 {summary.all_time_completed !== undefined && (
                   <div className=" text-gray-400">
-                    <span className="mr-4 ml-4">All-time Completed: {summary.all_time_completed}</span>
-                    <span>All-time Attempted: {summary.all_time_attempted}</span>
+                    <span className="mr-4 ml-4 text-xs">All-time Completed: {summary.all_time_completed}</span>
+                    <span className="text-xs">All-time Attempted: {summary.all_time_attempted}</span>
                   </div>
                 )}
               </div>
@@ -277,52 +323,29 @@ const DashboardHeatmap: React.FC<DashboardHeatmapProps> = ({
         </div>
       </div>
       
-      <div className="heatmap-container bg-white p-2 rounded-lg border-2 border-gray-200 flex">
-        <CalendarHeatmap
-          startDate={startDate || defaultStartDate}
-          endDate={endDate || defaultEndDate}
-          values={heatmapValues}
-          classForValue={getClassForValue}
-          tooltipDataAttrs={getTooltipDataAttrs}
-          showWeekdayLabels={true}
-          showMonthLabels={true}
-          onClick={handleClick}
-          gutterSize={1}
-          horizontal={true}
-        />
-        {/* <CalendarHeatmap
-          startDate={startDate || defaultStartDate}
-          endDate={endDate || defaultEndDate}
-          values={heatmapValues}
-          classForValue={getClassForValue}
-          tooltipDataAttrs={getTooltipDataAttrs}
-          showWeekdayLabels={true}
-          showMonthLabels={true}
-          onClick={handleClick}
-          gutterSize={2}
-          horizontal={true}
-        /> */}
-      </div>
-      
-      {/* Legend */}
-      <div className="mt-3 w-[25%] flex items-center justify-between text-xs text-gray-500 h-3">
-        <div className='mr-2'>Less</div>
-        <svg className="flex mx-auto items-center space-x-1 react-calendar-heatmap">
-          <g className="flex mx-auto items-center w-3 h-3 rounded-sm border-2 border-red-500">
-            <rect width="4" height="4" x="0" y="70" className="w-4 h-4 rounded-sm border color-github-1"></rect>
-            <rect width="4" height="4" x="20" y="70" className="w-4 h-4 rounded-sm border color-github-2"></rect>
-            <rect width="4" height="4" x="40" y="70" className="w-4 h-4 rounded-sm border color-github-3"></rect>
-            <rect width="4" height="4" x="60" y="70" className="w-4 h-4 rounded-sm border color-github-4"></rect>
-            <rect width="4" height="4" x="80" y="70" className="w-4 h-4 rounded-sm border color-github-5"></rect>
-            <rect width="4" height="4" x="100" y="70" className="w-4 h-4 rounded-sm border color-github-6"></rect>
-            <rect width="4" height="4" x="120" y="70" className="w-4 h-4 rounded-sm border color-github-7"></rect>
-            <rect width="4" height="4" x="140" y="70" className="w-4 h-4 rounded-sm border color-github-8"></rect>
-            <rect width="4" height="4" x="160" y="70" className="w-4 h-4 rounded-sm border color-github-9"></rect>
-            <rect width="4" height="4" x="180" y="70" className="w-4 h-4 rounded-sm border color-github-10"></rect>
-          </g>
-        </svg>
-        <div>More</div>
-      </div>
+      { activeTab == 'quiz' && 
+      <div className="heatmap-container bg-white p-2 rounded-lg border-2 border-gray-200 flex-col">
+        <>
+          <CalendarHeatmap
+            startDate={startDate || defaultStartDate}
+            endDate={endDate || defaultEndDate}
+            values={heatmapValues}
+            classForValue={getClassForValue}
+            tooltipDataAttrs={getTooltipDataAttrs}
+            showWeekdayLabels={true}
+            showMonthLabels={true}
+            onClick={handleClick}
+            gutterSize={1}
+            horizontal={true}
+          />
+          <div className='w-[25%]'>
+            {/* <p className='text-sm font-thin'>Legend:</p> */}
+            {/* Legend */}
+            <HeatmapLegend />
+          </div>
+          </>
+      </div>}
+      { activeTab == 'study' &&  <StudyTracker user={user} /> }
     </div>
   );
 };

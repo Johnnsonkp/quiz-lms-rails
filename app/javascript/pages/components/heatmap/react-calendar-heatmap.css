@@ -144,69 +144,66 @@
   fill: #EB726B;
 }
 
-/* .react-calendar-heatmap .color-gitlab-0 {
-  fill: #1a1a1a;
-}
-.react-calendar-heatmap .color-gitlab-1 {
-  fill: #00ffff;
-}
-.react-calendar-heatmap .color-gitlab-2 {
-  fill: #00ccff;
-}
-.react-calendar-heatmap .color-gitlab-3 {
-  fill: #0099ff;
-}
-.react-calendar-heatmap .color-gitlab-4 {
-  fill: #0066ff;
-} */
-
-
-
-/* previous colour scheme */
-/* .react-calendar-heatmap .color-empty {
-  fill: #eeeeee;
+/* toggle slide button */
+/* Toggle Button Style */
+.toggle-button {
+  appearance: none;
+  position: absolute;
+  background-color: rgba(0, 0, 0, 0);
+  border: 1px solid var(--color-outline);
+  top: 0;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  transition: background-color 0.2s ease-in-out;
+  user-select: none;
+  cursor: pointer;
 }
 
-.react-calendar-heatmap .color-filled {
-  fill: #8cc665;
-} */
+.toggle-button:hover {
+  background-color: color-mix(
+    in srgb,
+    rgba(0, 0, 0, 0) 90%,
+    var(--color-secondary)
+  );
+}
 
-/*
- * Github color scale
- */
+.toggle-button:active {
+  background-color: color-mix(
+    in srgb,
+    rgba(0, 0, 0, 0) 80%,
+    var(--color-secondary)
+  );
+}
 
-/* .react-calendar-heatmap .color-github-0 {
-  fill: #eeeeee;
+.toggle-button:checked {
+  background-color: color-mix(
+    in srgb,
+    rgba(0, 0, 0, 0) 80%,
+    var(--color-secondary)
+  );
 }
-.react-calendar-heatmap .color-github-1 {
-  fill: #d6e685;
-}
-.react-calendar-heatmap .color-github-2 {
-  fill: #8cc665;
-}
-.react-calendar-heatmap .color-github-3 {
-  fill: #44a340;
-}
-.react-calendar-heatmap .color-github-4 {
-  fill: #1e6823;
-} */
 
-/*
- * Gitlab color scale
- */
+/* Toggle Button Label Style */
+.toggle-button-label {
+  position: relative;
+  font-size: 0.875rem; /* text-sm */
+  padding: 0.5rem 1.5rem; /* px-6 py-2 */
+  display: flex;
+  flex-direction: row;
+  gap: 0.5rem; /* gap-2 */
+  text-align: center;
+  justify-content: center;
+  align-items: center;
+  color: var(--color-primary);
+}
 
-/* .react-calendar-heatmap .color-gitlab-0 {
-  fill: #ededed;
+/* Toggle Button Indicator Style (e.g. checkmarks) */
+.toggle-button-indicator {
+  display: none !important;
+  font-size: 0.875rem !important; /* text-sm */
 }
-.react-calendar-heatmap .color-gitlab-1 {
-  fill: #acd5f2;
+
+.toggle-button:checked ~ .toggle-button-indicator {
+  display: block !important;
 }
-.react-calendar-heatmap .color-gitlab-2 {
-  fill: #7fa8d1;
-}
-.react-calendar-heatmap .color-gitlab-3 {
-  fill: #49729b;
-}
-.react-calendar-heatmap .color-gitlab-4 {
-  fill: #254e77;
-} */

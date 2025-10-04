@@ -85,6 +85,75 @@ class DashboardController < ApplicationController
     render json: { error: "Invalid date format" }, status: 400
   end
 
+  # Study Hours endpoints moved here for better autoloading
+  def create_study_hours
+    if @user.nil?
+      render json: { error: "User not authenticated" }, status: 401
+      return
+    end
+
+    study_hour_params = params.require(:study_hour).permit(:date, :hours)
+    
+    begin
+      # Find existing record or create new one
+      study_hour = @user.study_hours.find_or_initialize_by(date: study_hour_params[:date])
+      
+      if study_hour.persisted?
+        # Update existing record
+        study_hour.hours = study_hour_params[:hours]
+        action = "updated"
+      else
+        # Create new record
+        study_hour.hours = study_hour_params[:hours]
+        action = "created"
+      end
+
+      if study_hour.save
+        render json: {
+          message: "Study hours #{action} successfully",
+          study_hour: {
+            id: study_hour.id,
+            date: study_hour.date,
+            hours: study_hour.hours.to_f,
+            action: action
+          }
+        }, status: 200
+      else
+        render json: {
+          error: "Failed to save study hours",
+          details: study_hour.errors.full_messages
+        }, status: 422
+      end
+    rescue => e
+      Rails.logger.error "Error saving study hours: #{e.message}"
+      render json: { error: "Failed to save study hours: #{e.message}" }, status: 500
+    end
+  end
+
+  def study_hours_data
+    puts "=== STUDY HOURS DATA ENDPOINT CALLED ===" if Rails.env.development?
+    
+    if @user.nil?
+      render json: { error: "User not authenticated" }, status: 401
+      return
+    end
+
+    begin
+      start_date = params[:start_date] ? Date.parse(params[:start_date]) : 6.months.ago.to_date
+      end_date = params[:end_date] ? Date.parse(params[:end_date]) : Date.current
+
+      activity_data = StudyHour.daily_study_activity(@user, start_date, end_date)
+      summary = StudyHour.study_summary(@user, start_date, end_date)
+
+      render json: {
+        activity_data: activity_data,
+        summary: summary
+      }
+    rescue => e
+      Rails.logger.error "Error fetching study hours data: #{e.message}"
+      render json: { error: "Failed to load study hours data" }, status: 500
+    end
+  end
 
   def update 
     if params[:quiz_ids].present?
@@ -781,6 +850,11 @@ class DashboardController < ApplicationController
     end
     
     merged_data.values.sort_by { |data| data[:date] }
+  end
+
+  # Test method to verify controller loading
+  def test_method
+    render json: { message: "Controller is working" }
   end
 
 end

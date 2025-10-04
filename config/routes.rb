@@ -26,6 +26,9 @@ Rails.application.routes.draw do
   # dashboard routes
   get 'dashboard', to: 'dashboard#index'
   get 'dashboard/study_activity', to: 'dashboard#study_activity'
+  get 'dashboard/study_hours_data', to: 'dashboard#study_hours_data'
+  get 'dashboard/test_method', to: 'dashboard#test_method'
+  post 'dashboard/study_hours', to: 'dashboard#create_study_hours'
   get 'dashboard/:topic/get', to: 'dashboard#get_topic_quizzes'
   get 'dashboard/:topic', to: 'dashboard#page_refresh'
   get 'dashboard/:topic/:subject/:quiz_ids', to: 'dashboard#show'

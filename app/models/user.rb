@@ -19,6 +19,9 @@ class User < ApplicationRecord
   has_many :user_quiz_progresses, dependent: :destroy
   has_many :user_question_attempts, dependent: :destroy
 
+  # Study hours association
+  has_many :study_hours, dependent: :destroy
+
   # Notes associations
   has_many :notes, dependent: :destroy
 
