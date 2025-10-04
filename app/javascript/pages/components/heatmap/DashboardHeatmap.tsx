@@ -4,7 +4,6 @@ import './react-calendar-heatmap.css'
 import React, { useEffect, useMemo, useState } from 'react';
 
 import CalendarHeatmap from 'react-calendar-heatmap';
-import HeatmapLegend from './HeatmapLegend';
 import StudyTracker from '../study-tracker/StudyTracker';
 
 interface QuizActivity {
@@ -104,17 +103,7 @@ const DashboardHeatmap: React.FC<DashboardHeatmapProps> = ({
         setLoading(false);
       }
     };
-
-    const setViewBoxLayout = () => {
-      const svg = document.querySelector('.heatmap-container svg');
-      if (svg) {
-        // svg.setAttribute('viewBox', '10 7 552 90');
-        svg.setAttribute('viewBox', '10 7 400 90');
-      }
-    }
-
     fetchActivityData();
-    // setViewBoxLayout()
   }, [user]);
 
   // Transform the quiz activities data for the heatmap
@@ -132,10 +121,9 @@ const DashboardHeatmap: React.FC<DashboardHeatmapProps> = ({
   useEffect(() => {
     const svg = document.querySelector('.heatmap-container svg');
     if (svg) {
-      // svg.setAttribute('viewBox', '10 7 552 90');
       svg.setAttribute('viewBox', '10 7 400 90');
     }
-  }, [quizActivities,]); 
+  }, [activeTab, quizActivities]);
 
   // Generate tooltip content
   const getTooltipDataAttrs = (value: any) => {
@@ -258,16 +246,14 @@ const DashboardHeatmap: React.FC<DashboardHeatmapProps> = ({
     );
   }
 
-  return (
-    <div className="dashboard-heatmap">
-      
-     <div className="flex justify-start mb-2 mt-0">
+  const HeatMapSlider = () => (
+    <div className="flex justify-start mb-2 mt-0">
       <nav className="bg-gray-200 rounded-md px-1 py-1 w-[200px]">
-        <ul className="flex text-gray-600 gap-1 text-xs py-1.8">
-            <div className="relative flex w-[100%]">
+        <ul className="flex text-gray-600 gap-1 text-xs py-1.8 cursor-pointer">
+            <div className="relative flex w-[100%] cursor-pointer h-[100%]">
               {/* Slider background */}
               <span
-                className="absolute cursor-pointer left-0 top-0 h-full w-1/3 bg-white rounded-md shadow transition-transform duration-300 ease-in-out"
+                className="absolute cursor-pointer left-0 top-0 h-full w-1/3 bg-white rounded-md shadow transition-transform duration-300 ease-in-out font-semibold"
                 style={{
                 transform: `translateX(${activeTab === 'quiz' ? '0%' : activeTab === 'study' ? '100%' : '200%'})`,
                 zIndex: 0,
@@ -295,17 +281,12 @@ const DashboardHeatmap: React.FC<DashboardHeatmapProps> = ({
         </ul>
       </nav>
     </div>
-      
-      <div className="mb-2">
-        {/* <h3 className="text-md font-semibold text-gray-900 mb-2">
-          Study Activity Heatmap
-          {activityType === 'quiz' && ' - Quiz Completions'}
-          {activityType === 'question' && ' - Questions Answered'}
-          {activityType === 'combined' && ' - All Activities'}
-        </h3> */}
-        <div className="flex justify-between items-center">
+  )
+
+  const HeatmapStats = () => {
+    return  <div className="flex justify-between items-center">
           {summary && activeTab == 'quiz' && (
-            <div className="text-sm text-gray-500">
+            <div className="text-sm text-gray-500 pb-3 pt-1">
               <div className="flex space-y-1">
                 <div className=''>
                   <span className="mr-4 text-xs">Period Completed: {summary.total_completed}</span>
@@ -321,11 +302,48 @@ const DashboardHeatmap: React.FC<DashboardHeatmapProps> = ({
             </div>
           )}
         </div>
-      </div>
-      
-      { activeTab == 'quiz' && 
-      <div className="heatmap-container bg-white p-2 rounded-lg border-2 border-gray-200 flex-col">
-        <>
+  }
+
+  return (
+    <div className="dashboard-heatmap">
+      <div className="heatmap-container bg-white p-2 px-3 rounded-lg border-2 border-gray-200 flex-col">
+        {/* <HeatMapSlider /> */}
+        <div className="flex justify-start mb-2 mt-0">
+          <nav className="bg-gray-200 rounded-md px-1 py-1 w-[200px] shadow-sm">
+            <ul className="flex text-gray-600 gap-1 text-xs py-1.8 cursor-pointer">
+              <div className="relative flex w-[100%] cursor-pointer h-[100%]">
+                {/* Slider background */}
+                <span
+                  className="absolute cursor-pointer left-0 top-0 py-1 h-full w-1/3 bg-white rounded-md shadow transition-transform duration-300 ease-in-out !font-bold"
+                  style={{
+                  transform: `translateX(${activeTab === 'quiz' ? '0%' : activeTab === 'study' ? '100%' : '200%'})`,
+                  zIndex: 0,
+                  }}
+                />
+                <li 
+                  className="hover:bg-white !cursor-pointer py-1 relative flex mx-auto z-10 w-1/3 rounded-md text-center justify-center align-middle items-center h-full" 
+                  onClick={() => setActiveTab('quiz')}
+                >
+                  Quiz
+                </li>
+                <li 
+                  className="hover:bg-white cursor-pointer py-1 relative flex mx-auto z-10 w-1/3 rounded-md text-center justify-center align-middle items-center" 
+                  onClick={() => setActiveTab('study')}
+                >
+                    Study
+                </li>
+                <li 
+                  className="hover:bg-white cursor-pointer py-1 relative flex mx-auto z-10 w-1/3 rounded-md text-center justify-center align-middle items-center" 
+                  onClick={() => setActiveTab('combined')}
+                >
+                  All
+                </li>
+              </div>
+            </ul>
+          </nav>
+        </div>
+        <HeatmapStats />
+        { activeTab == 'quiz' && 
           <CalendarHeatmap
             startDate={startDate || defaultStartDate}
             endDate={endDate || defaultEndDate}
@@ -337,15 +355,10 @@ const DashboardHeatmap: React.FC<DashboardHeatmapProps> = ({
             onClick={handleClick}
             gutterSize={1}
             horizontal={true}
-          />
-          <div className='w-[25%]'>
-            {/* <p className='text-sm font-thin'>Legend:</p> */}
-            {/* Legend */}
-            <HeatmapLegend />
-          </div>
-          </>
-      </div>}
-      { activeTab == 'study' &&  <StudyTracker user={user} /> }
+          />}
+
+          { activeTab == 'study' &&  <StudyTracker user={user} /> }
+      </div>
     </div>
   );
 };

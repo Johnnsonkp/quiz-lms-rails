@@ -4,7 +4,6 @@ import '../heatmap/react-calendar-heatmap.css';
 import React, { useEffect, useMemo, useState } from 'react';
 
 import CalendarHeatmap from 'react-calendar-heatmap';
-import HeatmapLegend from '../heatmap/HeatmapLegend';
 
 interface StudyActivity {
   date: string; // ISO date string (YYYY-MM-DD)
@@ -108,11 +107,11 @@ const StudyHoursHeatmap: React.FC<StudyHoursHeatmapProps> = ({
 
   // Modify viewBox after component mounts
   useEffect(() => {
-    const svg = document.querySelector('.study-heatmap-container svg');
+    const svg = document.querySelector('.heatmap-container svg');
     if (svg) {
-      svg.setAttribute('viewBox', '10 7 300 90');
+      svg.setAttribute('viewBox', '10 7 350 90');
     }
-  }, [heatmapValues]); 
+  }, [heatmapValues, refreshTrigger]); 
 
   // Generate tooltip content
   const getTooltipDataAttrs = (value: any) => {
@@ -209,29 +208,24 @@ const StudyHoursHeatmap: React.FC<StudyHoursHeatmapProps> = ({
     );
   }
 
-  return (
-    <div className="study-hours-heatmap">
-      <div className="mb-2">
-        {/* <h3 className="text-lg font-semibold text-gray-900 mb-2">
-          Study Hours Tracker
-        </h3> */}
-        <div className="flex justify-between items-center">
-          {summary && (
-            <div className="text-sm text-gray-500">
-              <div className="flex space-y-1">
-                <div className=''>
-                  <span className="mr-4 text-xs">Total Hours: {summary.total_hours}</span>
-                  <span className="mr-4 text-xs">Days Studied: {summary.days_studied}</span>
-                  <span className='text-xs'>Avg Daily: {summary.average_daily_hours?.toFixed(1)}h</span>
-                  {/* <span className='text-xs'>Avg Daily: {summary.average_daily_hours}h</span> */}
-                </div>
+  const HeatMapStats = () => {
+    return <div className="flex justify-between items-center pb-3 pt-1">
+        {summary && (
+          <div className="text-sm text-gray-500">
+            <div className="flex space-y-1">
+              <div className=''>
+                <span className="mr-4 text-xs">Total Hours: {summary.total_hours}</span>
+                <span className="mr-4 text-xs">Days Studied: {summary.days_studied}</span>
+                <span className='text-xs'>Avg Daily: {summary.average_daily_hours?.toFixed(1)}h</span>
               </div>
             </div>
-          )}
-        </div>
+          </div>)}
       </div>
-      
-      <div className="study-heatmap-container bg-white p-2 rounded-lg border-2 border-gray-200 flex">
+  }
+
+  return (
+    <div className="study-hours-heatmap">
+        <HeatMapStats />
         <CalendarHeatmap
           startDate={startDate || defaultStartDate}
           endDate={endDate || defaultEndDate}
@@ -244,12 +238,6 @@ const StudyHoursHeatmap: React.FC<StudyHoursHeatmapProps> = ({
           gutterSize={1}
           horizontal={true}
         />
-
-        {/* <div className='w-[25%]'>
-          <p className='text-sm font-thin'>Legend:</p>
-          <HeatmapLegend />
-        </div> */}
-      </div>
     </div>
   );
 };

@@ -54,11 +54,6 @@ export const DashboardHome = memo(({ user, dashboard_stats }: DashboardHomeProps
         activityType="quiz"
       />
 
-      {/* <StudyHoursHeatmap 
-        user={user}
-      /> */}
-      
-
     </section>
   );
 });

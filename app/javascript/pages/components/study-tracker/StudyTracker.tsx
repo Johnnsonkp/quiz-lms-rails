@@ -64,14 +64,14 @@ const StudyTracker: React.FC<StudyTrackerProps> = ({ user }) => {
   return (
     <div className="study-tracker space-y-6 flex justify-between w-full align-middle items-center">
       
-      <div className='flex-[0.8] mr-2'>
+      <div className='flex-[0.85] mr-2'>
         {/* Study Hours Heatmap */}
         <StudyHoursHeatmap 
           user={user}
           refreshTrigger={refreshTrigger}
         />
       </div>
-      <div className='flex-[0.2]'>
+      <div className='flex-[0.15]'>
         {/* Study Hours Form */}
         <StudyHoursForm 
           onSubmit={handleStudyHoursSubmit}

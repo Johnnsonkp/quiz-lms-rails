@@ -36,14 +36,14 @@ const StudyHoursForm: React.FC<StudyHoursFormProps> = ({ onSubmit, loading = fal
   };
 
   return (
-    <div className="bg-white p-4 rounded-lg border border-gray-200 shadow-sm ">
-      <h3 className="text-sm font-semibold text-gray-900 mb-2">Log Study Hours</h3>
+    <div className="bg-white p-4 rounded-lg border border-gray-200 shadow-xs">
+      <h3 className="text-xs font-semibold text-gray-900 mb-2">Log Study Hours</h3>
       
-      <form onSubmit={handleSubmit} className="space-y-4">
+      <form onSubmit={handleSubmit} className="space-y-2">
         <div className="grid grid-cols-1 md:grid-cols-1 gap-4">
           {/* Date Input */}
           <div>
-            <label htmlFor="study-date" className="block text-sm font-sm text-gray-700 mb-1">
+            <label htmlFor="study-date" className="block text-sm font-xs text-gray-700 mb-1">
               Date
             </label>
             <input
@@ -52,14 +52,14 @@ const StudyHoursForm: React.FC<StudyHoursFormProps> = ({ onSubmit, loading = fal
               value={selectedDate}
               onChange={(e) => setSelectedDate(e.target.value)}
               max={new Date().toISOString().split('T')[0]} // Can't log future dates
-              className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              className="text-xs w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
               required
             />
           </div>
 
           {/* Hours Input */}
           <div>
-            <label htmlFor="study-hours" className="block text-sm font-sm text-gray-700 mb-1">
+            <label htmlFor="study-hours" className="block text-sm font-xs text-gray-700 mb-1">
               Study Hours
             </label>
             <input
@@ -71,7 +71,7 @@ const StudyHoursForm: React.FC<StudyHoursFormProps> = ({ onSubmit, loading = fal
               max="24"
               step="0.25"
               placeholder="e.g., 2.5"
-              className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              className="text-xs w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
               required
             />
             {/* <p className="text-xs text-gray-500 mt-1">Enter hours in increments of 0.25 (15 minutes)</p> */}
@@ -84,7 +84,7 @@ const StudyHoursForm: React.FC<StudyHoursFormProps> = ({ onSubmit, loading = fal
             type="submit"
             disabled={isSubmitting || loading}
             className={`
-              px-4 py-2 text-sm font-medium rounded-md transition-all duration-200 ease-in-out
+              cursor-pointer px-4 py-2 text-xs font-medium rounded-md transition-all duration-200 ease-in-out
               ${isSubmitting || loading
                 ? 'bg-gray-300 text-gray-500 cursor-not-allowed'
                 : 'bg-blue-600 text-white hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transform active:scale-95'
