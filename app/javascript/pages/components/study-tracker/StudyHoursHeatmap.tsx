@@ -5,7 +5,7 @@ import React, { useEffect, useMemo, useState } from 'react';
 
 import CalendarHeatmap from 'react-calendar-heatmap';
 import DashboardStatus from '../heatmap/DashboardStatus';
-import {fetchHeatmapActivityData} from '../../../services/heatmapServices/fetchAvtivityData';
+import {fetchStudyHeatmapActivityData} from '../../../services/heatmapServices/fetchAvtivityData';
 
 interface StudyActivity {
   date: string; // ISO date string (YYYY-MM-DD)
@@ -72,19 +72,15 @@ const StudyHoursHeatmap: React.FC<StudyHoursHeatmapProps> = ({
       return;
     }
     const svg = document.querySelector('.heatmap-container svg');
-    if (svg) {
-      svg.setAttribute('viewBox', '10 7 400 90');
-    }
-    if (studyActivities?.length > 0) {
-      return;
-    }
+    if (svg) { svg.setAttribute('viewBox', '10 7 400 90');}
+    if (studyActivities?.length > 0) return;
 
     const params = new URLSearchParams({
       start_date: (startDate || defaultStartDate).toISOString().split('T')[0],
       end_date: (endDate || defaultEndDate).toISOString().split('T')[0]
     });
 
-    const data = await fetchHeatmapActivityData({params});
+    const data = await fetchStudyHeatmapActivityData({params});
     if(!data) return;
     
     setStudyActivities(data.activity_data || []);
