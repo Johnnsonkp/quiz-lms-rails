@@ -4,10 +4,13 @@ import '../heatmap/react-calendar-heatmap.css';
 import React, { useEffect, useMemo, useState } from 'react';
 
 import CalendarHeatmap from 'react-calendar-heatmap';
+import DashboardStatus from '../heatmap/DashboardStatus';
+import {fetchHeatmapActivityData} from '../../../services/heatmapServices/fetchAvtivityData';
 
 interface StudyActivity {
   date: string; // ISO date string (YYYY-MM-DD)
   hours: number; // Number of study hours on this date
+  count: number; // Optional count field for compatibility
 }
 
 interface StudyHoursHeatmapProps {
@@ -53,64 +56,47 @@ const StudyHoursHeatmap: React.FC<StudyHoursHeatmapProps> = ({
     return date;
   }, [today]);
 
-  // Fetch study hours data from API
-  useEffect(() => {
-    if (!user) {
-      setLoading(false);
-      return;
-    }
-
-    const fetchStudyData = async () => {
-      try {
-        setLoading(true);
-        const params = new URLSearchParams({
-          start_date: (startDate || defaultStartDate).toISOString().split('T')[0],
-          end_date: (endDate || defaultEndDate).toISOString().split('T')[0]
-        });
-
-        const response = await fetch(`/dashboard/study_hours_data?${params}`, {
-          headers: {
-            'Content-Type': 'application/json',
-            'X-CSRF-Token': document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '',
-          }
-        });
-
-        if (!response.ok) {
-          throw new Error(`HTTP error! status: ${response.status}`);
-        }
-
-        const data = await response.json();
-        console.log('Fetched study hours data:', data);
-        setStudyActivities(data.activity_data || []);
-        setSummary(data.summary || null);
-        setError(null);
-      } catch (error) {
-        console.error('Error fetching study hours data:', error);
-        setError('Failed to load study hours data');
-        setStudyActivities([]);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchStudyData();
-  }, [user, startDate, endDate, refreshTrigger]);
-
   // Transform the study activities data for the heatmap
   const heatmapValues = useMemo(() => {
     return studyActivities.map(activity => ({
       date: new Date(activity.date),
-      count: activity.hours, // Using 'count' for compatibility with heatmap component
-      hours: activity.hours
+      count: activity.hours || activity?.count, 
+      hours: activity.hours || activity?.count
     }));
   }, [studyActivities]);
 
-  // Modify viewBox after component mounts
-  useEffect(() => {
+
+  const loadHeatmapData = async () => {
+    if (!user) {
+      setLoading(false);
+      return;
+    }
     const svg = document.querySelector('.heatmap-container svg');
     if (svg) {
-      svg.setAttribute('viewBox', '10 7 350 90');
+      svg.setAttribute('viewBox', '10 7 400 90');
     }
+    if (studyActivities?.length > 0) {
+      return;
+    }
+
+    const params = new URLSearchParams({
+      start_date: (startDate || defaultStartDate).toISOString().split('T')[0],
+      end_date: (endDate || defaultEndDate).toISOString().split('T')[0]
+    });
+
+    const data = await fetchHeatmapActivityData({params});
+    if(!data) return;
+    
+    setStudyActivities(data.activity_data || []);
+    setSummary(data.summary || null);
+    setError(null);
+    setLoading(false);
+    console.log('Fetched activity data:', data);
+  };
+
+  // Modify viewBox after component mounts
+  useEffect(() => {
+    loadHeatmapData();
   }, [heatmapValues, refreshTrigger]); 
 
   // Generate tooltip content
@@ -137,7 +123,6 @@ const StudyHoursHeatmap: React.FC<StudyHoursHeatmapProps> = ({
     if (!value || value.hours === 0) {
       return 'color-empty';
     }
-    
     // Study hours thresholds (adjust based on your preferences)
     const thresholds = [0.5, 1, 2, 3, 4, 5, 6, 7, 8, 10]; // Hours studied
     
@@ -167,46 +152,10 @@ const StudyHoursHeatmap: React.FC<StudyHoursHeatmapProps> = ({
     }
   };
 
-  if (!user) {
-    return (
-      <div className="study-hours-heatmap">
-        <div className="mb-4">
-          <h3 className="text-lg font-semibold text-gray-900 mb-2">
-            Study Hours Tracker
-          </h3>
-          <p className="text-sm text-gray-600">
-            Please log in to track your study hours.
-          </p>
-        </div>
-      </div>
-    );
-  }
-
-  if (loading) {
-    return (
-      <div className="study-hours-heatmap">
-        <div className="mb-4">
-          <h3 className="text-lg font-semibold text-gray-900 mb-2">
-            Study Hours Tracker
-          </h3>
-          <p className="text-sm text-gray-600">Loading your study hours...</p>
-        </div>
-      </div>
-    );
-  }
-
-  if (error) {
-    return (
-      <div className="study-hours-heatmap">
-        <div className="mb-4">
-          <h3 className="text-lg font-semibold text-gray-900 mb-2">
-            Study Hours Tracker
-          </h3>
-          <p className="text-sm text-red-600">{error}</p>
-        </div>
-      </div>
-    );
-  }
+  <DashboardStatus 
+    user={user} 
+    loading={loading} 
+    error={error} />
 
   const HeatMapStats = () => {
     return <div className="flex justify-between items-center pb-3 pt-1">
@@ -225,19 +174,19 @@ const StudyHoursHeatmap: React.FC<StudyHoursHeatmapProps> = ({
 
   return (
     <div className="study-hours-heatmap">
-        <HeatMapStats />
-        <CalendarHeatmap
-          startDate={startDate || defaultStartDate}
-          endDate={endDate || defaultEndDate}
-          values={heatmapValues}
-          classForValue={getClassForValue}
-          tooltipDataAttrs={getTooltipDataAttrs}
-          showWeekdayLabels={true}
-          showMonthLabels={true}
-          onClick={handleClick}
-          gutterSize={1}
-          horizontal={true}
-        />
+      <HeatMapStats />
+      <CalendarHeatmap
+        startDate={startDate || defaultStartDate}
+        endDate={endDate || defaultEndDate}
+        values={heatmapValues}
+        classForValue={getClassForValue}
+        tooltipDataAttrs={getTooltipDataAttrs}
+        showWeekdayLabels={true}
+        showMonthLabels={true}
+        onClick={handleClick}
+        gutterSize={1}
+        horizontal={true}
+      />
     </div>
   );
 };

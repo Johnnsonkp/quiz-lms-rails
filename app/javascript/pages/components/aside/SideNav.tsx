@@ -3,10 +3,21 @@ import { useEffect, useState } from 'react';
 import { Category } from '../../../types/dashboard';
 import CategoryIcons from '../icons/CategoryIcons';
 import Divider from '../divider/Divider';
+// import SideNavFixed from '../ui/SideNavFixed';
 import SideNavUserBadge from '../ui/SideNavUserBadge';
 import quizIcon from '../../../assets/quiz-icon.png';
 
-function SideNav({categories, handleTopicClick, activeSection, showSidebar, quizData, selectedSubject, setShowSidebar, user}: 
+function SideNav(
+  {
+    categories, 
+    handleTopicClick, 
+    activeSection, 
+    showSidebar, 
+    quizData, 
+    selectedSubject, 
+    setShowSidebar, 
+    user
+  }: 
   {
     categories: Category[];
     handleTopicClick: (topic: string) => void;
@@ -55,6 +66,8 @@ function SideNav({categories, handleTopicClick, activeSection, showSidebar, quiz
         md:translate-x-0 overflow-x-hidden
       `}
     >
+      {/* <SideNavFixed /> */}
+
       {/* Header with Logo and Collapse Button */}
       <div className="flex justify-between items-center h-16 px-4 border-b border-gray-200">
         <a href="/" className="flex items-center space-x-2 min-w-0">
@@ -266,13 +279,6 @@ function SideNav({categories, handleTopicClick, activeSection, showSidebar, quiz
                           <div className="absolute left-0 top-1/2 transform -translate-y-1/2 -translate-x-1 
                                         border-4 border-transparent border-r-gray-900"></div>
                         </div>
-
-                        // <div className="flex items-center absolute left-2 z-60">
-                        //   <div className="h-4 w-4 border-y-8 border-l-0 border-r-8 border-solid border-gray-100 border-y-transparent z-60"></div>
-                        //   <div className="flex h-10 items-center rounded-md bg-gray-100 px-4 font-medium z-60">
-                        //       40K stars on GitHub
-                        //   </div>
-                        // </div>
                       )}
                     </div>
                   </a>

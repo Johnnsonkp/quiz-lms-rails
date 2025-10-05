@@ -6,11 +6,9 @@ import Divider from '../components/divider/Divider';
 import NoAvailableTopics from '../dashboard/NoAvailableTopics';
 import QuizListPage from '../dashboard/QuizListPage';
 import { QuizPreview } from '../../types/dashboard';
-import { SideButton } from '../components/buttons/SideButton';
 import SideNav from "../components/aside/SideNav";
 import SimpleLoadScreen from '../components/loading/SimpleLoadScreen';
 import SingleQuestionComponent from '../components/cards/SingleQuestionComp';
-import StudyHoursHeatmap from '../components/study-tracker/StudyHoursHeatmap';
 import SubjectCards from '../components/cards/SubjectCard';
 import TableOfContents from '../components/cards/TableOfContents';
 import { getSelectedTopic } from '../../api/quiz';
@@ -203,7 +201,7 @@ function DashboardLayout({ children, user, categories, dashboard_stats, url_para
   };
 
   return (
-    <div className="flex flex-col md:flex-row min-h-screen w-full overflow-y-hidden bg-[#F9FAFB]">
+    <div className="flex flex-col md:flex-row min-h-screen w-full overflow-y-hidden bg-[#fff]">
       <div className={`${showSidebar ? 'flex-[0.23]' : 'flex-[0.07]'} relative`}>
         <SideNav 
           categories={finalCategories}
@@ -219,7 +217,7 @@ function DashboardLayout({ children, user, categories, dashboard_stats, url_para
 
       <main 
         style={{ opacity: loading || loadingQuizPreview ? 0 : 1 }}
-        className={`flex-[0.95] p-4 !pt-3 !mt-0 md:p-6 overflow-y-auto w-[100%] bg-[#F9FAFB] transition-opacity duration-300 ${showSidebar && 'translate-x-0'}`}
+        className={`flex-[0.95] p-4 !pt-3 !mt-0 md:p-6 overflow-y-auto w-[100%] transition-opacity duration-300 ${showSidebar && 'translate-x-0'}`}
       >
         {renderContent()}
       </main>

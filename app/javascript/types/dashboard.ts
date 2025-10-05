@@ -122,3 +122,23 @@ export interface EditQuizQuestionFormProps {
   onClose: () => void;
   onSuccess?: (updatedQuestion: EditableQuestion) => void;
 }
+
+export interface DashboardHeatmapProps {
+  user?: {
+    id: number;
+    email: string;
+    name?: string;
+  } | null;
+  activityType?: 'quiz' | 'study' | 'combined';
+  startDate?: Date;
+  endDate?: Date;
+  onDateClick?: (value: any) => void;
+}
+
+export interface QuizActivity {
+  date: string; 
+  count: number; 
+  attempted?: number; 
+  questions_answered?: number; 
+  activity_type?: string; 
+}

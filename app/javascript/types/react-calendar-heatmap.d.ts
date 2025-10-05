@@ -3,7 +3,7 @@ declare module 'react-calendar-heatmap' {
 
   export interface CalendarHeatmapValue {
     date: Date | string;
-    count: number;
+    count: number | null;
     [key: string]: any;
   }
 
