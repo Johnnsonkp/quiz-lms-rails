@@ -95,8 +95,14 @@ class DashboardController < ApplicationController
     study_hour_params = params.require(:study_hour).permit(:date, :hours)
     
     begin
-      # Find existing record or create new one
-      study_hour = @user.study_hours.find_or_initialize_by(date: study_hour_params[:date])
+      # Convert date to AEST timezone for consistency
+      aest_timezone = 'Australia/Sydney'
+      parsed_date = Date.parse(study_hour_params[:date]).in_time_zone(aest_timezone).to_date
+      
+      puts "Creating/updating study hours for AEST date: #{parsed_date}" if Rails.env.development?
+      
+      # Find existing record or create new one using AEST date
+      study_hour = @user.study_hours.find_or_initialize_by(date: parsed_date)
       
       if study_hour.persisted?
         # Update existing record
@@ -139,8 +145,23 @@ class DashboardController < ApplicationController
     end
 
     begin
-      start_date = params[:start_date] ? Date.parse(params[:start_date]) : 6.months.ago.to_date
-      end_date = params[:end_date] ? Date.parse(params[:end_date]) : Date.current
+      # Convert dates to AEST timezone
+      aest_timezone = 'Australia/Sydney'
+      
+      # Parse dates and convert to AEST
+      start_date = if params[:start_date]
+        Date.parse(params[:start_date]).in_time_zone(aest_timezone).to_date
+      else
+        6.months.ago.in_time_zone(aest_timezone).to_date
+      end
+      
+      end_date = if params[:end_date]
+        Date.parse(params[:end_date]).in_time_zone(aest_timezone).to_date
+      else
+        Time.current.in_time_zone(aest_timezone).to_date
+      end
+
+      puts "AEST Date range: #{start_date} to #{end_date}" if Rails.env.development?
 
       activity_data = StudyHour.daily_study_activity(@user, start_date, end_date)
       summary = StudyHour.study_summary(@user, start_date, end_date)

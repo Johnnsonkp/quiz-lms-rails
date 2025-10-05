@@ -6,7 +6,16 @@ interface StudyHoursFormProps {
 }
 
 const StudyHoursForm: React.FC<StudyHoursFormProps> = ({ onSubmit, loading = false }) => {
-  const [selectedDate, setSelectedDate] = useState(new Date().toISOString().split('T')[0]);
+  // Initialize with current AEST date
+  const getAESTDate = () => {
+    const now = new Date();
+    // Convert to AEST (UTC+10 or UTC+11 depending on DST)
+    const aestOffset = 10 * 60; // Base AEST offset in minutes
+    const aestTime = new Date(now.getTime() + (aestOffset + now.getTimezoneOffset()) * 60000);
+    return aestTime.toISOString().split('T')[0];
+  };
+
+  const [selectedDate, setSelectedDate] = useState(getAESTDate());
   const [hours, setHours] = useState<string>('');
   const [isSubmitting, setIsSubmitting] = useState(false);
 
@@ -39,11 +48,11 @@ const StudyHoursForm: React.FC<StudyHoursFormProps> = ({ onSubmit, loading = fal
     <div className="bg-white p-4 rounded-lg border border-gray-200 shadow-xs">
       <h3 className="text-xs font-semibold text-gray-900 mb-2">Log Study Hours</h3>
       
-      <form onSubmit={handleSubmit} className="space-y-2">
+      <form onSubmit={handleSubmit} className="space-y-4">
         <div className="grid grid-cols-1 md:grid-cols-1 gap-4">
           {/* Date Input */}
           <div>
-            <label htmlFor="study-date" className="block text-sm font-xs text-gray-700 mb-1">
+            <label htmlFor="study-date" className="block text-xs font-xs text-gray-700 mb-1">
               Date
             </label>
             <input
@@ -51,7 +60,7 @@ const StudyHoursForm: React.FC<StudyHoursFormProps> = ({ onSubmit, loading = fal
               id="study-date"
               value={selectedDate}
               onChange={(e) => setSelectedDate(e.target.value)}
-              max={new Date().toISOString().split('T')[0]} // Can't log future dates
+              // max={getAESTDate()} 
               className="text-xs w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
               required
             />
@@ -59,7 +68,7 @@ const StudyHoursForm: React.FC<StudyHoursFormProps> = ({ onSubmit, loading = fal
 
           {/* Hours Input */}
           <div>
-            <label htmlFor="study-hours" className="block text-sm font-xs text-gray-700 mb-1">
+            <label htmlFor="study-hours" className="block text-xs font-xs text-gray-700 mb-1">
               Study Hours
             </label>
             <input
@@ -100,7 +109,7 @@ const StudyHoursForm: React.FC<StudyHoursFormProps> = ({ onSubmit, loading = fal
                 Saving...
               </span>
             ) : (
-              'Log Study Hours'
+              'Log Hours'
             )}
           </button>
         </div>

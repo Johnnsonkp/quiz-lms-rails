@@ -41,9 +41,18 @@ const StudyHoursHeatmap: React.FC<StudyHoursHeatmapProps> = ({
     days_studied: number;
   } | null>(null);
 
-  const today = new Date();
+  // Get current AEST date
+  const getAESTDate = () => {
+    const now = new Date();
+    // Convert to AEST (UTC+10 or UTC+11 depending on DST)
+    const aestOffset = 10 * 60; // Base AEST offset in minutes
+    const aestTime = new Date(now.getTime() + (aestOffset + now.getTimezoneOffset()) * 60000);
+    return aestTime;
+  };
+
+  const today = getAESTDate();
   
-  // Default to showing last 6 months if no dates provided
+  // Default to showing last 6 months if no dates provided (using AEST)
   const defaultStartDate = useMemo(() => {
     const date = new Date(today);
     date.setMonth(date.getMonth() - 4);

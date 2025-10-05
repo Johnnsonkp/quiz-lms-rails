@@ -8,8 +8,10 @@ class StudyHour < ApplicationRecord
   scope :for_user, ->(user) { where(user: user) }
 
   def self.daily_study_activity(user, start_date = nil, end_date = nil)
-    start_date ||= 6.months.ago.to_date
-    end_date ||= Date.current
+    # Use AEST timezone for consistency
+    aest_timezone = 'Australia/Sydney'
+    start_date ||= 6.months.ago.in_time_zone(aest_timezone).to_date
+    end_date ||= Time.current.in_time_zone(aest_timezone).to_date
 
     study_hours = for_user(user).for_date_range(start_date, end_date)
     
@@ -23,8 +25,10 @@ class StudyHour < ApplicationRecord
   end
 
   def self.study_summary(user, start_date = nil, end_date = nil)
-    start_date ||= 6.months.ago.to_date
-    end_date ||= Date.current
+    # Use AEST timezone for consistency
+    aest_timezone = 'Australia/Sydney'
+    start_date ||= 6.months.ago.in_time_zone(aest_timezone).to_date
+    end_date ||= Time.current.in_time_zone(aest_timezone).to_date
 
     period_hours = for_user(user).for_date_range(start_date, end_date).sum(:hours)
     all_time_hours = for_user(user).sum(:hours)
