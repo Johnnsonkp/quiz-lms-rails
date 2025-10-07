@@ -10,6 +10,7 @@ export default function SingleQuestionComponent({ quizData, selectedSubject, onB
   const [answers, setAnswers] = useState<Record<string, string>>({});
   const [showResults, setShowResults] = useState<Record<string, boolean>>({});
   const [questions, setQuestions] = useState(quizData?.questions || []);
+  const [quizCompleted, setQuizCompleted] = useState(false);
 
   // Update questions when quizData changes
   useEffect(() => {
@@ -105,9 +106,9 @@ export default function SingleQuestionComponent({ quizData, selectedSubject, onB
   };
 
   const handleCompletion = async () => {
-    if(calculateProgress() === 100) {
+    if(calculateProgress() === 100 && quizCompleted === false) {
+      setQuizCompleted(true);
       try {
-
         console.log('Quiz data', quizData );
         console.log('Quiz completed! Saving progress...', quizData.id, answers  );
         // Call the quiz completion API
@@ -115,13 +116,14 @@ export default function SingleQuestionComponent({ quizData, selectedSubject, onB
         
         setTimeout(() => {
           alert('Quiz completed! Your progress has been saved.');
+
         }, 1000);
       } catch (error) {
         console.error('Failed to save quiz completion:', error);
         setTimeout(() => {
           alert('Quiz completed! However, there was an error saving your progress.');
         }, 1000);
-      }
+      } 
     }
   }
 

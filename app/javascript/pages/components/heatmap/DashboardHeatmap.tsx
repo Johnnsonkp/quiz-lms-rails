@@ -52,7 +52,8 @@ const DashboardHeatmap: React.FC<DashboardHeatmapProps> = ({
     
     const svg = document.querySelector('.heatmap-container svg');
     if (svg) {
-      svg.setAttribute('viewBox', '10 7 400 90');
+      // svg.setAttribute('viewBox', '10 7 400 90');
+      svg.setAttribute('viewBox', '10 7 450 85');
     }
 
     if (quizActivities.length > 0) return;
@@ -222,6 +223,7 @@ const DashboardHeatmap: React.FC<DashboardHeatmapProps> = ({
             tooltipDataAttrs={getTooltipDataAttrs}
             showWeekdayLabels={true}
             showMonthLabels={true}
+            showOutOfRangeDays={true}
             onClick={handleClick}
             gutterSize={1}
             horizontal={true}
