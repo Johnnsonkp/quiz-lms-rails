@@ -49,13 +49,14 @@ const DashboardHeatmap: React.FC<DashboardHeatmapProps> = ({
       setLoading(false);
       return;
     }
+    
     const svg = document.querySelector('.heatmap-container svg');
     if (svg) {
       svg.setAttribute('viewBox', '10 7 400 90');
     }
-    if (quizActivities.length > 0) {
-      return;
-    }
+
+    if (quizActivities.length > 0) return;
+    
     const params = new URLSearchParams({
       type: activityType,
       start_date: (startDate || defaultStartDate).toISOString().split('T')[0],
@@ -170,6 +171,7 @@ const DashboardHeatmap: React.FC<DashboardHeatmapProps> = ({
 
   return (
     <div className="dashboard-heatmap">
+      <p className='text-sm mb-2'>Tracker Heatmaps</p>
       <div className="heatmap-container bg-white p-2 px-3 rounded-lg border-2 border-gray-200 flex-col">
         {/* <HeatMapSlider /> */}
         <div className="flex justify-start mb-2 mt-0">

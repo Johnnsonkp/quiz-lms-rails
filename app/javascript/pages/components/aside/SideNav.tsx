@@ -64,6 +64,7 @@ function SideNav(
         ${showSidebar ? 'w-64' : 'w-16'}
         ${showSidebar ? 'translate-x-0' : '-translate-x-full'}
         md:translate-x-0 overflow-x-hidden
+        overflow-y-hidden
       `}
     >
       {/* <SideNavFixed /> */}
@@ -86,7 +87,6 @@ function SideNav(
         </a>
         
         <button 
-          // onClick={() => setOpen(!open)} 
           onClick={() => setShowSidebar(!showSidebar)}
           className={`
             p-2 rounded-lg text-gray-500 hover:text-gray-700 hover:bg-gray-100
@@ -240,7 +240,7 @@ function SideNav(
                 <li key={topic.topic}>
                   <a href="#"
                     className={`
-                      flex items-center px-3 py-3 rounded-lg
+                      flex items-center px-3 py-2 rounded-lg
                       hover:bg-gray-100 transition-all duration-200 ease-in-out
                       group relative cursor-pointer
                       ${activeSection === topic.topic ? 'bg-blue-50 border-r-2 border-blue-500' : ''}
@@ -260,7 +260,7 @@ function SideNav(
                       />
                       
                       <span className={`
-                        text-gray-700 text-sm font-medium truncate
+                        text-gray-700 text-xs font-medium truncate
                         transition-all duration-300 ease-in-out cursor-pointer
                         ${showSidebar ? 'opacity-100 translate-x-0' : 'opacity-0 -translate-x-4 absolute pointer-events-none'}
                       `}>
@@ -288,10 +288,9 @@ function SideNav(
             </div>
           </nav>
         }
-        <SideNavUserBadge 
-          user={user} 
-        />
+        {/* <SideNavUserBadge user={user} /> */}
       </div>
+      <SideNavUserBadge user={user} />
     </aside>
   )
 }

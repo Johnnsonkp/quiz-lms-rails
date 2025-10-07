@@ -45,13 +45,6 @@ class DashboardController < ApplicationController
       activity_data = merge_activity_data(quiz_data, question_data)
     end
 
-
-    # puts "Activity data for user #{@user.id} from #{start_date} to #{end_date}: #{activity_data}" if Rails.env.development?
-    puts "Summary: completed_quizzes_count - #{@user.completed_quizzes_count}, attempted_quizzes_count - #{@user.attempted_quizzes_count}" if Rails.env.development?
-    puts "Date range: #{start_date} to #{end_date}" if Rails.env.development?
-    puts "Timezone: Australia/Sydney (AEST)" if Rails.env.development?
-    puts "Current time (AEST): #{Time.current.in_time_zone('Australia/Sydney')}" if Rails.env.development?
-
     # Calculate summary data for the same date range as activity data (AEST timezone)
     aest_start = start_date.in_time_zone('Australia/Sydney').beginning_of_day
     aest_end = end_date.in_time_zone('Australia/Sydney').end_of_day
@@ -64,9 +57,6 @@ class DashboardController < ApplicationController
     date_range_attempted = @user.user_quiz_progresses
       .where(created_at: aest_start..aest_end)
       .count
-
-    puts "Date range completed: #{date_range_completed}, attempted: #{date_range_attempted}" if Rails.env.development?
-    puts "Recent progresses (AEST): #{@user.user_quiz_progresses.where('created_at > ?', 1.day.ago).pluck(:created_at).map { |t| t.in_time_zone('Australia/Sydney') }}" if Rails.env.development?
 
     render json: {
       activity_data: activity_data,
@@ -333,17 +323,9 @@ class DashboardController < ApplicationController
     puts "Questions correct: #{questions_correct}" if Rails.env.development?
 
     if progress.save
-      puts "✅ Progress saved successfully! ID: #{progress.id}" if Rails.env.development?
-      puts "Progress created_at: #{progress.created_at}" if Rails.env.development?
-      puts "Progress timezone (AEST): #{progress.created_at.in_time_zone('Australia/Sydney')}" if Rails.env.development?
-      puts "Current time (AEST): #{Time.current.in_time_zone('Australia/Sydney')}" if Rails.env.development?
-      puts "Application timezone: #{Time.zone.name}" if Rails.env.development?
-      
       # Check totals after save
       new_completed = @user.user_quiz_progresses.where(completed: true).count
       new_attempted = @user.user_quiz_progresses.count
-      puts "AFTER SAVE - User totals: completed=#{new_completed}, attempted=#{new_attempted}" if Rails.env.development?
-      puts "Change in totals: completed +#{new_completed - current_completed}, attempted +#{new_attempted - current_attempted}" if Rails.env.development?
       
       # Check if today's records exist (AEST timezone)
       today_start = Date.current.in_time_zone('Australia/Sydney').beginning_of_day
@@ -473,17 +455,17 @@ class DashboardController < ApplicationController
   end
 
 
-  def page_refresh
-    if params[:topic].present?
-      render inertia: 'dashboard/Dashboard', props: { 
-        categories: @categories,
-        dashboard_stats: @dashboard_stats,
-        url_params: params[:topic],
-      }
-    else
-      render json: { error: "Missing topic parameter" }, status: 400
-    end
-  end
+  # def page_refresh
+  #   if params[:topic].present?
+  #     render inertia: 'dashboard/Dashboard', props: { 
+  #       categories: @categories,
+  #       dashboard_stats: @dashboard_stats,
+  #       url_params: params[:topic],
+  #     }
+  #   else
+  #     render json: { error: "Missing topic parameter" }, status: 400
+  #   end
+  # end
 
 
   def create
@@ -528,39 +510,67 @@ class DashboardController < ApplicationController
   
 
   def file_upload_extract
+    title = params[:title]&.strip&.presence || nil
+    topic = params[:topic]&.strip&.presence || nil
+    subject = params[:subject]&.strip&.presence || nil
     uploaded_file = params[:file]
-    title = params[:title]&.strip&.presence
-    topic = params[:topic]&.strip&.presence
-    subject = params[:subject]&.strip&.presence
+    content_text = params[:content]&.strip&.presence || nil
 
-    # Validate required file parameter
-    unless uploaded_file.present?
-      render json: { error: "No file uploaded" }, status: :unprocessable_entity
+    # Validate that we have either a file or text content
+    if uploaded_file.blank? && content_text.blank?
+      render json: { error: "Please provide either a file upload or text content" }, status: :unprocessable_entity
       return
     end
 
-    # Validate file type
-    unless ['application/pdf', 'text/plain'].include?(uploaded_file.content_type)
-      render json: { 
-        error: "Invalid file type. Only PDF and TXT files are supported." 
-      }, status: :unprocessable_entity
-      return
-    end
-
-    # Validate file size (e.g., max 10MB)
-    max_size = 10.megabytes
-    if uploaded_file.size > max_size
-      render json: { 
-        error: "File too large. Maximum size is #{max_size / 1.megabyte}MB." 
-      }, status: :unprocessable_entity
+    # Validate that we don't have both
+    if uploaded_file.present? && content_text.present?
+      render json: { error: "Please provide either a file upload OR text content, not both" }, status: :unprocessable_entity
       return
     end
 
     begin
-      file_text = extract_text(uploaded_file)
+      file_text = nil
+      uploaded_original_file_name = nil
 
-      puts "Extracted text length: #{file_text.length} characters" if Rails.env.development?
-      uploaded_original_file_name = uploaded_file.original_filename
+      if uploaded_file.present?
+        # Handle file upload
+        # Validate file type
+        unless [
+          'application/pdf', 
+          'text/plain', 
+          'application/vnd.openxmlformats-officedocument.wordprocessingml.document'
+        ].include?(uploaded_file.content_type)
+          render json: { 
+            error: "Invalid file type. Only PDF, TXT, and DOCX files are supported." 
+          }, status: :unprocessable_entity
+          return
+        end
+
+        # Validate file size (e.g., max 10MB)
+        max_size = 10.megabytes
+        if uploaded_file.size > max_size
+          render json: { 
+            error: "File too large. Maximum size is #{max_size / 1.megabyte}MB." 
+          }, status: :unprocessable_entity
+          return
+        end
+
+        file_text = extract_text(uploaded_file)
+        uploaded_original_file_name = uploaded_file.original_filename
+      else
+        # Handle text content
+        if content_text.length < 50
+          render json: { 
+            error: "Text content must be at least 50 characters long" 
+          }, status: :unprocessable_entity
+          return
+        end
+        
+        file_text = content_text
+        uploaded_original_file_name = "Direct Text Input"
+      end
+
+      puts "Content length: #{file_text.length} characters" if Rails.env.development?
       
       # Generate quiz with optional parameters
       quiz_data = OpenaiService.generate_quiz_from_uploaded_file(
@@ -584,16 +594,20 @@ class DashboardController < ApplicationController
       end
 
       if quiz_data.present?
-        # 1. Create note for all users (authenticated and unauthenticated) with PDF attached
+        # 1. Create note for all users (authenticated and unauthenticated)
         note = Note.new(
           title: title || "Note from #{uploaded_original_file_name}",
           content: file_text,
-          pdf_images: extract_pdf_images(uploaded_file),
           user: @user # Will be nil for unauthenticated users, which is fine
         )
         
-        # 2. Attach the PDF file before saving to pass validation
-        note.pdf_file.attach(uploaded_file)
+        # 2. Attach the PDF file only if we have a file upload
+        # TODO: transform note content to PDF format if notes typed or notes a .txt file format
+        if uploaded_file.present?
+          note.pdf_images = extract_pdf_images(uploaded_file)
+          note.pdf_file.attach(uploaded_file)
+        end
+        
         note.save!
         
         puts "Successfully created note: #{note.title}" if Rails.env.development?
@@ -609,22 +623,23 @@ class DashboardController < ApplicationController
           Rails.logger.error "Failed to save quiz to database"
         end
       else
-        Rails.logger.error "Failed to generate quiz data from file"
+        Rails.logger.error "Failed to generate quiz data from content"
       end
       
       render json: { 
-        message: "File uploaded and processed successfully", 
-        filename: uploaded_file.original_filename,
-        content_type: uploaded_file.content_type,
+        message: "Content processed and quiz generated successfully", 
+        source: uploaded_file.present? ? "file_upload" : "text_input",
+        filename: uploaded_original_file_name,
+        content_type: uploaded_file&.content_type || "text/plain",
         note_created: note.present?,
         quiz_generated: quiz_data.present?,
         quiz_saved: saved_quiz.present?
       }
       
     rescue => e
-      Rails.logger.error "Error processing file upload: #{e.message}"
+      Rails.logger.error "Error processing content: #{e.message}"
       render json: { 
-        error: "Failed to process uploaded file: #{e.message}" 
+        error: "Failed to process content: #{e.message}" 
       }, status: :internal_server_error
     end
   end
@@ -716,9 +731,15 @@ class DashboardController < ApplicationController
 
 
   def extract_text(file)
-    if file.content_type == "application/pdf"
+    case file.content_type
+    when "application/pdf"
       reader = PDF::Reader.new(file.tempfile)
       reader.pages.map(&:text).join("\n")
+    when "application/vnd.openxmlformats-officedocument.wordprocessingml.document"
+      # Handle DOCX files
+      require 'docx'
+      doc = Docx::Document.open(file.tempfile)
+      doc.paragraphs.map(&:text).join("\n")
     else # .txt file
       file.read
     end

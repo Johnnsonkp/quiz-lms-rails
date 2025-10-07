@@ -47,6 +47,7 @@ gem "redis", "~> 4.0"
 gem 'dotenv-rails'
 
 gem "pdf-reader"
+gem "docx"
 
 gem 'ruby-openai'
 

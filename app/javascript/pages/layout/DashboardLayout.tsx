@@ -174,7 +174,7 @@ function DashboardLayout({ children, user, categories, dashboard_stats, url_para
             </div>
 
             {showQuizCards == true &&
-              <div className="lg:col-span-1 fixed right-[25px] border-gray-300 border-2 w-[250px] rounded-md">
+              <div className="lg:col-span-1 fixed right-[25px] border-gray-300 border-2 w-[200px] rounded-md">
                 {showQuizCards && quiz_preview && (<TableOfContents quiz_preview={quiz_preview} />)}
               </div>}
           </div>

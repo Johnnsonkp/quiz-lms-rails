@@ -53,12 +53,6 @@ function SubjectCards(
     </svg>
   );
 
-  // const deleteConfirmation = (ids: (number | undefined)[] | null, e: React.MouseEvent<HTMLButtonElement, MouseEvent>) => {
-  //   e.preventDefault();
-  //   return window.confirm("Are you sure you want to delete this quiz? This action cannot be undone.") ? 
-  //   handleDelete(ids, e) : setShowEditForm(false);
-  // }
-
   const EditQuizCard: React.FC<{ subject: string | null; topic: string | null, show: boolean, ids: number[] }> = 
   ({ subject, topic, show, ids }) => {
     const [onSubjectChange, setOnSubjectChange] = React.useState(subject || '');
@@ -183,13 +177,13 @@ function SubjectCards(
 
   return (
     <>
-    <div className="bg-white rounded-xl overflow-hidden shadow-sm flex flex-col cursor-pointer w-full max-w-[250px]" 
+    <div className="bg-white rounded-xl overflow-hidden shadow-sm flex flex-col cursor-pointer w-full max-w-[220px]" 
       onClick={() => {
         const validIds = ids ? ids.filter((id): id is number => id !== undefined) : null;
         onSubjectClick(subject, externalIds, validIds, titles);
       }}
     >
-    <div className=" bg-white rounded-xl overflow-hidden shadow-lg h-[100%] border border-gray-100 w-full max-w-[300px]">
+    <div className=" bg-white rounded-xl overflow-hidden shadow-lg h-[100%] border border-gray-100 w-full max-w-[220px]">
 
     <div className="relative">
       {!subjectImg ? (
@@ -201,17 +195,17 @@ function SubjectCards(
             <img
               src={subjectImg}
               alt={ subject ? subject : 'Quiz Image'}
-              className="card-image !h-40 blur-[1px]"
+              className="card-image !h-33 blur-[1px]"
             />
             <div className={imgOverlaySelector()}></div>
             <div className="card-content">
               <span style={{width: '100%'}} className="text-white font-semibold text-md">
                 {subject && subject?.trim().substring(0, 20)}
               </span>
-              <span style={{width: '100%'}} className="text-white font-semibold text-md">
+              <span style={{width: '100%'}} className="text-white font-semibold text-sm">
                 {subject && subject.length > 20 && subject.trim().substring(20, 40)}
               </span>
-              <span style={{width: '100%'}} className="text-white font-semibold text-md">
+              <span style={{width: '100%'}} className="text-white font-semibold text-sm">
                 {subject && subject.length > 40 && subject.trim().substring(40, 60)}
               </span>
             </div>
@@ -223,15 +217,15 @@ function SubjectCards(
             </span>
           </div>
         )}
-      <div className="absolute top-3 badge-flag-container">
+      <div className="absolute top-3 badge-flag-container ">
         <div
-          className="relative bg-white pl-1 pr-1 py-1 text-[8px] font-semibold text-gray-700 flex items-center gap-1 badge-flag shadow-sm z-20">
+          className="relative bg-white pl-1 pr-1 py-1 text-[8px] font-semibold text-gray-700 flex items-center gap-1 badge-flag shadow-sm z-20 border-1 rounded-r-lg">
           <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth="1.5"
-            stroke="currentColor" className="w-5 h-4">
+            stroke="currentColor" className="w-5 h-3">
             <path strokeLinecap="round" strokeLinejoin="round"
               d="M4.26 10.147a60.438 60.438 0 0 0-.491 6.347A48.627 48.627 0 0 1 12 20.904a48.627 48.627 0 0 1 8.232-4.41 60.46 60.46 0 0 0-.491-6.347m-15.482 0a50.57 50.57 0 0 0-2.658-.813A59.906 59.906 0 0 1 12 3.493a59.903 59.903 0 0 1 10.399 5.84c-.896.248-1.783.52-2.658.814m-15.482 0A50.697 50.697 0 0 1 12 13.489a50.702 50.702 0 0 1 7.74-3.342M6.75 15a.75.75 0 1 0 0-1.5.75.75 0 0 0 0 1.5Zm0 0v-3.675A55.378 55.378 0 0 1 12 8.443m-7.007 11.55A5.981 5.981 0 0 0 6.75 15.75v-1.5" />
           </svg>
-          <div className='z-20 text-[0.83rem]'>Average Score: <span className='font-bold text-green-700'>90%</span></div>
+          <div className='z-20 text-[0.73rem]'>Average Score: <span className='font-bold text-green-700'>90%</span></div>
         </div>
       </div>
 
@@ -266,18 +260,18 @@ function SubjectCards(
 
     <div className="bg-cyan-50 text-cyan-700 px-4 py-1 text-xs font-semibold flex items-center gap-2">
       <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth="2" stroke="currentColor"
-        className="w-4 h-4">
+        className="w-4 h-3">
         <path strokeLinecap="round" strokeLinejoin="round"
           d="M3 13.125C3 12.504 3.504 12 4.125 12h2.25c.621 0 1.125.504 1.125 1.125v6.75C7.5 20.496 6.996 21 6.375 21h-2.25A1.125 1.125 0 0 1 3 19.875v-6.75ZM9.75 8.625c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125v11.25c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 0 1-1.125-1.125V8.625ZM16.5 4.125c0-.621.504-1.125 1.125-1.125h2.25C20.496 3 21 3.504 21 4.125v15.75c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 0 1-1.125-1.125V4.125Z" />
       </svg>
-      <span>{tag || 'ADVANCED'}</span>
+      <span className='!text-xs'>{tag || 'ADVANCED'}</span>
     </div>
 
-    <div className="p-4">
+    <div className="p-4 px-2 py-1">
       <div className='flex justify-between'>
         <div>
           <p className="text-[11px] text-gray-500 mb-2">{updatedTopic || topic}</p>
-          <h3 className="text-base font-semibold text-gray-800 mb-3 leading-tight">
+          <h3 className=" font-semibold text-gray-800 mb-3 leading-tight text-sm">
             {updatedSubject.length > 0 && updatedSubject?.slice(0, 20) || subject && subject?.slice(0, 20)}
             <span>{updatedSubject.length > 20 && updatedSubject?.slice(20, 30) || subject && subject?.slice(20, 30)}</span>
             <span>{updatedSubject.length > 30 && updatedSubject?.slice(30, 40) || subject && subject?.slice(30, 40)}</span>
@@ -323,11 +317,11 @@ function SubjectCards(
       {/* Display quiz titles */}
       <div className="space-y-1 mb-3">
         {titles.length > 1? titles?.slice(0, 2).map((title: any, index: number) => (
-          <div key={index} className="text-[11px] text-gray-600 border-l-2 border-blue-500 pl-2">
+          <div key={index} className="text-[10px] text-gray-600 border-l-2 border-blue-500 pl-2">
             {title}
           </div>
         )) : (
-          <div className="text-[11px] text-gray-600 border-l-2 border-blue-500 pl-2">
+          <div className="text-[10px] text-gray-600 border-l-2 border-blue-500 pl-2">
             {titles}
           </div>)}
       </div>

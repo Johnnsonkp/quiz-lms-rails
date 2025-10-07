@@ -2,28 +2,12 @@ import 'react-calendar-heatmap/dist/styles.css';
 import '../heatmap/react-calendar-heatmap.css';
 
 import React, { useEffect, useMemo, useState } from 'react';
+import { StudyActivity, StudyHoursHeatmapProps } from '../../../types/heatmapTypes';
 
 import CalendarHeatmap from 'react-calendar-heatmap';
 import DashboardStatus from '../heatmap/DashboardStatus';
+import {HeatMapStats} from './StudyTrackerHeatmapStats';
 import {fetchStudyHeatmapActivityData} from '../../../services/heatmapServices/fetchAvtivityData';
-
-interface StudyActivity {
-  date: string; // ISO date string (YYYY-MM-DD)
-  hours: number; // Number of study hours on this date
-  count: number; // Optional count field for compatibility
-}
-
-interface StudyHoursHeatmapProps {
-  user?: {
-    id: number;
-    email: string;
-    name?: string;
-  } | null;
-  startDate?: Date;
-  endDate?: Date;
-  onDateClick?: (value: any) => void;
-  refreshTrigger?: number; // To trigger refresh when new data is added
-}
 
 const StudyHoursHeatmap: React.FC<StudyHoursHeatmapProps> = ({
   user,
@@ -65,24 +49,15 @@ const StudyHoursHeatmap: React.FC<StudyHoursHeatmapProps> = ({
     return date;
   }, [today]);
 
-  // Transform the study activities data for the heatmap
-  const heatmapValues = useMemo(() => {
-    return studyActivities.map(activity => ({
-      date: new Date(activity.date),
-      count: activity.hours || activity?.count, 
-      hours: activity.hours || activity?.count
-    }));
-  }, [studyActivities]);
-
-
   const loadHeatmapData = async () => {
     if (!user) {
       setLoading(false);
       return;
     }
+
+    if (studyActivities.length > 0) return;
     const svg = document.querySelector('.heatmap-container svg');
     if (svg) { svg.setAttribute('viewBox', '10 7 400 90');}
-    if (studyActivities?.length > 0) return;
 
     const params = new URLSearchParams({
       start_date: (startDate || defaultStartDate).toISOString().split('T')[0],
@@ -99,10 +74,17 @@ const StudyHoursHeatmap: React.FC<StudyHoursHeatmapProps> = ({
     console.log('Fetched activity data:', data);
   };
 
-  // Modify viewBox after component mounts
   useEffect(() => {
     loadHeatmapData();
-  }, [heatmapValues, refreshTrigger]); 
+  }, [refreshTrigger]); 
+
+  const heatmapValues = useMemo(() => {
+    return studyActivities.map(activity => ({
+      date: new Date(activity.date),
+      count: activity.hours || activity?.count, 
+      hours: activity.hours || activity?.count
+    }));
+  }, [studyActivities]);
 
   // Generate tooltip content
   const getTooltipDataAttrs = (value: any) => {
@@ -125,9 +107,8 @@ const StudyHoursHeatmap: React.FC<StudyHoursHeatmapProps> = ({
 
   // Determine CSS class based on study hours
   const getClassForValue = (value: any) => {
-    if (!value || value.hours === 0) {
-      return 'color-empty';
-    }
+    if (!value || value.hours === 0) return 'color-empty';
+
     // Study hours thresholds (adjust based on your preferences)
     const thresholds = [0.5, 1, 2, 3, 4, 5, 6, 7, 8, 10]; // Hours studied
     
@@ -162,32 +143,19 @@ const StudyHoursHeatmap: React.FC<StudyHoursHeatmapProps> = ({
     loading={loading} 
     error={error} />
 
-  const HeatMapStats = () => {
-    return <div className="flex justify-between items-center pb-3 pt-1">
-        {summary && (
-          <div className="text-sm text-gray-500">
-            <div className="flex space-y-1">
-              <div className=''>
-                <span className="mr-4 text-xs">Total Hours: {summary.total_hours}</span>
-                <span className="mr-4 text-xs">Days Studied: {summary.days_studied}</span>
-                <span className='text-xs'>Avg Daily: {summary.average_daily_hours?.toFixed(1)}h</span>
-              </div>
-            </div>
-          </div>)}
-      </div>
-  }
-
   return (
     <div className="study-hours-heatmap">
-      <HeatMapStats />
+      <HeatMapStats summary={summary} />
       <CalendarHeatmap
         startDate={startDate || defaultStartDate}
         endDate={endDate || defaultEndDate}
         values={heatmapValues}
         classForValue={getClassForValue}
+        titleForValue={getClassForValue}
         tooltipDataAttrs={getTooltipDataAttrs}
         showWeekdayLabels={true}
         showMonthLabels={true}
+        showOutOfRangeDays={true}
         onClick={handleClick}
         gutterSize={1}
         horizontal={true}

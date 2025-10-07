@@ -224,30 +224,7 @@ class OpenaiService
     - Include optional code snippets or examples when relevant; format them clearly for readability"
   end
 
-
-  # def build_quiz_prompt(categories, file_text, uploaded_original_file_name, title, topic, subject)
-  #   puts "Building quiz prompt...", title, topic, subject
-  #   truncated_text = file_text.length > 8000 ? file_text[0..8000] + "..." : file_text
-
-  #   # Build conditional instructions based on provided parameters
-  #   title_instruction = title.present? ? "- Use '#{title}' as the quiz title" : "- Generate an appropriate quiz title based on content"
-  #   topic_instruction = topic.present? ? "- Use '#{topic}' as the quiz topic" : "- If quiz is related to an existing topic (#{categories&.map { |c| c[:topic] }&.join(', ')}), use that topic (case insensitive)"
-  #   subject_instruction = subject.present? ? "- Use '#{subject}' as the quiz subject" : "- Generate an appropriate subject based on content"
-    
-  #   "Based on the following text content from file '#{uploaded_original_file_name}', generate quiz questions in this EXACT JSON format: #{json_quiz_example.to_json}
-
-  #   Requirements:
-  #   #{enhanced_prompt}
-  #   #{title_instruction}
-  #   #{topic_instruction}
-  #   #{subject_instruction}
-
-  #   Text content to analyze: #{truncated_text}"
-  # end
-
-
-  #  def build_quiz_prompt(categories, file_text, uploaded_original_file_name, title, topic, subject)
-   def build_quiz_prompt(categories, file_text, uploaded_original_file_name, title, topic, subject)
+  def build_quiz_prompt(categories, file_text, uploaded_original_file_name, title, topic, subject)
     puts "Building enhanced quiz prompt..." if Rails.env.development?
     
     # Use intelligent text chunking instead of hard truncation
