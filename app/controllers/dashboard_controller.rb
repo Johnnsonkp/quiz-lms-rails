@@ -411,17 +411,17 @@ class DashboardController < ApplicationController
   end
 
 
-  # def page_refresh
-  #   if params[:topic].present?
-  #     render inertia: 'dashboard/Dashboard', props: { 
-  #       categories: @categories,
-  #       dashboard_stats: @dashboard_stats,
-  #       url_params: params[:topic],
-  #     }
-  #   else
-  #     render json: { error: "Missing topic parameter" }, status: 400
-  #   end
-  # end
+  def page_refresh
+    if params[:topic].present?
+      render inertia: 'dashboard/Dashboard', props: { 
+        categories: @categories,
+        dashboard_stats: @dashboard_stats,
+        url_params: params[:topic],
+      }
+    else
+      render json: { error: "Missing topic parameter" }, status: 400
+    end
+  end
 
 
   def create
@@ -460,6 +460,44 @@ class DashboardController < ApplicationController
 
     else
       render json: { error: "Missing topic parameter" }, status: 400
+    end
+  end
+
+
+  def study_goal_progress
+    if @user.nil?
+      render json: { error: "User not authenticated" }, status: 401
+      return
+    end
+
+    progress_data = @user.study_goal_progress
+    render json: progress_data
+  end
+
+
+  def update_study_goal
+    if @user.nil?
+      render json: { error: "User not authenticated" }, status: 401
+      return
+    end
+
+    goal_hours = params.require(:goal_hours).to_f
+    
+    if goal_hours < 0.5 || goal_hours > 24
+      render json: { error: "Goal hours must be between 0.5 and 24 hours" }, status: 422
+      return
+    end
+
+    begin
+      @user.update!(daily_study_goal_hours: goal_hours)
+      
+      render json: { 
+        message: "Study goal updated successfully",
+        new_goal: goal_hours,
+        progress: @user.study_goal_progress
+      }
+    rescue => e
+      render json: { error: "Failed to update study goal: #{e.message}" }, status: 500
     end
   end
 
@@ -599,6 +637,7 @@ class DashboardController < ApplicationController
       }, status: :internal_server_error
     end
   end
+
 
 
 
@@ -849,6 +888,7 @@ class DashboardController < ApplicationController
     
     merged_data.values.sort_by { |data| data[:date] }
   end
+
 
   # Test method to verify controller loading
   def test_method

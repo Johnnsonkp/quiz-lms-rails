@@ -7,7 +7,10 @@ import React, { useEffect, useMemo, useState } from 'react';
 import CalendarHeatmap from 'react-calendar-heatmap';
 import DashboardStatus from './DashboardStatus';
 import {HeatmapStats} from './HeatmapStats';
-import StudyTracker from '../study-tracker/StudyTracker';
+import SliderButton from './SliderButton';
+import StudyGoalTracker from '../study-goal/StudyGoalTracker';
+// import StudyHoursForm from '../study-tracker/StudyHoursForm';
+import StudyHoursHeatmap from '../study-tracker/StudyHoursHeatmap';
 import {fetchHeatmapActivityData} from '../../../services/heatmapServices/fetchAvtivityData';
 
 const DashboardHeatmap: React.FC<DashboardHeatmapProps> = ({
@@ -29,6 +32,8 @@ const DashboardHeatmap: React.FC<DashboardHeatmapProps> = ({
 
   const [activeTab, setActiveTab] = useState<'quiz' | 'study' | 'combined'>(activityType);
   const today = new Date();
+  // const [refreshTrigger, setRefreshTrigger] = useState(false);
+  // const [isSubmitting, setIsSubmitting] = useState(false);
   
   // Default to showing last 6 months if no dates provided
   const defaultStartDate = useMemo(() => {
@@ -51,10 +56,8 @@ const DashboardHeatmap: React.FC<DashboardHeatmapProps> = ({
     }
     
     const svg = document.querySelector('.heatmap-container svg');
-    if (svg) {
-      // svg.setAttribute('viewBox', '10 7 400 90');
-      svg.setAttribute('viewBox', '10 7 450 85');
-    }
+    // if (svg) {svg.setAttribute('viewBox', '10 7 450 85');}
+    if (svg) { svg.setAttribute('viewBox', '10 7 400 90');}
 
     if (quizActivities.length > 0) return;
     
@@ -168,67 +171,64 @@ const DashboardHeatmap: React.FC<DashboardHeatmapProps> = ({
   <DashboardStatus 
     user={user} 
     loading={loading} 
-    error={error} />
+    error={error} 
+  />
 
   return (
     <div className="dashboard-heatmap">
       <p className='text-sm mb-2'>Tracker Heatmaps</p>
-      <div className="heatmap-container bg-white p-2 px-3 rounded-lg border-2 border-gray-200 flex-col">
+
+      <div className='flex justify-between gap-4'>
+
+      <div className="heatmap-container bg-white p-2 px-3 rounded-lg border-2 border-gray-200 flex-col flex-[0.7] shadow-sm">
         {/* <HeatMapSlider /> */}
-        <div className="flex justify-start mb-2 mt-0">
-          <nav className="bg-gray-200 rounded-md px-1 py-1 w-[240px] shadow-sm">
-            <ul className="flex text-gray-600 gap-1 text-xs py-1.8 cursor-pointer">
-              <div className="relative flex w-[100%] cursor-pointer h-[100%]">
-                {/* Slider background */}
-                <span
-                  className="absolute cursor-pointer left-0 top-0 py-1 h-full
-                  w-1/3 bg-white rounded-md shadow transition-transform duration-300 ease-in-out !font-bold"
-                  style={{
-                  transform: `translateX(${activeTab === 'quiz' ? '0%' : activeTab === 'study' ? '100%' : '200%'})`,
-                  zIndex: 0,
-                  }}
-                />
-                <li 
-                  className="hover:bg-white !cursor-pointer py-1 relative
-                  flex mx-auto z-10 w-1/4 rounded-md text-center justify-center align-middle items-center h-full" 
-                  onClick={() => setActiveTab('quiz')}
-                >
-                  Quiz
-                </li>
-                <li 
-                  className="hover:bg-white cursor-pointer py-1 relative 
-                  flex mx-auto z-10 w-1/4 rounded-md text-center justify-center align-middle items-center" 
-                  onClick={() => setActiveTab('study')}
-                >
-                  Study
-                </li>
-                <li 
-                  className="hover:bg-white cursor-pointer py-1 relative 
-                  flex mx-auto z-10 w-1/4 rounded-md text-center justify-center align-middle items-center" 
-                  onClick={() => setActiveTab('combined')}
-                >
-                  All
-                </li>
-              </div>
-            </ul>
-          </nav>
-        </div>
+        <SliderButton 
+          activeTab={activeTab} 
+          setActiveTab={(tab) => setActiveTab(tab as 'quiz' | 'study' | 'combined')} 
+          options={['Quiz', 'Study', 'Combined']}
+        />
         <HeatmapStats summary={summary} activeTab={activeTab} />
+        
         {activeTab == 'quiz' && 
-          <CalendarHeatmap
-            startDate={startDate || defaultStartDate}
-            endDate={endDate || defaultEndDate}
-            values={heatmapValues}
-            classForValue={getClassForValue}
-            tooltipDataAttrs={getTooltipDataAttrs}
-            showWeekdayLabels={true}
-            showMonthLabels={true}
-            showOutOfRangeDays={true}
-            onClick={handleClick}
-            gutterSize={1}
-            horizontal={true}
-          />}
-        {activeTab == 'study' &&  <StudyTracker user={user} />}
+          <div className="study-tracker space-y-6 flex justify-between w-full align-middle items-center">
+            <div className='flex-1 mr-1'>
+              <CalendarHeatmap
+                startDate={startDate || defaultStartDate}
+                endDate={endDate || defaultEndDate}
+                values={heatmapValues}
+                classForValue={getClassForValue}
+                tooltipDataAttrs={getTooltipDataAttrs}
+                showWeekdayLabels={true}
+                showMonthLabels={true}
+                showOutOfRangeDays={true}
+                onClick={handleClick}
+                gutterSize={1}
+                horizontal={true}
+              />
+            </div>
+          </div>
+        }
+        {activeTab == 'study' &&  
+        <>
+          <div className="study-tracker space-y-6 flex justify-between w-full align-middle items-center">
+            <div className='flex-1 mr-1'>
+              <StudyHoursHeatmap
+                today={today}
+                user={user}
+                startDate={startDate || defaultStartDate}
+                endDate={endDate || defaultEndDate}
+              />
+            </div>
+          </div>
+          </>
+        }
+      </div>
+      
+        {/* {activeTab == 'study' &&   */}
+          <div className="study-tracker flex justify-between w-full h-full  align-middle items-end flex-[0.3]">
+            <StudyGoalTracker user={user} />
+          </div>
+        {/* } */}
       </div>
     </div>
   );

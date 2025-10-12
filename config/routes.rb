@@ -24,9 +24,14 @@ Rails.application.routes.draw do
   # get '/get', to: 'template#signup'
 
   # dashboard routes
+  get 'dashboard/study_goal_progress', to: 'dashboard#study_goal_progress'
+  patch 'dashboard/update_study_goal', to: 'dashboard#update_study_goal'
+
   get 'dashboard', to: 'dashboard#index'
   get 'dashboard/study_activity', to: 'dashboard#study_activity'
   get 'dashboard/study_hours_data', to: 'dashboard#study_hours_data'
+
+  
   get 'dashboard/test_method', to: 'dashboard#test_method'
   post 'dashboard/study_hours', to: 'dashboard#create_study_hours'
   get 'dashboard/:topic/get', to: 'dashboard#get_topic_quizzes'

@@ -54,7 +54,12 @@ function SubjectCards(
   );
 
   const EditQuizCard: React.FC<{ subject: string | null; topic: string | null, show: boolean, ids: number[] }> = 
-  ({ subject, topic, show, ids }) => {
+  ({ 
+      subject, 
+      topic, 
+      show, 
+      ids 
+    }) => {
     const [onSubjectChange, setOnSubjectChange] = React.useState(subject || '');
     const [onTopicChange, setOnTopicChange] = React.useState(topic || '');
     const [onUserIdChange, setOnUserIdChange] = React.useState('');
@@ -187,9 +192,25 @@ function SubjectCards(
 
     <div className="relative">
       {!subjectImg ? (
-          <div className="h-full flex items-center justify-center">
-            <div className="animate-spin rounded-full h-6 w-4 border-b-2 border-blue-600"></div>
+          <>
+          <div className={imgOverlaySelector()}></div>
+          <div className="card-content">
+              <span style={{width: '100%'}} className="text-white font-semibold text-sm w-[100%]">
+                {subject && subject?.trim().substring(0, 24)}
+              </span>
+              <span style={{width: '100%'}} className="text-white font-semibold text-sm">
+                {subject && subject.length > 24 && subject.trim().substring(25, 45)}
+              </span>
+              <span style={{width: '100%'}} className="text-white font-semibold text-sm">
+                {subject && subject.length > 45 && subject.trim().substring(46, 62)}
+              </span>
           </div>
+          <img
+            src={"https://images.unsplash.com/photo-1501504905252-473c47e087f8?ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&q=80&w=1548"}
+            alt={ subject ? subject : 'Quiz Image'}
+            className="card-image !h-33 blur-[1px]"
+          />
+          </>
         ) : subjectImg ? (
           <>
             <img
@@ -199,14 +220,14 @@ function SubjectCards(
             />
             <div className={imgOverlaySelector()}></div>
             <div className="card-content">
-              <span style={{width: '100%'}} className="text-white font-semibold text-md">
-                {subject && subject?.trim().substring(0, 20)}
+              <span style={{width: '100%'}} className="text-white font-semibold text-sm w-[100%]">
+                {subject && subject?.trim().substring(0, 24)}
               </span>
               <span style={{width: '100%'}} className="text-white font-semibold text-sm">
-                {subject && subject.length > 20 && subject.trim().substring(20, 40)}
+                {subject && subject.length > 24 && subject.trim().substring(25, 45)}
               </span>
               <span style={{width: '100%'}} className="text-white font-semibold text-sm">
-                {subject && subject.length > 40 && subject.trim().substring(40, 60)}
+                {subject && subject.length > 45 && subject.trim().substring(46, 62)}
               </span>
             </div>
           </>
@@ -267,72 +288,73 @@ function SubjectCards(
       <span className='!text-xs'>{tag || 'ADVANCED'}</span>
     </div>
 
-    <div className="p-4 px-2 py-1">
-      <div className='flex justify-between'>
-        <div>
-          <p className="text-[11px] text-gray-500 mb-2">{updatedTopic || topic}</p>
-          <h3 className=" font-semibold text-gray-800 mb-3 leading-tight text-sm">
-            {updatedSubject.length > 0 && updatedSubject?.slice(0, 20) || subject && subject?.slice(0, 20)}
-            <span>{updatedSubject.length > 20 && updatedSubject?.slice(20, 30) || subject && subject?.slice(20, 30)}</span>
-            <span>{updatedSubject.length > 30 && updatedSubject?.slice(30, 40) || subject && subject?.slice(30, 40)}</span>
-          </h3>
-        </div>
+    <div className="p-4 px-2 py-1 flex flex-col justify-between ">
+      <div>
+        <div className='flex justify-between'>
+          <div>
+            <p className="text-[11px] text-gray-500 mb-2">{updatedTopic || topic}</p>
+            <h3 className=" font-semibold text-gray-800 mb-3 leading-tight text-sm">
+              {updatedSubject.length > 0 && updatedSubject?.slice(0, 20) || subject && subject?.slice(0, 20)}
+              <span>{updatedSubject.length > 20 && updatedSubject?.slice(20, 30) || subject && subject?.slice(20, 30)}</span>
+              <span>{updatedSubject.length > 30 && updatedSubject?.slice(30, 40) || subject && subject?.slice(30, 40)}</span>
+            </h3>
+          </div>
 
-        <div className="flex items-center gap-2">
-          {/* Circular Progress Bar */}
-          <div className="relative w-13 h-13">
-            <svg className="w-13 h-13 transform -rotate-90" viewBox="0 0 32 32">
-              {/* Background circle */}
-              <circle
-                cx="16"
-                cy="16"
-                r="14"
-                stroke="currentColor"
-                strokeWidth="3"
-                fill="transparent"
-                className="text-gray-200"
-              />
-              {/* Progress circle */}
-              <circle
-                cx="16"
-                cy="16"
-                r="14"
-                stroke="currentColor"
-                strokeWidth="3"
-                fill="transparent"
-                strokeDasharray={`${87.96 * 0.65} 87.96`} // 65% progress
-                strokeLinecap="round"
-                className="text-emerald-500"
-              />
-            </svg>
-            {/* Progress percentage text */}
-            <div className="absolute inset-0 flex items-center justify-center">
-              <span className="text-xs font-semibold text-gray-700">65%</span>
+          <div className="flex items-center gap-2">
+            {/* Circular Progress Bar */}
+            <div className="relative w-13 h-13">
+              <svg className="w-13 h-13 transform -rotate-90" viewBox="0 0 32 32">
+                {/* Background circle */}
+                <circle
+                  cx="16"
+                  cy="16"
+                  r="14"
+                  stroke="currentColor"
+                  strokeWidth="3"
+                  fill="transparent"
+                  className="text-gray-200"
+                />
+                {/* Progress circle */}
+                <circle
+                  cx="16"
+                  cy="16"
+                  r="14"
+                  stroke="currentColor"
+                  strokeWidth="3"
+                  fill="transparent"
+                  strokeDasharray={`${87.96 * 0.65} 87.96`} // 65% progress
+                  strokeLinecap="round"
+                  className="text-emerald-500"
+                />
+              </svg>
+              {/* Progress percentage text */}
+              <div className="absolute inset-0 flex items-center justify-center">
+                <span className="text-xs font-semibold text-gray-700">65%</span>
+              </div>
             </div>
           </div>
         </div>
 
+        {/* Display quiz titles */}
+        <div className="space-y-1 mb-3">
+          {titles.length > 1? titles?.slice(0, 2).map((title: any, index: number) => (
+            <div key={index} className="text-[10px] text-gray-600 border-l-2 border-blue-500 pl-2">
+              {title}
+            </div>
+          )) : (
+            <div className="text-[10px] text-gray-600 border-l-2 border-blue-500 pl-2">
+              {titles}
+            </div>)}
+        </div>
       </div>
 
-      {/* Display quiz titles */}
-      <div className="space-y-1 mb-3">
-        {titles.length > 1? titles?.slice(0, 2).map((title: any, index: number) => (
-          <div key={index} className="text-[10px] text-gray-600 border-l-2 border-blue-500 pl-2">
-            {title}
-          </div>
-        )) : (
-          <div className="text-[10px] text-gray-600 border-l-2 border-blue-500 pl-2">
-            {titles}
-          </div>)}
-      </div>
-
-      <div className="flex items-end justify-between text-sm text-gray-600 mb-0 mt-4">
+      <div className="flex items-end justify-between text-sm text-gray-600 mb-1 h-[100%]">
         <div className="flex items-center gap-1">
           <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth="1.5"
             stroke="currentColor" className="w-4 h-4">
             <path strokeLinecap="round" strokeLinejoin="round" d="M12 6v6h4.5m4.5 0a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" />
           </svg>
-          <span className='text-[11px]'>{titles ? `${titles.length} Quizzes` : 'N/A'}</span>
+          <span className='text-[10px]'>{titles ? `${titles.length} Quizzes` : 'N/A'}</span>
         </div>
 
         <div className="flex items-center gap-2">
@@ -342,11 +364,13 @@ function SubjectCards(
               <path strokeLinecap="round" strokeLinejoin="round"
                 d="M4.26 10.147a60.438 60.438 0 0 0-.491 6.347A48.627 48.627 0 0 1 12 20.904a48.627 48.627 0 0 1 8.232-4.41 60.46 60.46 0 0 0-.491-6.347m-15.482 0a50.57 50.57 0 0 0-2.658-.813A59.906 59.906 0 0 1 12 3.493a59.903 59.903 0 0 1 10.399 5.84c-.896.248-1.783.52-2.658.814m-15.482 0A50.697 50.697 0 0 1 12 13.489a50.702 50.702 0 0 1 7.74-3.342M6.75 15a.75.75 0 1 0 0-1.5.75.75 0 0 0 0 1.5Zm0 0v-3.675A55.378 55.378 0 0 1 12 8.443m-7.007 11.55A5.981 5.981 0 0 0 6.75 15.75v-1.5" />
             </svg>
-            <span className='text-[11px]'>39 Questions</span>
+            <span className='text-[10px]'>39 Questions</span>
           </div>
         </div>
       </div>
+      
     </div>
+
   </div>
 </div>
 

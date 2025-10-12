@@ -1,11 +1,12 @@
 import { useEffect, useState } from 'react';
 
+import AppLogo from '../ui/AppLogo';
 import { Category } from '../../../types/dashboard';
 import CategoryIcons from '../icons/CategoryIcons';
 import Divider from '../divider/Divider';
-// import SideNavFixed from '../ui/SideNavFixed';
+import SideNavFixed from '../ui/SideNavFixed';
 import SideNavUserBadge from '../ui/SideNavUserBadge';
-import quizIcon from '../../../assets/quiz-icon.png';
+import { UserI } from '../../../types/userTypes';
 
 function SideNav(
   {
@@ -26,7 +27,7 @@ function SideNav(
     quizData: any;
     selectedSubject: any;
     setShowSidebar: React.Dispatch<React.SetStateAction<boolean>>;
-    user: any;
+    user: UserI | null;
   }) {
 
   const [questions, setQuestions] = useState(quizData?.questions || []);
@@ -61,31 +62,28 @@ function SideNav(
         fixed top-0 left-0 h-screen z-30 
         bg-white shadow-lg border-r border-gray-200
         transition-all duration-300 ease-in-out
-        ${showSidebar ? 'w-64' : 'w-16'}
+        ${showSidebar ? 'w-70' : 'w-24'}
         ${showSidebar ? 'translate-x-0' : '-translate-x-full'}
         md:translate-x-0 overflow-x-hidden
         overflow-y-hidden
       `}
     >
-      {/* <SideNavFixed /> */}
-
+      <SideNavFixed />
+      
+      <div 
+        className={`
+          fixed top-0 left-12 h-screen z-30 
+          bg-white shadow-lg border-r border-gray-200
+          transition-all duration-300 ease-in-out
+          ${showSidebar ? 'w-60' : 'w-15'}
+          ${showSidebar ? 'translate-x-0' : '-translate-x-full'}
+          md:translate-x-0 overflow-x-hidden
+          overflow-y-hidden
+        `}
+      >
       {/* Header with Logo and Collapse Button */}
       <div className="flex justify-between items-center h-16 px-4 border-b border-gray-200">
-        <a href="/" className="flex items-center space-x-2 min-w-0">
-          <img 
-            src={quizIcon} 
-            alt="Quiz Logo" 
-            className="w-8 h-8 flex-shrink-0 transition-transform duration-300 hover:scale-110" 
-          />
-          <h1 className={`
-            font-bold text-xl text-gray-800 whitespace-nowrap
-            transition-all duration-300 ease-in-out
-            ${showSidebar ? 'opacity-100 translate-x-0' : 'opacity-0 -translate-x-4 pointer-events-none'}
-          `}>
-            QLearn
-          </h1>
-        </a>
-        
+        <AppLogo showSidebar={showSidebar} />
         <button 
           onClick={() => setShowSidebar(!showSidebar)}
           className={`
@@ -262,7 +260,7 @@ function SideNav(
                       <span className={`
                         text-gray-700 text-xs font-medium truncate
                         transition-all duration-300 ease-in-out cursor-pointer
-                        ${showSidebar ? 'opacity-100 translate-x-0' : 'opacity-0 -translate-x-4 absolute pointer-events-none'}
+                        ${showSidebar ? 'opacity-100 translate-x-[-2px]' : 'opacity-0 -translate-x-4 absolute pointer-events-none'}
                       `}>
                         {topic.topic}
                       </span>
@@ -286,11 +284,10 @@ function SideNav(
               ))}
               </ul>
             </div>
-          </nav>
-        }
-        {/* <SideNavUserBadge user={user} /> */}
+          </nav>}
       </div>
       <SideNavUserBadge user={user} />
+      </div>
     </aside>
   )
 }

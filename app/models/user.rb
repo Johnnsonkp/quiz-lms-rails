@@ -81,7 +81,36 @@ class User < ApplicationRecord
     generate_question_heatmap_data(start_date, end_date, question_counts)
   end
 
+  # Study goal tracking methods
+  def today_study_hours_aest
+    aest_today = Date.current.in_time_zone('Australia/Sydney')
+    study_hours.where(date: aest_today).sum(:hours) || 0.0
+  end
+
+  def study_goal_progress
+    goal = daily_study_goal_hours || 8.0
+    actual = today_study_hours_aest
+    progress_percentage = goal > 0 ? [(actual / goal * 100).round(1), 100].min : 0
+    hours_remaining = [goal - actual, 0].max
+
+    {
+      goal_hours: goal,
+      actual_hours: actual.round(2),
+      progress_percentage: progress_percentage,
+      hours_remaining: hours_remaining.round(2),
+      status: determine_study_status(progress_percentage),
+      is_goal_achieved: progress_percentage >= 100
+    }
+  end
+
   private
+
+  def determine_study_status(percentage)
+    return 'completed' if percentage >= 100
+    return 'on-track' if percentage >= 80
+    return 'behind' if percentage >= 50
+    'far-behind'
+  end
 
   def generate_heatmap_data(start_date, end_date, completed_counts, attempted_counts)
     (start_date.to_date..end_date.to_date).map do |date|

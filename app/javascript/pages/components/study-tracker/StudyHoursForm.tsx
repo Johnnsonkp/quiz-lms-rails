@@ -1,15 +1,27 @@
 import React, { useState } from 'react';
 
+import { UserI } from '../../../types/userTypes';
+import { handleStudyHoursSubmit } from '../../../services/heatmapServices/studyHeatmap';
+import { usePage } from '@inertiajs/react';
+
 interface StudyHoursFormProps {
-  onSubmit: (date: string, hours: number) => void;
+  onSubmit?: (
+    date: string, 
+    hours: number, 
+    user: any, 
+    setRefreshTrigger: (value: number) => void
+  ) => void;
   loading?: boolean;
+  setRefreshTrigger: (value: boolean) => void;
 }
 
-const StudyHoursForm: React.FC<StudyHoursFormProps> = ({ onSubmit, loading = false }) => {
+const StudyHoursForm: React.FC<StudyHoursFormProps> = ({ loading = false, setRefreshTrigger }: StudyHoursFormProps) => {
+  const { props } = usePage();
+  const user = props.user as UserI | null;
+
   // Initialize with current AEST date
   const getAESTDate = () => {
     const now = new Date();
-    // Convert to AEST (UTC+10 or UTC+11 depending on DST)
     const aestOffset = 10 * 60; // Base AEST offset in minutes
     const aestTime = new Date(now.getTime() + (aestOffset + now.getTimezoneOffset()) * 60000);
     return aestTime.toISOString().split('T')[0];
@@ -35,7 +47,8 @@ const StudyHoursForm: React.FC<StudyHoursFormProps> = ({ onSubmit, loading = fal
 
     setIsSubmitting(true);
     try {
-      await onSubmit(selectedDate, studyHours);
+      // await onSubmit(selectedDate, studyHours, user, setIsSubmittingT, setRefreshTrigger);
+      await handleStudyHoursSubmit(selectedDate, studyHours, user, setIsSubmitting, setRefreshTrigger);
       setHours(''); // Reset hours after successful submission
     } catch (error) {
       console.error('Error submitting study hours:', error);
@@ -45,11 +58,12 @@ const StudyHoursForm: React.FC<StudyHoursFormProps> = ({ onSubmit, loading = fal
   };
 
   return (
-    <div className="bg-white p-4 rounded-lg border border-gray-200 shadow-xs">
+    <div className="bg-white p-2 shadow-xs">
       <h3 className="text-xs font-semibold text-gray-900 mb-2">Log Study Hours</h3>
       
       <form onSubmit={handleSubmit} className="space-y-4">
-        <div className="grid grid-cols-1 md:grid-cols-1 gap-4">
+        {/* <div className="grid grid-cols-1 md:grid-cols-1 gap-4 "> */}
+          <div className="flex gap-4">
           {/* Date Input */}
           <div>
             <label htmlFor="study-date" className="block text-xs font-xs text-gray-700 mb-1">

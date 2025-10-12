@@ -14,7 +14,8 @@ const StudyHoursHeatmap: React.FC<StudyHoursHeatmapProps> = ({
   startDate,
   endDate,
   onDateClick,
-  refreshTrigger
+  refreshTrigger,
+  today,
 }) => {
   const [studyActivities, setStudyActivities] = useState<StudyActivity[]>([]);
   const [loading, setLoading] = useState(true);
@@ -25,29 +26,17 @@ const StudyHoursHeatmap: React.FC<StudyHoursHeatmapProps> = ({
     days_studied: number;
   } | null>(null);
 
-  // Get current AEST date
-  const getAESTDate = () => {
-    const now = new Date();
-    // Convert to AEST (UTC+10 or UTC+11 depending on DST)
-    const aestOffset = 10 * 60; // Base AEST offset in minutes
-    const aestTime = new Date(now.getTime() + (aestOffset + now.getTimezoneOffset()) * 60000);
-    return aestTime;
-  };
-
-  const today = getAESTDate();
+    const defaultStartDate = useMemo(() => {
+      const date = new Date(today);
+      date.setMonth(date.getMonth() - 4);
+      return date;
+    }, [today]);
   
-  // Default to showing last 6 months if no dates provided (using AEST)
-  const defaultStartDate = useMemo(() => {
-    const date = new Date(today);
-    date.setMonth(date.getMonth() - 4);
-    return date;
-  }, [today]);
-
-  const defaultEndDate = useMemo(() => {
-    const date = new Date(today);
-    date.setMonth(date.getMonth() + 3);
-    return date;
-  }, [today]);
+    const defaultEndDate = useMemo(() => {
+      const date = new Date(today);
+      date.setMonth(date.getMonth() + 3);
+      return date;
+    }, [today]);
 
   const loadHeatmapData = async () => {
     if (!user) {
@@ -101,17 +90,13 @@ const StudyHoursHeatmap: React.FC<StudyHoursHeatmapProps> = ({
     const dateStr = value.date.toISOString().slice(0, 10);
     const hoursText = value.hours === 1 ? 'hour' : 'hours';
     const tooltip = `${dateStr}: ${value.hours} ${hoursText} studied`;
-    
     return { 'data-tip': tooltip };
   };
 
-  // Determine CSS class based on study hours
   const getClassForValue = (value: any) => {
     if (!value || value.hours === 0) return 'color-empty';
 
-    // Study hours thresholds (adjust based on your preferences)
-    const thresholds = [0.5, 1, 2, 3, 4, 5, 6, 7, 8, 10]; // Hours studied
-    
+    const thresholds = [0.5, 1, 2, 3, 4, 5, 6, 7, 8, 10]; 
     if (value.hours >= thresholds[9]) return 'color-github-10'; // 10+ hours
     if (value.hours >= thresholds[8]) return 'color-github-9';  // 8+ hours
     if (value.hours >= thresholds[7]) return 'color-github-8';  // 7+ hours
@@ -122,7 +107,7 @@ const StudyHoursHeatmap: React.FC<StudyHoursHeatmapProps> = ({
     if (value.hours >= thresholds[2]) return 'color-github-3';  // 2+ hours
     if (value.hours >= thresholds[1]) return 'color-github-2';  // 1+ hours
     if (value.hours >= thresholds[0]) return 'color-github-1';  // 30 minutes+
-    return 'color-github-1'; // Light activity
+    return 'color-github-1';
   };
 
   const handleClick = (value: any) => {
@@ -131,7 +116,6 @@ const StudyHoursHeatmap: React.FC<StudyHoursHeatmapProps> = ({
     if (onDateClick) {
       onDateClick(value);
     } else if (value && value.hours > 0) {
-      // Default behavior: show alert with details
       const dateStr = value.date?.toISOString().slice(0, 10);
       const hoursText = value.hours === 1 ? 'hour' : 'hours';
       alert(`${dateStr}: ${value.hours} ${hoursText} studied`);
