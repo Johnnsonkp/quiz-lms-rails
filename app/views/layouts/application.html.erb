@@ -1,11 +1,47 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
   <head>
-    <title inertia>QLearn.ai</title>
+    <title inertia><%= content_for?(:title) ? "#{content_for(:title)} | QLearn.ai" : "QLearn.ai - AI-Powered Quiz Learning Management System" %></title>
     <meta name="viewport" content="width=device-width,initial-scale=1">
-    <meta name="description" content="An AI powered-quiz Learning Management System app" />
+    
+    <!-- SEO Meta Tags -->
+    <meta name="description" content="<%= content_for?(:description) ? content_for(:description) : 'Transform your learning experience with QLearn.ai - an advanced AI-powered quiz platform featuring personalized study tracking, goal setting, and comprehensive analytics. Perfect for students, educators, and professionals.' %>" />
+    <meta name="keywords" content="quiz platform, learning management system, AI education, study tracker, online quizzes, educational technology, personalized learning, student analytics, study goals, e-learning" />
+    <meta name="author" content="QLearn.ai">
+    <meta name="robots" content="index, follow">
+    <link rel="canonical" href="<%= request.original_url %>">
 
+    <!-- Open Graph / Facebook -->
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="<%= request.original_url %>">
+    <meta property="og:title" content="<%= content_for?(:og_title) ? content_for(:og_title) : 'QLearn.ai - AI-Powered Quiz Learning Management System' %>">
+    <meta property="og:description" content="<%= content_for?(:og_description) ? content_for(:og_description) : 'Transform your learning with AI-powered quizzes, study tracking, and personalized analytics. Join thousands of learners improving their knowledge with QLearn.ai.' %>">
+    <meta property="og:image" content="<%= asset_url('quiz-icon.png') %>">
+    <meta property="og:image:width" content="400">
+    <meta property="og:image:height" content="400">
+    <meta property="og:image:alt" content="QLearn.ai - AI-Powered Learning Platform">
+    <meta property="og:site_name" content="QLearn.ai">
+
+    <!-- Twitter -->
+    <meta property="twitter:card" content="summary_large_image">
+    <meta property="twitter:url" content="<%= request.original_url %>">
+    <meta property="twitter:title" content="<%= content_for?(:twitter_title) ? content_for(:twitter_title) : 'QLearn.ai - AI-Powered Quiz Learning Management System' %>">
+    <meta property="twitter:description" content="<%= content_for?(:twitter_description) ? content_for(:twitter_description) : 'Transform your learning with AI-powered quizzes, study tracking, and personalized analytics.' %>">
+    <meta property="twitter:image" content="<%= asset_url('quiz-icon.png') %>">
+    <meta property="twitter:image:alt" content="QLearn.ai - AI-Powered Learning Platform">
+
+    <!-- Additional Meta -->
+    <meta name="theme-color" content="#3B82F6">
+    <meta name="application-name" content="QLearn.ai">
+    <meta name="apple-mobile-web-app-title" content="QLearn.ai">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="default">
+
+    <!-- Favicons -->
     <%= favicon_link_tag 'quiz-icon.png' %>
+    <link rel="icon" type="image/png" sizes="32x32" href="<%= asset_path('quiz-icon.png') %>">
+    <link rel="icon" type="image/png" sizes="16x16" href="<%= asset_path('quiz-icon.png') %>">
+    <link rel="apple-touch-icon" sizes="180x180" href="<%= asset_path('quiz-icon.png') %>">
 
     <%= csrf_meta_tags %>
     <%= csp_meta_tag %>
@@ -18,6 +54,28 @@
     <%= vite_typescript_tag "inertia" %>
     <%= inertia_ssr_head %>
     <%= vite_javascript_tag 'application' %>
+
+    <!-- Structured Data -->
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "WebApplication",
+      "name": "QLearn.ai",
+      "description": "AI-powered quiz learning management system with personalized study tracking and analytics",
+      "url": "<%= request.base_url %>",
+      "applicationCategory": "EducationalApplication",
+      "operatingSystem": "Web Browser",
+      "offers": {
+        "@type": "Offer",
+        "price": "0",
+        "priceCurrency": "AU"
+      },
+      "author": {
+        "@type": "Organization",
+        "name": "QLearn.ai"
+      }
+    }
+    </script>
 
     <!--
       If using a TypeScript entrypoint file:
