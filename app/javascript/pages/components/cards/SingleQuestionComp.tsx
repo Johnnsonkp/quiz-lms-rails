@@ -135,7 +135,8 @@ export default function SingleQuestionComponent({ quizData, selectedSubject, onB
     <div className="max-w-5xl mx-auto p-1">
       {/* Header */}
        <SingleComponentHeader 
-        onBack={onBack} 
+        // onBack={onBack} 
+        onBack={() => window.history.back()} 
         currentQuestionIndex={currentQuestionIndex} 
         totalQuestions={totalQuestions}
         calculateProgress={calculateProgress} 

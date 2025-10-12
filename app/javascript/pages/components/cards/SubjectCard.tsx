@@ -240,7 +240,7 @@ function SubjectCards(
         )}
       <div className="absolute top-3 badge-flag-container ">
         <div
-          className="relative bg-white pl-1 pr-1 py-1 text-[8px] font-semibold text-gray-700 flex items-center gap-1 badge-flag shadow-sm z-20 border-1 rounded-r-lg">
+          className="relative bg-white pl-1 pr-1 py-1 text-[8px] font-semibold text-gray-700 flex items-center gap-1 badge-flag shadow-sm z-20 border-1 rounded-r-md">
           <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth="1.5"
             stroke="currentColor" className="w-5 h-3">
             <path strokeLinecap="round" strokeLinejoin="round"

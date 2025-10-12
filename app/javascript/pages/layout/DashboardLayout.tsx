@@ -105,6 +105,12 @@ function DashboardLayout({ children, user, categories, dashboard_stats, url_para
     setSelectedSubject(null);
     setSelectedTopic(null);
     setActiveSection('dashboard');
+    // go back -1 in history to previous page
+    // window.history.back();
+    // setListTitles(null);
+    // setListSubject(null);
+    // setShowQuizCards(true);
+    
   };
 
   // Content renderer based on state
@@ -113,7 +119,15 @@ function DashboardLayout({ children, user, categories, dashboard_stats, url_para
 
     // Dashboard Home
     if (!selectedTopic && activeSection === 'dashboard') {
-      return <DashboardHome user={finalUser} dashboard_stats={finalDashboardStats} />;
+      return (
+        <DashboardHome 
+          user={finalUser} 
+          dashboard_stats={finalDashboardStats} 
+          setSelectedSubject={setSelectedSubject}
+          setSelectedTopic={setSelectedTopic}
+          setActiveSection={setActiveSection}
+        />
+      )
     }
 
     // Loading states

@@ -15,14 +15,27 @@ type DashboardHomeProps = {
     total_subjects: number;
   };
   user: UserI | null;
+  setSelectedSubject?: (subject: string | null) => void;
+  setSelectedTopic?: (topic: string | null) => void;
+  setActiveSection?: (section: string) => void;
 };
 
 
-export const DashboardHome = memo(({ user, dashboard_stats }: DashboardHomeProps) => {
+export const DashboardHome = memo((
+  { 
+    user, 
+    dashboard_stats, 
+    setSelectedSubject, 
+    setSelectedTopic, 
+    setActiveSection,
+  }: DashboardHomeProps) => {
   const [updateURL, setUpdateURL] = React.useState(true);
 
   useEffect(() => {
     if (updateURL == true) {
+      // setSelectedSubject && setSelectedSubject(null);
+      // setSelectedTopic && setSelectedTopic(null);
+      // setActiveSection && setActiveSection('dashboard');
       window.history.replaceState(null, "", "/dashboard");
       setUpdateURL(false);
     }
