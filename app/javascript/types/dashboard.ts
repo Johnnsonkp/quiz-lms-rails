@@ -75,6 +75,7 @@ export interface SingleQuestionCardProps {
   handleNext: () => void;
   handleShowResult: () => void;
   handleReset: () => void;
+  quizTitle?: string;
   currentQuestion: {
     id: number;
     question: string;

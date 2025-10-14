@@ -1,5 +1,6 @@
 import './singleCard.css';
 
+import AddToFavourites from '../ui/AddToFavourites';
 import React from 'react';
 import { SubjectCardProps } from '../../../types/dashboard';
 import { deleteQuizData } from '../../../api/quiz';
@@ -285,22 +286,30 @@ function SubjectCards(
         <path strokeLinecap="round" strokeLinejoin="round"
           d="M3 13.125C3 12.504 3.504 12 4.125 12h2.25c.621 0 1.125.504 1.125 1.125v6.75C7.5 20.496 6.996 21 6.375 21h-2.25A1.125 1.125 0 0 1 3 19.875v-6.75ZM9.75 8.625c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125v11.25c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 0 1-1.125-1.125V8.625ZM16.5 4.125c0-.621.504-1.125 1.125-1.125h2.25C20.496 3 21 3.504 21 4.125v15.75c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 0 1-1.125-1.125V4.125Z" />
       </svg>
-      <span className='!text-xs'>{tag || 'ADVANCED'}</span>
+      <span className='text-xs'>{tag || 'ADVANCED'}</span>
     </div>
 
     <div className="p-4 px-2 py-1 flex flex-col justify-between ">
       <div>
-        <div className='flex justify-between'>
+        <div className='flex-col justify-between'>
           <div>
-            <p className="text-[11px] text-gray-500 mb-2">{updatedTopic || topic}</p>
-            <h3 className=" font-semibold text-gray-800 mb-3 leading-tight text-sm">
+            <div className='flex items-center justify-between gap-2'>
+              <p className="text-[11px] text-gray-500 mt-1">{updatedTopic || topic}</p>
+              <AddToFavourites />
+            </div>
+            {/* <h3 className=" font-semibold text-gray-800 mb-3 leading-tight text-sm">
+              {updatedSubject.length > 0 && updatedSubject?.slice(0, 20) || subject && subject?.slice(0, 20)}
+              <span>{updatedSubject.length > 20 && updatedSubject?.slice(20, 30) || subject && subject?.slice(20, 30)}</span>
+              <span>{updatedSubject.length > 30 && updatedSubject?.slice(30, 40) || subject && subject?.slice(30, 40)}</span>
+            </h3> */}
+          </div>
+
+          <div className="flex items-center justify-between mt-0">
+            <h3 className=" font-semibold text-gray-800 mb-3 mt-2 leading-tight text-sm">
               {updatedSubject.length > 0 && updatedSubject?.slice(0, 20) || subject && subject?.slice(0, 20)}
               <span>{updatedSubject.length > 20 && updatedSubject?.slice(20, 30) || subject && subject?.slice(20, 30)}</span>
               <span>{updatedSubject.length > 30 && updatedSubject?.slice(30, 40) || subject && subject?.slice(30, 40)}</span>
             </h3>
-          </div>
-
-          <div className="flex items-center gap-2">
             {/* Circular Progress Bar */}
             <div className="relative w-13 h-13">
               <svg className="w-13 h-13 transform -rotate-90" viewBox="0 0 32 32">
@@ -336,7 +345,7 @@ function SubjectCards(
         </div>
 
         {/* Display quiz titles */}
-        <div className="space-y-1 mb-3">
+        <div className="space-y-1 mb-3 mt-1">
           {titles.length > 1? titles?.slice(0, 2).map((title: any, index: number) => (
             <div key={index} className="text-[10px] text-gray-600 border-l-2 border-blue-500 pl-2">
               {title}

@@ -190,6 +190,7 @@ export default function SingleQuestionComponent({ quizData, selectedSubject, onB
           handleNext={handleNext}
           handleShowResult={handleShowResult}
           handleReset={handleReset}
+          quizTitle={quizData?.quiz_title || quizData?.title || ''}
           currentQuestion={currentQuestion}
         />
 

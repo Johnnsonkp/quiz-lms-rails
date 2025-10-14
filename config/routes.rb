@@ -47,6 +47,8 @@ Rails.application.routes.draw do
   
   post 'dashboard/complete_quiz', to: 'dashboard#complete_quiz'
   
+  get 'dashboard/quiz/note', to: 'dashboard#quiz_note'
+  
   delete 'dashboard/delete_quiz', to: 'dashboard#delete'
   delete 'dashboard/delete_single_quiz', to: 'dashboard#delete_single_quiz'
 

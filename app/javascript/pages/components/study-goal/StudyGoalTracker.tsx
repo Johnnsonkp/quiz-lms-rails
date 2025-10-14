@@ -95,6 +95,32 @@ export default function StudyGoalTracker({ user }: StudyGoalTrackerProps) {
     );
   }
 
+  if (!user) {
+    // Show empty state with placeholder data for unauthenticated users
+    const emptyGoalData = {
+      goal_hours: 8,
+      actual_hours: 0,
+      progress_percentage: 0,
+      hours_remaining: 8,
+      status: 'not-started',
+      is_goal_achieved: false
+    };
+
+    return (
+      <div className="space-y-0 h-full">
+        <StudyGoalProgress 
+          goalHours={emptyGoalData.goal_hours}
+          actualHours={emptyGoalData.actual_hours}
+          progressPercentage={emptyGoalData.progress_percentage}
+          hoursRemaining={emptyGoalData.hours_remaining}
+          status={emptyGoalData.status}
+          isGoalAchieved={emptyGoalData.is_goal_achieved}
+          onGoalUpdate={() => {}} // No-op for unauthenticated users
+        />
+      </div>
+    );
+  }
+
   if (error || !goalData) {
     return (
       <div className="bg-red-50 border border-red-200 rounded-lg p-4">

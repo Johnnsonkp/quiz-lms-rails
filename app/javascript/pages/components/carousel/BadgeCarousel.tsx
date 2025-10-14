@@ -14,7 +14,7 @@ function BadgeCarousel({selectedTopic, quiz_preview}:
     <div className="flex items-center pt-2 w-full mb-6">
       {titles && titles?.length > 1? (
         <>
-          <button
+          {/* <button
             className="p-0 px-3 rounded-sm bg-gray-200 hover:bg-gray-300 text-gray-900 mr-[2px] disabled:opacity-50 cursor-pointer border-1 border-gray-500"
             onClick={() => setStartIndex((prev: number) => Math.max(prev - 1, 0))}
             disabled={startIndex === 0}
@@ -31,7 +31,7 @@ function BadgeCarousel({selectedTopic, quiz_preview}:
             type="button"
           >
             &#8594;
-          </button>
+          </button> */}
 
         <div className="flex flex-wrap gap-2 flex-1 mx-4">
           {titles && titles
@@ -40,7 +40,7 @@ function BadgeCarousel({selectedTopic, quiz_preview}:
             .map((title: string, index: number) => (
 
             <span key={startIndex + index}
-              className="inline-block bg-gray-200 rounded-full px-2 py-1 text-[13px] font-medium text-gray-800 cursor-pointer border-1 border-transparent hover:border-blue-500"
+              className="inline-block bg-white rounded-md px-2 py-1 text-xs font-medium text-gray-800 cursor-pointer border-1 border-gray-500 hover:border-blue-500"
             >
               {title}
             </span>))}

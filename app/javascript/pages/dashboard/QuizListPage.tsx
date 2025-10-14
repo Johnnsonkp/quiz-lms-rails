@@ -2,6 +2,7 @@ import React, { useCallback, useState } from 'react';
 
 import { EditForm } from '../components/forms/EditListItemQuiz';
 import {EditIcon} from '../components/ui/EditIcon';
+import NoteSideDrawer from '../components/ui/NoteSideDrawer';
 import {deleteSingleQuizData} from '../../api/quiz';
 
 // Types
@@ -53,6 +54,12 @@ const handleDelete = (id: number | undefined | null) => {
 function QuizListPage({ titles, subject, img, getQuizData, quizList = [], showList }: QuizListPageProps) {
   const [showEditForm, setShowEditForm] = useState(false);
   const [editFormData, setEditFormData] = useState<EditFormData>({id: null, title: '', subject: ''});
+  
+  // Note drawer state
+  const [showNoteDrawer, setShowNoteDrawer] = useState(false);
+  const [selectedNote, setSelectedNote] = useState<string | null>(null);
+  const [selectedQuizTitle, setSelectedQuizTitle] = useState<string>('');
+  const [noteLoading, setNoteLoading] = useState(false);
 
   // TODO: Move to separate file
   const getQuizId = useCallback((title: string): number | null => {
@@ -72,12 +79,63 @@ function QuizListPage({ titles, subject, img, getQuizData, quizList = [], showLi
     return <div>No quizzes available</div>;
   }
 
+  // Function to fetch note from backend and open drawer
+  const openNoteOnSideDrawer = async (title: string) => {
+    if (!title) {
+      console.error('Quiz title not provided');
+      return;
+    }
+
+    setSelectedQuizTitle(title);
+    setShowNoteDrawer(true);
+    setNoteLoading(true);
+    setSelectedNote(null);
+
+    try {
+      const response = await fetch(`/dashboard/quiz/note?title=${encodeURIComponent(title)}`, {
+        method: 'GET',
+        headers: {
+          'Accept': 'application/json',
+          'Content-Type': 'application/json',
+        },
+        credentials: 'same-origin'
+      });
+
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+
+      const data = await response.json();
+      // Backend now returns the note content directly
+      setSelectedNote(data.note || null);
+    } catch (error) {
+      console.error('Error fetching note:', error);
+      setSelectedNote(null);
+    } finally {
+      setNoteLoading(false);
+    }
+  };
+
+  const closeNoteDrawer = () => {
+    setShowNoteDrawer(false);
+    setSelectedNote(null);
+    setSelectedQuizTitle('');
+  };
+
   return (
     <div className={`${showList ? '' : 'hidden'}`}>
       <EditForm
         isOpen={showEditForm}
         setShowEditForm={setShowEditForm}
         formData={editFormData}
+      />
+      
+      <NoteSideDrawer
+        isOpen={showNoteDrawer}
+        onClose={closeNoteDrawer}
+        note={selectedNote}
+        quizTitle={selectedQuizTitle}
+        loading={noteLoading}
       />
       
       <table className="min-w-full divide-y divide-gray-200 overflow-x-auto border-2 border-gray-200 rounded-lg">
@@ -128,7 +186,12 @@ function QuizListPage({ titles, subject, img, getQuizData, quizList = [], showLi
               </td>
               <td className="px-3 py-4 whitespace-nowrap">
                 {quizList?.find((q: Quiz) => q.title === title)?.note ? (
-                    <button className="flex items-center gap-1 border border-gray-300 rounded-md px-2 py-1 text-sm text-gray-700 hover:bg-gray-100 hover:border-blue-500 transition-colors cursor-pointer">Note</button>
+                    <button 
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        openNoteOnSideDrawer(title);
+                      }}
+                      className="flex items-center gap-1 border border-gray-300 rounded-md px-2 py-1 text-sm text-gray-700 hover:bg-gray-100 hover:border-blue-500 transition-colors cursor-pointer">Note</button>
                   ) : (
                     <button className="text-gray-400 cursor-not-allowed text-sm" disabled>No Note</button>
                   )}

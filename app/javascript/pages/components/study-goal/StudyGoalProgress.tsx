@@ -93,7 +93,7 @@ export default function StudyGoalProgress({
   const predefinedGoals = [2, 4, 6, 8, 10];
   
   return (
-    <div className="bg-white p-3 rounded-lg shadow-sm border-gray-300 border w-[300px] h-full">
+    <div className="bg-white p-3  w-[300px] h-[250px]">
       <div className="w-[100%] m-auto">
         <SliderButton 
           activeTab={activeTab} 
@@ -177,17 +177,17 @@ export default function StudyGoalProgress({
             status={status}
           />
       
-          <div className="space-y-2 flex-[0.5] justify-end align-bottom items-start h-[100%]">
-            <p className="mt-6 border-2 border-gray-200 rounded-lg py-1 px-2 text-sm font-normal text-gray-800">
+          <div className="space-y-1 flex-[0.5] justify-end align-bottom items-start h-[100%]">
+            <p className="mt-6 border-2 border-gray-200 rounded-lg py-1 px-2 text-xs font-normal text-gray-800">
               Target: {Number(goalHours) || goalHours} hrs
             </p>
         
-            <p className="border-2 border-gray-200 rounded-lg py-1 px-2 text-sm font-normal text-gray-800">
-              Progress: {Number(actualHours) || actualHours} hrs
+            <p className="border-2 border-gray-200 rounded-lg py-1 px-2 text-xs font-normal text-gray-800">
+              Progress: {Number(actualHours) || 0} hrs
             </p>
             
             {!isGoalAchieved && hoursRemaining > 0 && (
-              <p className="mt-4 border-2 border-gray-200 rounded-lg py-1 px-2 text-xs text-orange-600">
+              <p className="mt-2 border-2 border-gray-200 rounded-lg py-1 px-2 text-xs text-orange-600">
                 Remaining: {Number(hoursRemaining) || hoursRemaining} hrs
               </p>
             )}

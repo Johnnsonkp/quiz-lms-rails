@@ -173,14 +173,24 @@ const DashboardHeatmap: React.FC<DashboardHeatmapProps> = ({
     loading={loading} 
     error={error} 
   />
-
+// border-gray-300 border-1 rounded-lg
   return (
     <div className="dashboard-heatmap">
       <p className='text-sm mb-2'>Tracker Heatmaps</p>
 
       <div className='flex justify-between gap-4'>
 
-      <div className="heatmap-container bg-white p-2 px-3 rounded-lg border-2 border-gray-200 flex-col flex-[0.7] shadow-sm">
+      <div className="heatmap-container bg-white p-2 px-3 rounded-lg border-1 border-gray-300 flex-col flex-[0.7] relative h-[250px] shadow-sm overflow-y-hidden">
+        {/* Glass blur overlay for unauthenticated users */}
+        {!user && (
+          <div className="absolute inset-0 bg-white/40 backdrop-blur-xs rounded-lg z-10 flex items-center justify-center">
+            <div className="text-center">
+              <p className="text-gray-700 font-medium mb-2">Log in to track your metrics</p>
+              <p className="text-gray-500 text-sm">Sign in to see your learning progress</p>
+            </div>
+          </div>
+        )}
+        
         {/* <HeatMapSlider /> */}
         <SliderButton 
           activeTab={activeTab} 
@@ -225,7 +235,16 @@ const DashboardHeatmap: React.FC<DashboardHeatmapProps> = ({
       </div>
       
         {/* {activeTab == 'study' &&   */}
-          <div className="study-tracker flex justify-between w-full h-full  align-middle items-end flex-[0.3]">
+          <div className="study-tracker flex justify-between w-full h-full  align-middle items-end flex-[0.3] relative border-gray-300 border-1 rounded-lg bg-white shadow-sm overflow-hidden">
+            {/* Glass blur overlay for unauthenticated users */}
+            {!user && (
+              <div className="absolute inset-0 bg-white/40 backdrop-blur-xs rounded-lg z-10 flex items-center justify-center">
+                <div className="text-center">
+                  <p className="text-gray-700 font-medium mb-2">Log in to track your metrics</p>
+                  <p className="text-gray-500 text-sm">Sign in to see your study goals</p>
+                </div>
+              </div>
+            )}
             <StudyGoalTracker user={user} />
           </div>
         {/* } */}

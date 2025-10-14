@@ -188,7 +188,43 @@ class DashboardController < ApplicationController
       end
 
     end
-  end 
+  end
+
+  # API endpoint to fetch quiz note
+  def quiz_note
+    begin
+      quiz_title = params[:title]
+      
+      if quiz_title.blank?
+        render json: { error: "Quiz title is required" }, status: 400
+        return
+      end
+
+      quiz = Quiz.find_by(title: quiz_title)
+      
+      if quiz.nil?
+        render json: { error: "Quiz not found" }, status: 404
+        return
+      end
+
+      # Check if user has access to this quiz (optional security check)
+      # if @user && quiz.user_id != @user.id
+      #   render json: { error: "Unauthorized access" }, status: 403
+      #   return
+      # end
+
+      render json: {
+        note: quiz.note&.content || quiz.note&.title || nil,
+        quiz_title: quiz.title,
+        quiz_id: quiz.id,
+        note_title: quiz.note&.title
+      }, status: 200
+
+    rescue => e
+      Rails.logger.error "Error fetching quiz note: #{e.message}"
+      render json: { error: "Failed to fetch quiz note" }, status: 500
+    end
+  end
 
 
 
