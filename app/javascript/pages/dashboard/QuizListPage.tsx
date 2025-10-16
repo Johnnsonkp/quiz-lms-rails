@@ -1,31 +1,11 @@
+import { EditFormData, Quiz, QuizListPageProps } from '../../types/dashboard';
 import React, { useCallback, useState } from 'react';
 
 import { EditForm } from '../components/forms/EditListItemQuiz';
 import {EditIcon} from '../components/ui/EditIcon';
 import NoteSideDrawer from '../components/ui/NoteSideDrawer';
 import {deleteSingleQuizData} from '../../api/quiz';
-
-// Types
-interface Quiz {
-  id: number;
-  title: string;
-}
-
-interface QuizListPageProps {
-  titles: string[] | null;
-  subject: string | null;
-  img: string | null;
-  getQuizData?: (subject: string, id: number) => void;
-  ids?: number[];
-  quizList?: Quiz[] | any;
-  showList?: boolean | false | undefined | any;
-}
-
-interface EditFormData {
-  id: number | null;
-  title: string;
-  subject: string;
-}
+import getNote from '../../services/noteServices/getNote';
 
 // Quiz List controllers TODO: Move to separate file
 const handleGetQuizData = (getQuizData: any, subject: string | null, title: string, quizList: Quiz[]) => {
@@ -47,8 +27,6 @@ const handleDelete = (id: number | undefined | null) => {
     window.location.reload();
   }
 };
-
-
 
 // Main Component
 function QuizListPage({ titles, subject, img, getQuizData, quizList = [], showList }: QuizListPageProps) {
@@ -79,42 +57,24 @@ function QuizListPage({ titles, subject, img, getQuizData, quizList = [], showLi
     return <div>No quizzes available</div>;
   }
 
-  // Function to fetch note from backend and open drawer
   const openNoteOnSideDrawer = async (title: string) => {
-    if (!title) {
-      console.error('Quiz title not provided');
-      return;
-    }
+    if (!title) return;
 
     setSelectedQuizTitle(title);
     setShowNoteDrawer(true);
     setNoteLoading(true);
     setSelectedNote(null);
 
-    try {
-      const response = await fetch(`/dashboard/quiz/note?title=${encodeURIComponent(title)}`, {
-        method: 'GET',
-        headers: {
-          'Accept': 'application/json',
-          'Content-Type': 'application/json',
-        },
-        credentials: 'same-origin'
-      });
-
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
-      }
-
-      const data = await response.json();
-      // Backend now returns the note content directly
-      setSelectedNote(data.note || null);
-    } catch (error) {
-      console.error('Error fetching note:', error);
-      setSelectedNote(null);
-    } finally {
-      setNoteLoading(false);
+    const note = await getNote({title});
+    if (note) {
+      setSelectedNote(note);
+      return setNoteLoading(false);
+    } else{
+      alert("hoops! unable to get quiz note.");
     }
+    setNoteLoading(false);
   };
+
 
   const closeNoteDrawer = () => {
     setShowNoteDrawer(false);
@@ -123,7 +83,7 @@ function QuizListPage({ titles, subject, img, getQuizData, quizList = [], showLi
   };
 
   return (
-    <div className={`${showList ? '' : 'hidden'}`}>
+    <div className={`${showList ? 'border-2 border-gray-200 rounded-lg overflow-hidden' : 'hidden'}`}>
       <EditForm
         isOpen={showEditForm}
         setShowEditForm={setShowEditForm}
@@ -138,7 +98,7 @@ function QuizListPage({ titles, subject, img, getQuizData, quizList = [], showLi
         loading={noteLoading}
       />
       
-      <table className="min-w-full divide-y divide-gray-200 overflow-x-auto border-2 border-gray-200 rounded-lg">
+      <table className="min-w-full divide-y divide-gray-200 overflow-x-auto rounded-lg">
         <thead className="bg-gray-50">
           <tr>
             <th className="w-16 px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">

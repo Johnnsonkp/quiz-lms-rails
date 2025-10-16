@@ -1,3 +1,5 @@
+// import { Route, Routes, useNavigate, useParams } from 'react-router-dom';
+
 import BadgeCarousel from '../components/carousel/BadgeCarousel';
 import DashboardBanner from '../components/header/dashboardHeader/DashboardBanner';
 import { DashboardHome } from '../dashboard/DashboardHome';
@@ -105,12 +107,6 @@ function DashboardLayout({ children, user, categories, dashboard_stats, url_para
     setSelectedSubject(null);
     setSelectedTopic(null);
     setActiveSection('dashboard');
-    // go back -1 in history to previous page
-    // window.history.back();
-    // setListTitles(null);
-    // setListSubject(null);
-    // setShowQuizCards(true);
-    
   };
 
   // Content renderer based on state
@@ -236,8 +232,7 @@ function DashboardLayout({ children, user, categories, dashboard_stats, url_para
       </div>
 
       <div className="flex-1 flex flex-row">
-        {/* Spacer for consistent gap between SideNav and Main */}
-        <div className="w-4 min-w-[1rem] max-w-[2rem] md:w-6 md:min-w-[1.5rem] md:max-w-[2.5rem]" />
+        {/* <div className="w-4 min-w-[1rem] max-w-[2rem] md:w-6 md:min-w-[1.5rem] md:max-w-[2.5rem]" /> */}
         <main
           style={{ opacity: loading || loadingQuizPreview ? 0 : 1 }}
           className={`flex-1 p-4 !pt-3 !mt-0 md:p-6 overflow-y-auto w-full transition-opacity duration-300`}

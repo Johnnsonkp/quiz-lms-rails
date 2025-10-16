@@ -33,21 +33,21 @@ function BadgeCarousel({selectedTopic, quiz_preview}:
             &#8594;
           </button> */}
 
-        <div className="flex flex-wrap gap-2 flex-1 mx-4">
+        <div className="flex flex-wrap gap-2 flex-1">
           {titles && titles
             .filter(Boolean)
             .slice(startIndex, startIndex + 4)
             .map((title: string, index: number) => (
 
             <span key={startIndex + index}
-              className="inline-block bg-white rounded-md px-2 py-1 text-xs font-medium text-gray-800 cursor-pointer border-1 border-gray-500 hover:border-blue-500"
+              className="inline-block bg-white rounded-md px-2 py-1 text-xs font-medium text-gray-600 cursor-pointer border-1 border-gray-300 hover:border-blue-500"
             >
               {title}
             </span>))}
         </div>
 
       </>) : 
-          <span className="inline-block bg-gray-200 rounded-full px-3 py-1 text-[13px] font-medium text-gray-800 cursor-pointer border-1 border-transparent hover:border-blue-500">
+          <span className="inline-block bg-white rounded-md px-2 py-1 text-xs font-medium text-gray-600 cursor-pointer border-1 border-gray-300 hover:border-blue-500">
             {titles}
           </span>
       }

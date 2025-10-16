@@ -32,8 +32,6 @@ const DashboardHeatmap: React.FC<DashboardHeatmapProps> = ({
 
   const [activeTab, setActiveTab] = useState<'quiz' | 'study' | 'combined'>(activityType);
   const today = new Date();
-  // const [refreshTrigger, setRefreshTrigger] = useState(false);
-  // const [isSubmitting, setIsSubmitting] = useState(false);
   
   // Default to showing last 6 months if no dates provided
   const defaultStartDate = useMemo(() => {

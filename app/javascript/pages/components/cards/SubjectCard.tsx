@@ -297,11 +297,6 @@ function SubjectCards(
               <p className="text-[11px] text-gray-500 mt-1">{updatedTopic || topic}</p>
               <AddToFavourites />
             </div>
-            {/* <h3 className=" font-semibold text-gray-800 mb-3 leading-tight text-sm">
-              {updatedSubject.length > 0 && updatedSubject?.slice(0, 20) || subject && subject?.slice(0, 20)}
-              <span>{updatedSubject.length > 20 && updatedSubject?.slice(20, 30) || subject && subject?.slice(20, 30)}</span>
-              <span>{updatedSubject.length > 30 && updatedSubject?.slice(30, 40) || subject && subject?.slice(30, 40)}</span>
-            </h3> */}
           </div>
 
           <div className="flex items-center justify-between mt-0">

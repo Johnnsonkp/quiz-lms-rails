@@ -143,3 +143,24 @@ export interface QuizActivity {
   questions_answered?: number; 
   activity_type?: string; 
 }
+
+export interface Quiz {
+  id: number;
+  title: string;
+}
+
+export interface QuizListPageProps {
+  titles: string[] | null;
+  subject: string | null;
+  img: string | null;
+  getQuizData?: (subject: string, id: number) => void;
+  ids?: number[];
+  quizList?: Quiz[] | any;
+  showList?: boolean | false | undefined | any;
+}
+
+export interface EditFormData {
+  id: number | null;
+  title: string;
+  subject: string;
+}

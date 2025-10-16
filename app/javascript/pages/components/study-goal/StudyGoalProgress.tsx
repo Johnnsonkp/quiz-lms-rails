@@ -25,13 +25,6 @@ export default function StudyGoalProgress({
   onGoalUpdate
 }: StudyGoalProgressProps) {
   
-  // const getStatusFillColor = () => {
-  //   if (status === 'completed') return 'text-emerald-500';
-  //   if (status === 'on-track') return 'text-blue-500';
-  //   if (status === 'behind') return 'text-red-500';
-  //   return 'text-red-500';
-  // };
-
   const [activeTab, setActiveTab] = React.useState<'Progress' | 'Edit' | 'Log hours'>('Progress');
   const [currentGoalHours, setCurrentGoalHours] = useState(goalHours);
   const [isEditing, setIsEditing] = useState(false);
