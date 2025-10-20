@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 
 import { QuestionOptionsProps } from '../../../types/dashboard';
 
-function QuestionOptions({ question, showResult, selectedAnswer, onAnswerSelect }: QuestionOptionsProps) {
+function QuestionOptions({ question, showResult, selectedAnswer, onAnswerSelect, optionsBlurred }: QuestionOptionsProps) {
   const [shuffledAnswers, setShuffledAnswers] = useState<string[]>([]);
   const allAnswers = [question.answer, ...(question.incorrect_answers || [])];
 
@@ -13,7 +13,7 @@ function QuestionOptions({ question, showResult, selectedAnswer, onAnswerSelect 
 
   
   return (
-    <div className="space-y-3 mb-6">
+    <div className="space-y-3 mb-6 ">
       {shuffledAnswers.map((answer, index) => {
         const isSelected = selectedAnswer === answer;
         const isCorrectAnswer = answer === question.answer;
@@ -35,14 +35,12 @@ function QuestionOptions({ question, showResult, selectedAnswer, onAnswerSelect 
           }
         }
 
-        
-
         return (
           <button
             key={index}
             onClick={() => !showResult && onAnswerSelect(answer)}
             disabled={showResult}
-            className={buttonClass}
+            className={`${buttonClass} transition-all duration-300 ${optionsBlurred ? 'blur-md' : ''}`}
           >
             <div className="flex items-center cursor-pointer">
               <span className="mr-4 text-sm font-semibold min-w-[24px] h-6 bg-white rounded-full flex items-center justify-center border">

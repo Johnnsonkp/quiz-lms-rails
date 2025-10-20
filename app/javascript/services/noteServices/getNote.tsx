@@ -1,4 +1,4 @@
-async function getNote({title}: {title: string}): Promise<string | null> {
+async function getNote({title}: {title: string}): Promise<{note: string, key_concepts: string | null} | null> {
   try {
     const response = await fetch(`/dashboard/quiz/note?title=${encodeURIComponent(title)}`, {
       method: 'GET',
@@ -14,7 +14,11 @@ async function getNote({title}: {title: string}): Promise<string | null> {
     }
 
     const data = await response.json();
-    return data.note || null;
+    // return data.note || null;
+    return {
+      note: data.note,
+      key_concepts: data.key_concepts || null
+    }
     // Backend now returns the note content directly
   } catch (error) {
     console.error('Error fetching note:', error);

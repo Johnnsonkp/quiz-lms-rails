@@ -38,6 +38,7 @@ function QuizListPage({ titles, subject, img, getQuizData, quizList = [], showLi
   const [selectedNote, setSelectedNote] = useState<string | null>(null);
   const [selectedQuizTitle, setSelectedQuizTitle] = useState<string>('');
   const [noteLoading, setNoteLoading] = useState(false);
+  const [keyConceptsData, setKeyConceptsData] = useState<any>({});
 
   // TODO: Move to separate file
   const getQuizId = useCallback((title: string): number | null => {
@@ -64,12 +65,20 @@ function QuizListPage({ titles, subject, img, getQuizData, quizList = [], showLi
     setShowNoteDrawer(true);
     setNoteLoading(true);
     setSelectedNote(null);
+    setKeyConceptsData(null);
 
-    const note = await getNote({title});
-    if (note) {
-      setSelectedNote(note);
+    const data = await getNote({title});
+    if (data?.note && data?.key_concepts) {
+      console.log("Fetched note data:", data);
+      setSelectedNote(data.note);
+      setKeyConceptsData(data.key_concepts);
       return setNoteLoading(false);
-    } else{
+    }
+    else if(data?.note && !data?.key_concepts){
+      console.log("Fetched note data:", data);
+      setSelectedNote(data.note);
+      return setNoteLoading(false);
+    } else {
       alert("hoops! unable to get quiz note.");
     }
     setNoteLoading(false);
@@ -96,6 +105,7 @@ function QuizListPage({ titles, subject, img, getQuizData, quizList = [], showLi
         note={selectedNote}
         quizTitle={selectedQuizTitle}
         loading={noteLoading}
+        keyConcepts={keyConceptsData}
       />
       
       <table className="min-w-full divide-y divide-gray-200 overflow-x-auto rounded-lg">

@@ -36,7 +36,7 @@ function SingleComponentHeader(
 
   return (
     <div className="mb-4 w-[100%] relative">
-      <div className='absolute top-[-18px] w-[80vw] left-[-55px] bg-white-100 px-5 !mx-0 flex justify-between align-middle border-b-2 border-gray-200 shadow-xs py-1'>
+      <div className='absolute top-[-18px] w-[80vw] left-[-55px] bg-white-100 px-5 !mx-0 flex justify-between align-middle py-1'>
         <button
           onClick={onBack}
           className="flex flex-[0.2] !text-[15px] items-center text-blue-600 hover:text-blue-800 transition-colors cursor-pointer"

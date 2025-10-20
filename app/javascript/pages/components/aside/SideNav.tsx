@@ -106,13 +106,13 @@ function SideNav(
           </svg>
         </button>
       </div>
-
+      
       {/* Content Area with Smooth Scrolling */}
-      <div className="h-full overflow-y-auto scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-transparent">
+      <div className={`h-full overflow-y-auto scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-transparent `}>
         <Divider />
         
         {activeSection == "quiz" && questions ? 
-          <nav className="py-4">
+          <nav className={`py-4 ${showSidebar ? '' : 'hidden'}`}>
             <button 
               onClick={() => toggleSection('questions')}
               className="w-full px-4 flex justify-between items-center hover:bg-gray-50 transition-colors duration-200"
@@ -201,7 +201,7 @@ function SideNav(
             </div>
           </nav>
         :
-          <nav className="py-4">
+          <nav className={`py-4 ${showSidebar ? '' : 'hidden'}`}>
             <button 
               onClick={() => toggleSection('categories')}
               className={`w-full px-4 flex justify-between items-center hover:bg-gray-50 transition-colors duration-200 py-2 cursor-pointer mb-2 ${showSidebar ? 'opacity-100' : 'opacity-0 hidden'} `}

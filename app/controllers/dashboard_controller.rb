@@ -213,16 +213,94 @@ class DashboardController < ApplicationController
       #   return
       # end
 
+      # Ensure key_concepts is always returned as a proper object/hash
+      key_concepts_data = if quiz.note.present?
+        quiz.note.key_concepts_hash
+      else
+        {}
+      end
+
+      puts "key_concepts_data: #{key_concepts_data}" if Rails.env.development?
+
       render json: {
         note: quiz.note&.content || quiz.note&.title || nil,
         quiz_title: quiz.title,
         quiz_id: quiz.id,
-        note_title: quiz.note&.title
+        note_title: quiz.note&.title,
+        key_concepts: key_concepts_data
       }, status: 200
 
     rescue => e
       Rails.logger.error "Error fetching quiz note: #{e.message}"
       render json: { error: "Failed to fetch quiz note" }, status: 500
+    end
+  end
+
+  # API endpoint to update quiz note
+  def update_quiz_note
+    begin
+      quiz_title = params[:quiz_title]
+      note_content = params[:note_content]
+      key_concepts = params[:key_concepts]
+      
+      if quiz_title.blank?
+        render json: { error: "Quiz title is required" }, status: 400
+        return
+      end
+
+      if note_content.blank?
+        render json: { error: "Note content is required" }, status: 400
+        return
+      end
+
+      quiz = Quiz.find_by(title: quiz_title)
+      
+      if quiz.nil?
+        render json: { error: "Quiz not found" }, status: 404
+        return
+      end
+
+      # Check if user has access to this quiz (optional security check)
+      # if @user && quiz.user_id != @user.id
+      #   render json: { error: "Unauthorized access" }, status: 403
+      #   return
+      # end
+
+      # Find or create note for this quiz
+      note = quiz.note || quiz.build_note
+
+      # Update the note content
+      note.content = note_content
+      note.title = note.title || "Note for #{quiz.title}" # Set default title if none exists
+      
+      # Update key_concepts if provided
+      if key_concepts.present?
+        # Ensure key_concepts is a hash
+        concepts_hash = key_concepts.is_a?(Hash) ? key_concepts : {}
+        note.key_concepts = concepts_hash
+      end
+
+      if note.save
+        render json: {
+          message: "Note updated successfully",
+          note: {
+            content: note.content,
+            title: note.title,
+            quiz_title: quiz.title,
+            quiz_id: quiz.id,
+            key_concepts: note.key_concepts_hash
+          }
+        }, status: 200
+      else
+        render json: { 
+          error: "Failed to save note", 
+          details: note.errors.full_messages 
+        }, status: 422
+      end
+
+    rescue => e
+      Rails.logger.error "Error updating quiz note: #{e.message}"
+      render json: { error: "Failed to update quiz note" }, status: 500
     end
   end
 
@@ -614,6 +692,10 @@ class DashboardController < ApplicationController
 
       note = nil
       saved_quiz = nil
+      key_concepts = nil
+      
+      # Extract key-value pairs for the key_concepts field
+      key_concepts = OpenaiService.extract_key_value_concepts(file_text)
 
       # Check if quiz_data contains an error
       if quiz_data.is_a?(Hash) && quiz_data[:error]
@@ -628,6 +710,7 @@ class DashboardController < ApplicationController
         note = Note.new(
           title: title || "Note from #{uploaded_original_file_name}",
           content: file_text,
+          key_concepts: key_concepts || {},
           user: @user # Will be nil for unauthenticated users, which is fine
         )
         
@@ -762,7 +845,7 @@ class DashboardController < ApplicationController
 
 
   def extract_text(file)
-    case file.content_type
+    raw_text = case file.content_type
     when "application/pdf"
       reader = PDF::Reader.new(file.tempfile)
       reader.pages.map(&:text).join("\n")
@@ -774,6 +857,8 @@ class DashboardController < ApplicationController
     else # .txt file
       file.read
     end
+
+    formatted_text = OpenaiService.formatted_text(raw_text)
   end
 
   def extract_pdf_images(uploaded_file)

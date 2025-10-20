@@ -1,10 +1,10 @@
-import { useState } from 'react';
 import HintButton from '../buttons/HintButton';
 import NoteSideDrawer from '../ui/NoteSideDrawer';
 import QuestionOptions from './QuestionOptions';
 import SingleCardControls2 from '../controls/SingleCardControls2';
 import { SingleQuestionCardProps } from '../../../types/dashboard';
 import ViewNoteBtn from '../ui/ViewNote';
+import { useState } from 'react';
 
 export function SingleQuestionCard({ 
   question, 
@@ -104,14 +104,13 @@ export function SingleQuestionCard({
         </div>
 
         {/* Answer Options */}
-        <div className={`transition-all duration-300 ${optionsBlurred ? 'blur-md' : ''}`}>
-          <QuestionOptions 
-            question={question}
-            showResult={showResult}
-            selectedAnswer={selectedAnswer}
-            onAnswerSelect={onAnswerSelect}
-          />
-        </div>
+        <QuestionOptions 
+          question={question}
+          showResult={showResult}
+          selectedAnswer={selectedAnswer}
+          onAnswerSelect={onAnswerSelect}
+          optionsBlurred={optionsBlurred}
+        />
 
         <div className=''>
           <div className='flex align-middle mb-6 mt-4 gap-2'>

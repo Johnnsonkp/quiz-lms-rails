@@ -50,6 +50,7 @@ export interface QuestionOptionsProps {
   showResult: boolean;
   selectedAnswer: string | null;
   onAnswerSelect: (answer: string) => void;
+  optionsBlurred?: boolean;
 }
 
 export interface SingleQuestionCardProps {

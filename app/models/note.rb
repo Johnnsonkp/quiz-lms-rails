@@ -17,6 +17,47 @@ class Note < ApplicationRecord
   # Validate file type
   validate :acceptable_pdf_file
   
+  # Key concepts methods - handle JSON manually
+  def key_concepts_hash
+    return {} if key_concepts.blank?
+    
+    if key_concepts.is_a?(String)
+      JSON.parse(key_concepts) rescue {}
+    elsif key_concepts.is_a?(Hash)
+      key_concepts
+    else
+      {}
+    end
+  end
+  
+  def key_concepts=(value)
+    if value.is_a?(Hash)
+      super(value.to_json)
+    elsif value.is_a?(String)
+      super(value)
+    else
+      super(nil)
+    end
+  end
+  
+  def add_key_concept(concept, definition)
+    current_concepts = key_concepts_hash
+    current_concepts[concept] = definition
+    self.key_concepts = current_concepts
+    save
+  end
+  
+  def remove_key_concept(concept)
+    current_concepts = key_concepts_hash
+    current_concepts.delete(concept)
+    self.key_concepts = current_concepts
+    save
+  end
+  
+  def has_key_concepts?
+    key_concepts_hash.any?
+  end
+  
   private
   
   def acceptable_pdf_file

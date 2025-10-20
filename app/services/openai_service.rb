@@ -1,10 +1,163 @@
 class OpenaiService
   require 'openai'
 
-  def self.generate_quiz_from_uploaded_file(categories, file_text, uploaded_original_file_name, title, 
-        topic, subject)
+
+  def self.generate_quiz_from_uploaded_file(categories, file_text, uploaded_original_file_name, title, topic, subject)
     new.generate_quiz_from_uploaded_file(categories, file_text, uploaded_original_file_name, title, topic, subject)
   end
+
+  def self.formatted_text(text)
+    new.formatted_text(text)
+  end
+
+  def self.generate_key_concepts_from_text(text)
+    new.generate_key_concepts_from_text(text)
+  end
+
+  def self.extract_key_value_concepts(text)
+    new.extract_key_value_concepts(text)
+  end
+
+
+  def extract_key_value_concepts(text)
+    prompt_with_note_text = <<~PROMPT 
+      You are an intelligent study assistant. Extract key concepts and their definitions from the provided text.
+      
+      Return ONLY a valid JSON object with key-value pairs where:
+      - Key: The concept/term name (short, concise)
+      - Value: The definition or explanation (clear, concise)
+      
+      Example format:
+      {
+        "TCP": "Transmission Control Protocol - reliable, connection-oriented transport protocol",
+        "UDP": "User Datagram Protocol - fast, connectionless transport protocol",
+        "HTTP": "HyperText Transfer Protocol - application layer protocol for web communication"
+      }
+
+      Extract 5-15 of the most important concepts from this text:
+      #{text}
+    PROMPT
+
+    api_key = Rails.application.credentials.openai_api_key || ENV['OPENAI_API_KEY'] || ENV['OPENAI_ACCESS_TOKEN']
+    client = OpenAI::Client.new(
+      access_token: api_key,
+      request_timeout: 120
+    )
+    
+    begin
+      response = client.chat(
+        parameters: {
+          model: "gpt-4o-mini",
+          messages: [
+            { role: "system", content: "You are a study assistant that extracts key concepts in JSON format." },
+            { role: "user", content: prompt_with_note_text } 
+          ],
+          temperature: 0.2,
+          response_format: { type: "json_object" }
+        }
+      )
+
+      json_content = response.dig("choices", 0, "message", "content")
+      parsed_concepts = JSON.parse(json_content) rescue {}
+      
+      puts "Extracted key concepts: #{parsed_concepts}" if Rails.env.development?
+      return parsed_concepts
+    rescue => e
+      Rails.logger.error "Failed to extract key concepts: #{e.message}"
+      return {}
+    end
+  end
+
+  def generate_key_concepts_from_text(text)
+    prompt_with_note_text = <<~PROMPT 
+      You are an intelligent study assistant. 
+      You will take raw lecture notes or study material as input and produce the following outputs:
+
+      1. **List of Contents**
+        - Generate a hierarchical table of contents showing sections, subsections, and topics.
+
+      2. **Key Concepts and Definitions**
+        - Extract all important concepts, protocols, or terms.
+        - Provide concise definitions or explanations for each.
+        - Include any important details such as ports, protocols, architecture, or usage where relevant.
+
+      3. **High-Level Diagram / Overview**
+        - Show a textual architecture or layer overview of how these concepts fit in the broader context of networking.
+        - Indicate relationships between Application Layer, Transport Layer (TCP/UDP), Network Layer (IP), and Data Link/Physical Layer.
+        - If possible, output a Mermaid diagram for rendering in Markdown or documentation.
+
+      **Requirements:**
+      - Preserve the original content of the note.
+      - Format for readability.
+      - Keep plain text output; do not rewrite or summarize the note unnecessarily.
+      - Use bullet points, indentation, and clear headings.
+
+      ---
+
+      **Input Note:**
+      #{text}
+    PROMPT
+
+    api_key = Rails.application.credentials.openai_api_key || ENV['OPENAI_API_KEY'] || ENV['OPENAI_ACCESS_TOKEN']
+    client = OpenAI::Client.new(
+      access_token: api_key,
+      request_timeout: 120
+    )
+    response = client.chat(
+      parameters: {
+        model: "gpt-4o-mini",
+        messages: [
+          { role: "system", content: "You are a study assistant that structures notes for learning." },
+          { role: "user", content: prompt_with_note_text } 
+        ],
+        temperature: 0.2
+      }
+    )
+
+    puts "OpenAI response//////////////////////////////////////////////////////// -> : #{response}" if Rails.env.development?
+    structured_output = response.dig("choices", 0, "message", "content")
+
+    puts "Structured Output response//////////////////////////////////////////////////////// -> : #{structured_output}" if Rails.env.development?
+    structured_output
+  end 
+
+  def formatted_text(text)
+    # client = OpenAI::Client.new(access_token: ENV["OPENAI_API_KEY"])
+    api_key = Rails.application.credentials.openai_api_key || ENV['OPENAI_API_KEY'] || ENV['OPENAI_ACCESS_TOKEN']
+    client = OpenAI::Client.new(
+      access_token: api_key,
+      request_timeout: 120
+    )
+
+    prompt = <<~PROMPT
+      You are a text cleaning and formatting assistant.
+      The following text was extracted from a document. 
+      Please:
+      - Improve spacing and line breaks for readability.
+      - Keep the content exactly the same (no rewriting, summarizing, or rewording).
+      - Do not add or remove any information.
+      - Keep plain text format — no Markdown or HTML.
+      - Preserve bullet points, lists, and paragraph structure.
+
+      Text:
+      #{text}
+    PROMPT
+
+    response = client.chat(
+      parameters: {
+        model: "gpt-4o-mini",
+        messages: [
+          { role: "system", content: "You are a text formatting assistant that outputs plain text only." },
+          { role: "user", content: prompt }
+        ],
+        temperature: 0.4,
+        # max_tokens: 2000
+      }
+    )
+    formatted_text = response.dig("choices", 0, "message", "content")
+    return formatted_text
+  end
+
 
   def generate_quiz_from_uploaded_file(categories,file_text, uploaded_original_file_name, title, topic, subject)
     system_prompt = <<~PROMPT
@@ -229,7 +382,6 @@ class OpenaiService
     
     # Use intelligent text chunking instead of hard truncation
     processed_text = intelligent_text_chunking(file_text, 6000)
-    
     puts "Text processed: #{file_text.length} -> #{processed_text.length} characters" if Rails.env.development?
 
     # Build conditional instructions based on provided parameters
@@ -247,5 +399,7 @@ class OpenaiService
 
     Text content to analyze: #{processed_text}"
   end
+
+
 
 end

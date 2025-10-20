@@ -78,7 +78,7 @@ const DashboardHeatmap: React.FC<DashboardHeatmapProps> = ({
   // Modify viewBox after component mounts
   useEffect(() => {
     loadHeatmapData();
-  }, [activeTab]);
+  }, [activeTab, user]);
 
 
   const heatmapValues = useMemo(() => {
