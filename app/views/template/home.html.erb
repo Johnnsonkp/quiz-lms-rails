@@ -1,4 +1,13 @@
-<div class="bg-white max-h-[100px]">
+<% set_meta_tags(
+  title: "QLearn.ai - AI-Powered Quiz Learning Management System",
+  description: "Transform your learning experience with QLearn.ai - an advanced AI-powered quiz platform featuring personalized study tracking, goal setting, and comprehensive analytics. Perfect for students, educators, and professionals.",
+  og_title: "QLearn.ai - Revolutionize Your Learning with AI",
+  og_description: "Join thousands of learners using AI-powered quizzes, study tracking, and personalized analytics to achieve their educational goals.",
+  twitter_title: "QLearn.ai - AI-Powered Learning Platform",
+  twitter_description: "Transform your learning with AI-powered quizzes and personalized study tracking."
+) %>
+
+<div class="bg-white h-100vh">
 
   <div class="absolute bottom-0 right-0 overflow-hidden lg:inset-y-0 h-full">
     <img 
@@ -8,22 +17,31 @@
     />
   </div>
 
+  <%# <%= render 'shared/topbar' %>  
   <%= render 'shared/header-2' %> 
   <%# <%= render 'shared/header' %> 
 
-  <div class="relative isolate px-6 lg:px-8">
-    <div aria-hidden="true" class="absolute inset-x-0 -top-40 -z-10 transform-gpu overflow-hidden blur-3xl sm:-top-80">
-      <div style="clip-path: polygon(74.1% 44.1%, 100% 61.6%, 97.5% 26.9%, 85.5% 0.1%, 80.7% 2%, 72.5% 32.5%, 60.2% 62.4%, 52.4% 68.1%, 47.5% 58.3%, 45.2% 34.5%, 27.5% 76.7%, 0.1% 64.9%, 17.9% 100%, 27.6% 76.8%, 76.1% 97.7%, 74.1% 44.1%)" class="relative left-[calc(50%-11rem)] aspect-1155/678 w-144.5 -translate-x-1/2 rotate-30 bg-linear-to-tr from-[#ff80b5] to-[#9089fc] opacity-30 sm:left-[calc(50%-30rem)] sm:w-288.75"></div>
+  <div class="relative isolate px-6 lg:px-8 overflow-y-hidden pt-12">
+    <div aria-hidden="true" class="absolute inset-x-0 -top-40 -z-10 h-full transform-gpu overflow-hidden blur-3xl sm:-top-80">
+      <div 
+        style="clip-path: polygon(74.1% 44.1%, 100% 61.6%, 97.5% 26.9%, 
+        85.5% 0.1%, 80.7% 2%, 72.5% 32.5%, 60.2% 62.4%, 52.4% 68.1%, 47.5% 58.3%, 45.2% s
+        34.5%, 27.5% 76.7%, 0.1% 64.9%, 17.9% 100%, 27.6% 76.8%, 76.1% 97.7%, 74.1% 44.1%)" 
+        class="relative left-[calc(50%-11rem)] aspect-1155/678 w-144.5 -translate-x-1/2 
+        rotate-30 bg-linear-to-tr from-[#ff80b5] to-[#9089fc] opacity-30 sm:left-[calc(50%-30rem)] 
+        sm:w-288.75"
+      ></div>
     </div>
 
-    <div class="mx-auto max-w-1xl py-14 sm:py-48 lg:py-22">
+    <div class="mx-auto max-w-1xl py-14 sm:py-48 lg:py-22 min-h-[100vh]">
       <%= render 'shared/landing_text_bubble' %>
 
-      <div class="text-center max-w-3xl mx-auto sm:max-w-md md:max-w-full mb-13">
-        <h1 class="text-4xl font-semibold leading-[4rem] text-gray-900 sm:text-5xl sm:leading-tight lg:text-[3.6rem] lg:leading-[4rem] font-pj mb-0">
+      <div class="text-center max-w-3xl mx-auto sm:max-w-md md:max-w-full mb-10 mt-6">
+        <%# <h1 class="text-4xl font-semibold leading-[4rem] text-gray-900 sm:text-5xl sm:leading-tight lg:text-[3.6rem] lg:leading-[4rem] font-pj mb-0">
           Stop Rereading, Start Remembering
-        </h1>
-        <h1 class="text-center text-4xl font-semibold leading-[4rem] text-gray-900 sm:text-5xl sm:leading-tight lg:text-[3.6rem] lg:leading-[4rem] font-pj mb-0"> Transform Your
+        </h1> %>
+        <h1 class="text-center text-5xl font-semibold leading-[4rem] text-gray-900 sm:text-5xl sm:leading-tight lg:text-[4.5rem] lg:leading-[4.3rem] font-pj mb-0">
+          Transform Your
           <span class="bg-gradient-to-r from-indigo-400 to-pink-600 bg-clip-text text-transparent">
             Study Notes
           </span>
@@ -37,12 +55,15 @@
             in Seconds.
           </div>
         </h1>
+
+        <p class="mt-10 text-2xl font-semibold text-gray-500 w-[50%] mx-auto">
+          Stop re-reading, and start Remembering. Upload your study notes and let our AI do the rest.
+        </p>
       </div>
+
       <%= render 'shared/upload_form' %>
     </div>
-
-    <div aria-hidden="true" class="absolute inset-x-0 top-[calc(100%-13rem)] -z-10 transform-gpu overflow-hidden blur-3xl sm:top-[calc(100%-30rem)]">
-      <div style="clip-path: polygon(74.1% 44.1%, 100% 61.6%, 97.5% 26.9%, 85.5% 0.1%, 80.7% 2%, 72.5% 32.5%, 60.2% 62.4%, 52.4% 68.1%, 47.5% 58.3%, 45.2% 34.5%, 27.5% 76.7%, 0.1% 64.9%, 17.9% 100%, 27.6% 76.8%, 76.1% 97.7%, 74.1% 44.1%)" class="relative left-[calc(50%+3rem)] aspect-1155/678 w-144.5 -translate-x-1/2 bg-linear-to-tr from-[#ff80b5] to-[#9089fc] opacity-30 sm:left-[calc(50%+36rem)] sm:w-288.75"></div>
-    </div>
   </div>
+
+  <%= render 'shared/footer' %>
 </div>

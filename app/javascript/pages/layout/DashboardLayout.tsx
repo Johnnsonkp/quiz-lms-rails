@@ -1,3 +1,5 @@
+// import { Route, Routes, useNavigate, useParams } from 'react-router-dom';
+
 import BadgeCarousel from '../components/carousel/BadgeCarousel';
 import DashboardBanner from '../components/header/dashboardHeader/DashboardBanner';
 import { DashboardHome } from '../dashboard/DashboardHome';
@@ -6,7 +8,6 @@ import Divider from '../components/divider/Divider';
 import NoAvailableTopics from '../dashboard/NoAvailableTopics';
 import QuizListPage from '../dashboard/QuizListPage';
 import { QuizPreview } from '../../types/dashboard';
-import { SideButton } from '../components/buttons/SideButton';
 import SideNav from "../components/aside/SideNav";
 import SimpleLoadScreen from '../components/loading/SimpleLoadScreen';
 import SingleQuestionComponent from '../components/cards/SingleQuestionComp';
@@ -35,7 +36,7 @@ function DashboardLayout({ children, user, categories, dashboard_stats, url_para
   const [quiz_preview, setQuizPreview] = useState<QuizPreview[] | null>([]);
   const [loadingQuizPreview, setLoadingQuizPreview] = useState(false);
   const { quizData, loading, error, fetchQuizData } = useQuizData();
-  const [showSidebar, setShowSidebar] = useState(false);
+  const [showSidebar, setShowSidebar] = useState(true);
   const [editStatus, setEditStatus] = useState(false);
   const [listTitles, setListTitles] = useState<string[] | null>(null);
   const [listSubject, setListSubject] = useState<string | null>(null);
@@ -62,6 +63,12 @@ function DashboardLayout({ children, user, categories, dashboard_stats, url_para
     
     const data: any = await getSelectedTopic(topicName);
     if(data && data?.quiz_preview) {
+      // order quiz_preview alphanumerically by subject
+      data?.quiz_preview.sort((a: QuizPreview, b: QuizPreview) => {
+        if (a?.subject !== null && b?.subject !== null && a?.subject < b?.subject) return -1;
+        if (a?.subject !== null && b?.subject !== null && a?.subject > b?.subject) return 1;
+        return 0;
+      }) || [];
       setQuizPreview(data?.quiz_preview);
       setLoadingQuizPreview(false);
       setListTitles(null);
@@ -108,7 +115,15 @@ function DashboardLayout({ children, user, categories, dashboard_stats, url_para
 
     // Dashboard Home
     if (!selectedTopic && activeSection === 'dashboard') {
-      return <DashboardHome user={finalUser} dashboard_stats={finalDashboardStats} />;
+      return (
+        <DashboardHome 
+          user={finalUser} 
+          dashboard_stats={finalDashboardStats} 
+          setSelectedSubject={setSelectedSubject}
+          setSelectedTopic={setSelectedTopic}
+          setActiveSection={setActiveSection}
+        />
+      )
     }
 
     // Loading states
@@ -175,7 +190,7 @@ function DashboardLayout({ children, user, categories, dashboard_stats, url_para
             </div>
 
             {showQuizCards == true &&
-              <div className="lg:col-span-1 fixed right-[25px] border-gray-300 border-2 w-[250px] rounded-md">
+              <div className="lg:col-span-1 fixed right-[25px] border-gray-300 border-2 w-[200px] rounded-md">
                 {showQuizCards && quiz_preview && (<TableOfContents quiz_preview={quiz_preview} />)}
               </div>}
           </div>
@@ -202,10 +217,8 @@ function DashboardLayout({ children, user, categories, dashboard_stats, url_para
   };
 
   return (
-    <div className="flex flex-col md:flex-row min-h-screen w-full overflow-y-hidden bg-[#F9FAFB]">
-      <SideButton showSidebar={showSidebar} setShowSidebar={setShowSidebar} />
-
-      <div className='flex-[0.23]'>
+    <div className="flex flex-col md:flex-row min-h-screen w-full overflow-y-hidden bg-[#fff]">
+      <div className={`${showSidebar ? 'flex-[0.24]' : 'flex-[0.07]'} relative`}>
         <SideNav 
           categories={finalCategories}
           handleTopicClick={handleTopicClick}
@@ -213,15 +226,20 @@ function DashboardLayout({ children, user, categories, dashboard_stats, url_para
           showSidebar={showSidebar}
           quizData={quizData}
           selectedSubject={selectedSubject}
+          setShowSidebar={setShowSidebar}
+          user={finalUser}
         />
       </div>
 
-      <main 
-        style={{ opacity: loading || loadingQuizPreview ? 0 : 1 }}
-        className="flex-[1] p-4 !pt-3 !mt-0 md:p-6 overflow-y-auto w-[100%] bg-[#F9FAFB] transition-opacity duration-300"
-      >
-        {renderContent()}
-      </main>
+      <div className="flex-1 flex flex-row">
+        {/* <div className="w-4 min-w-[1rem] max-w-[2rem] md:w-6 md:min-w-[1.5rem] md:max-w-[2.5rem]" /> */}
+        <main
+          style={{ opacity: loading || loadingQuizPreview ? 0 : 1 }}
+          className={`flex-1 p-4 !pt-3 !mt-0 md:p-6 overflow-y-auto w-full transition-opacity duration-300`}
+        >
+          {renderContent()}
+        </main>
+      </div>
     </div>
   );
 }

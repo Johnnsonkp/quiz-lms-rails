@@ -45,13 +45,6 @@ class DashboardController < ApplicationController
       activity_data = merge_activity_data(quiz_data, question_data)
     end
 
-
-    # puts "Activity data for user #{@user.id} from #{start_date} to #{end_date}: #{activity_data}" if Rails.env.development?
-    puts "Summary: completed_quizzes_count - #{@user.completed_quizzes_count}, attempted_quizzes_count - #{@user.attempted_quizzes_count}" if Rails.env.development?
-    puts "Date range: #{start_date} to #{end_date}" if Rails.env.development?
-    puts "Timezone: Australia/Sydney (AEST)" if Rails.env.development?
-    puts "Current time (AEST): #{Time.current.in_time_zone('Australia/Sydney')}" if Rails.env.development?
-
     # Calculate summary data for the same date range as activity data (AEST timezone)
     aest_start = start_date.in_time_zone('Australia/Sydney').beginning_of_day
     aest_end = end_date.in_time_zone('Australia/Sydney').end_of_day
@@ -64,9 +57,6 @@ class DashboardController < ApplicationController
     date_range_attempted = @user.user_quiz_progresses
       .where(created_at: aest_start..aest_end)
       .count
-
-    puts "Date range completed: #{date_range_completed}, attempted: #{date_range_attempted}" if Rails.env.development?
-    puts "Recent progresses (AEST): #{@user.user_quiz_progresses.where('created_at > ?', 1.day.ago).pluck(:created_at).map { |t| t.in_time_zone('Australia/Sydney') }}" if Rails.env.development?
 
     render json: {
       activity_data: activity_data,
@@ -85,6 +75,96 @@ class DashboardController < ApplicationController
     render json: { error: "Invalid date format" }, status: 400
   end
 
+  # Study Hours endpoints moved here for better autoloading
+  def create_study_hours
+    if @user.nil?
+      render json: { error: "User not authenticated" }, status: 401
+      return
+    end
+
+    study_hour_params = params.require(:study_hour).permit(:date, :hours)
+    
+    begin
+      # Convert date to AEST timezone for consistency
+      aest_timezone = 'Australia/Sydney'
+      parsed_date = Date.parse(study_hour_params[:date]).in_time_zone(aest_timezone).to_date
+      
+      puts "Creating/updating study hours for AEST date: #{parsed_date}" if Rails.env.development?
+      
+      # Find existing record or create new one using AEST date
+      study_hour = @user.study_hours.find_or_initialize_by(date: parsed_date)
+      
+      if study_hour.persisted?
+        # Update existing record
+        study_hour.hours = study_hour_params[:hours]
+        action = "updated"
+      else
+        # Create new record
+        study_hour.hours = study_hour_params[:hours]
+        action = "created"
+      end
+
+      if study_hour.save
+        render json: {
+          message: "Study hours #{action} successfully",
+          study_hour: {
+            id: study_hour.id,
+            date: study_hour.date,
+            hours: study_hour.hours.to_f,
+            action: action
+          }
+        }, status: 200
+      else
+        render json: {
+          error: "Failed to save study hours",
+          details: study_hour.errors.full_messages
+        }, status: 422
+      end
+    rescue => e
+      Rails.logger.error "Error saving study hours: #{e.message}"
+      render json: { error: "Failed to save study hours: #{e.message}" }, status: 500
+    end
+  end
+
+  def study_hours_data
+    puts "=== STUDY HOURS DATA ENDPOINT CALLED ===" if Rails.env.development?
+    
+    if @user.nil?
+      render json: { error: "User not authenticated" }, status: 401
+      return
+    end
+
+    begin
+      # Convert dates to AEST timezone
+      aest_timezone = 'Australia/Sydney'
+      
+      # Parse dates and convert to AEST
+      start_date = if params[:start_date]
+        Date.parse(params[:start_date]).in_time_zone(aest_timezone).to_date
+      else
+        6.months.ago.in_time_zone(aest_timezone).to_date
+      end
+      
+      end_date = if params[:end_date]
+        Date.parse(params[:end_date]).in_time_zone(aest_timezone).to_date
+      else
+        Time.current.in_time_zone(aest_timezone).to_date
+      end
+
+      puts "AEST Date range: #{start_date} to #{end_date}" if Rails.env.development?
+
+      activity_data = StudyHour.daily_study_activity(@user, start_date, end_date)
+      summary = StudyHour.study_summary(@user, start_date, end_date)
+
+      render json: {
+        activity_data: activity_data,
+        summary: summary
+      }
+    rescue => e
+      Rails.logger.error "Error fetching study hours data: #{e.message}"
+      render json: { error: "Failed to load study hours data" }, status: 500
+    end
+  end
 
   def update 
     if params[:quiz_ids].present?
@@ -108,7 +188,121 @@ class DashboardController < ApplicationController
       end
 
     end
-  end 
+  end
+
+  # API endpoint to fetch quiz note
+  def quiz_note
+    begin
+      quiz_title = params[:title]
+      
+      if quiz_title.blank?
+        render json: { error: "Quiz title is required" }, status: 400
+        return
+      end
+
+      quiz = Quiz.find_by(title: quiz_title)
+      
+      if quiz.nil?
+        render json: { error: "Quiz not found" }, status: 404
+        return
+      end
+
+      # Check if user has access to this quiz (optional security check)
+      # if @user && quiz.user_id != @user.id
+      #   render json: { error: "Unauthorized access" }, status: 403
+      #   return
+      # end
+
+      # Ensure key_concepts is always returned as a proper object/hash
+      key_concepts_data = if quiz.note.present?
+        quiz.note.key_concepts_hash
+      else
+        {}
+      end
+
+      puts "key_concepts_data: #{key_concepts_data}" if Rails.env.development?
+
+      render json: {
+        note: quiz.note&.content || quiz.note&.title || nil,
+        quiz_title: quiz.title,
+        quiz_id: quiz.id,
+        note_title: quiz.note&.title,
+        key_concepts: key_concepts_data
+      }, status: 200
+
+    rescue => e
+      Rails.logger.error "Error fetching quiz note: #{e.message}"
+      render json: { error: "Failed to fetch quiz note" }, status: 500
+    end
+  end
+
+  # API endpoint to update quiz note
+  def update_quiz_note
+    begin
+      quiz_title = params[:quiz_title]
+      note_content = params[:note_content]
+      key_concepts = params[:key_concepts]
+      
+      if quiz_title.blank?
+        render json: { error: "Quiz title is required" }, status: 400
+        return
+      end
+
+      if note_content.blank?
+        render json: { error: "Note content is required" }, status: 400
+        return
+      end
+
+      quiz = Quiz.find_by(title: quiz_title)
+      
+      if quiz.nil?
+        render json: { error: "Quiz not found" }, status: 404
+        return
+      end
+
+      # Check if user has access to this quiz (optional security check)
+      # if @user && quiz.user_id != @user.id
+      #   render json: { error: "Unauthorized access" }, status: 403
+      #   return
+      # end
+
+      # Find or create note for this quiz
+      note = quiz.note || quiz.build_note
+
+      # Update the note content
+      note.content = note_content
+      note.title = note.title || "Note for #{quiz.title}" # Set default title if none exists
+      
+      # Update key_concepts if provided
+      if key_concepts.present?
+        # Ensure key_concepts is a hash
+        concepts_hash = key_concepts.is_a?(Hash) ? key_concepts : {}
+        note.key_concepts = concepts_hash
+      end
+
+      if note.save
+        render json: {
+          message: "Note updated successfully",
+          note: {
+            content: note.content,
+            title: note.title,
+            quiz_title: quiz.title,
+            quiz_id: quiz.id,
+            key_concepts: note.key_concepts_hash
+          }
+        }, status: 200
+      else
+        render json: { 
+          error: "Failed to save note", 
+          details: note.errors.full_messages 
+        }, status: 422
+      end
+
+    rescue => e
+      Rails.logger.error "Error updating quiz note: #{e.message}"
+      render json: { error: "Failed to update quiz note" }, status: 500
+    end
+  end
 
 
 
@@ -163,55 +357,33 @@ class DashboardController < ApplicationController
     puts "=== COMPLETE QUIZ ENDPOINT CALLED ===" if Rails.env.development?
     
     if @user.nil?
-      puts "ERROR: User not authenticated" if Rails.env.development?
       render json: { error: "User not authenticated" }, status: 401
       return
     end
 
     quiz_id = params[:quiz_id]
-    puts "Quiz ID received: #{quiz_id}" if Rails.env.development?
-    
     quiz = Quiz.find_by(id: quiz_id)
 
     unless quiz
-      puts "ERROR: Quiz not found with ID: #{quiz_id}" if Rails.env.development?
       render json: { error: "Quiz not found" }, status: 404
       return
     end
 
-    puts "Quiz found: #{quiz.title}" if Rails.env.development?
-
     # Calculate quiz statistics
     answers = params[:answers] || {}
-    puts "Answers received: #{answers}" if Rails.env.development?
-    
     total_questions = quiz.questions.count
     questions_answered = answers.keys.count
     questions_correct = 0
     total_points = 0
 
-    puts "Total questions in quiz: #{total_questions}" if Rails.env.development?
-    puts "Questions answered: #{questions_answered}" if Rails.env.development?
-
     # Calculate correct answers
     quiz.questions.each do |question|
-      puts "question ID: #{question.id}, external_id: #{question.external_id}" if Rails.env.development?
-      puts "answers hash: #{answers}" if Rails.env.development?
-
       user_answer = answers[question.external_id.to_s]
-      puts "user_answer for question #{question.external_id}: #{user_answer}" if Rails.env.development?
-      puts "correct_answer: #{question.answer}" if Rails.env.development?
-      
       if user_answer && user_answer == question.answer
         questions_correct += 1
         total_points += 1 # You can adjust point values as needed
-        puts "Question #{question.id} answered correctly!" if Rails.env.development?
       end
     end
-
-    # Create new UserQuizProgress record for each completion
-    puts "=== CREATING NEW USER QUIZ PROGRESS ===" if Rails.env.development?
-    puts "Creating new progress record for user #{@user.id} and quiz #{quiz.id}" if Rails.env.development?
     
     # Always create a new record for each quiz completion
     progress = UserQuizProgress.new(
@@ -222,44 +394,19 @@ class DashboardController < ApplicationController
       total_points: total_points,
       completed: true
     )
-
-    puts "New progress record: #{progress.inspect}" if Rails.env.development?
-
-    puts "About to save new progress with attributes:" if Rails.env.development?
-    puts "  questions_answered: #{questions_answered}" if Rails.env.development?
-    puts "  questions_correct: #{questions_correct}" if Rails.env.development?
-    puts "  total_points: #{total_points}" if Rails.env.development?
-    puts "  completed: true" if Rails.env.development?
     
     # Check current totals before save
     current_completed = @user.user_quiz_progresses.where(completed: true).count
     current_attempted = @user.user_quiz_progresses.count
-    puts "BEFORE SAVE - User totals: completed=#{current_completed}, attempted=#{current_attempted}" if Rails.env.development?
-
-    puts "=== Quiz Completion Debug ===" if Rails.env.development?
-    puts "User: #{@user.id}, Quiz: #{quiz_id}" if Rails.env.development?
-    puts "Total questions: #{total_questions}" if Rails.env.development?
-    puts "Questions answered: #{questions_answered}" if Rails.env.development?
-    puts "Questions correct: #{questions_correct}" if Rails.env.development?
 
     if progress.save
-      puts "✅ Progress saved successfully! ID: #{progress.id}" if Rails.env.development?
-      puts "Progress created_at: #{progress.created_at}" if Rails.env.development?
-      puts "Progress timezone (AEST): #{progress.created_at.in_time_zone('Australia/Sydney')}" if Rails.env.development?
-      puts "Current time (AEST): #{Time.current.in_time_zone('Australia/Sydney')}" if Rails.env.development?
-      puts "Application timezone: #{Time.zone.name}" if Rails.env.development?
-      
       # Check totals after save
       new_completed = @user.user_quiz_progresses.where(completed: true).count
       new_attempted = @user.user_quiz_progresses.count
-      puts "AFTER SAVE - User totals: completed=#{new_completed}, attempted=#{new_attempted}" if Rails.env.development?
-      puts "Change in totals: completed +#{new_completed - current_completed}, attempted +#{new_attempted - current_attempted}" if Rails.env.development?
       
       # Check if today's records exist (AEST timezone)
       today_start = Date.current.in_time_zone('Australia/Sydney').beginning_of_day
       today_end = Date.current.in_time_zone('Australia/Sydney').end_of_day
-      puts "Today's date range (AEST): #{today_start} to #{today_end}" if Rails.env.development?
-      puts "Current time (AEST): #{Time.current.in_time_zone('Australia/Sydney')}" if Rails.env.development?
       
       today_completed = @user.user_quiz_progresses
         .where(completed: true)
@@ -268,7 +415,6 @@ class DashboardController < ApplicationController
       today_attempted = @user.user_quiz_progresses
         .where(created_at: today_start..today_end)
         .count
-      puts "Today's totals (AEST): completed=#{today_completed}, attempted=#{today_attempted}" if Rails.env.development?
       
       render json: {
         message: "Quiz completed successfully",
@@ -282,10 +428,6 @@ class DashboardController < ApplicationController
         }
       }, status: 200
     else
-      puts "❌ FAILED TO SAVE PROGRESS!" if Rails.env.development?
-      puts "Validation errors: #{progress.errors.full_messages}" if Rails.env.development?
-      puts "Progress object: #{progress.inspect}" if Rails.env.development?
-      
       render json: { 
         error: "Failed to save quiz completion", 
         details: progress.errors.full_messages 
@@ -435,42 +577,108 @@ class DashboardController < ApplicationController
     end
   end
 
-  
 
-  def file_upload_extract
-    uploaded_file = params[:file]
-    title = params[:title]&.strip&.presence
-    topic = params[:topic]&.strip&.presence
-    subject = params[:subject]&.strip&.presence
-
-    # Validate required file parameter
-    unless uploaded_file.present?
-      render json: { error: "No file uploaded" }, status: :unprocessable_entity
+  def study_goal_progress
+    if @user.nil?
+      render json: { error: "User not authenticated" }, status: 401
       return
     end
 
-    # Validate file type
-    unless ['application/pdf', 'text/plain'].include?(uploaded_file.content_type)
-      render json: { 
-        error: "Invalid file type. Only PDF and TXT files are supported." 
-      }, status: :unprocessable_entity
+    progress_data = @user.study_goal_progress
+    render json: progress_data
+  end
+
+
+  def update_study_goal
+    if @user.nil?
+      render json: { error: "User not authenticated" }, status: 401
       return
     end
 
-    # Validate file size (e.g., max 10MB)
-    max_size = 10.megabytes
-    if uploaded_file.size > max_size
-      render json: { 
-        error: "File too large. Maximum size is #{max_size / 1.megabyte}MB." 
-      }, status: :unprocessable_entity
+    goal_hours = params.require(:goal_hours).to_f
+    
+    if goal_hours < 0.5 || goal_hours > 24
+      render json: { error: "Goal hours must be between 0.5 and 24 hours" }, status: 422
       return
     end
 
     begin
-      file_text = extract_text(uploaded_file)
+      @user.update!(daily_study_goal_hours: goal_hours)
+      
+      render json: { 
+        message: "Study goal updated successfully",
+        new_goal: goal_hours,
+        progress: @user.study_goal_progress
+      }
+    rescue => e
+      render json: { error: "Failed to update study goal: #{e.message}" }, status: 500
+    end
+  end
 
-      puts "Extracted text length: #{file_text.length} characters" if Rails.env.development?
-      uploaded_original_file_name = uploaded_file.original_filename
+  
+
+  def file_upload_extract
+    title = params[:title]&.strip&.presence || nil
+    topic = params[:topic]&.strip&.presence || nil
+    subject = params[:subject]&.strip&.presence || nil
+    uploaded_file = params[:file]
+    content_text = params[:content]&.strip&.presence || nil
+
+    # Validate that we have either a file or text content
+    if uploaded_file.blank? && content_text.blank?
+      render json: { error: "Please provide either a file upload or text content" }, status: :unprocessable_entity
+      return
+    end
+
+    # Validate that we don't have both
+    if uploaded_file.present? && content_text.present?
+      render json: { error: "Please provide either a file upload OR text content, not both" }, status: :unprocessable_entity
+      return
+    end
+
+    begin
+      file_text = nil
+      uploaded_original_file_name = nil
+
+      if uploaded_file.present?
+        # Handle file upload
+        # Validate file type
+        unless [
+          'application/pdf', 
+          'text/plain', 
+          'application/vnd.openxmlformats-officedocument.wordprocessingml.document'
+        ].include?(uploaded_file.content_type)
+          render json: { 
+            error: "Invalid file type. Only PDF, TXT, and DOCX files are supported." 
+          }, status: :unprocessable_entity
+          return
+        end
+
+        # Validate file size (e.g., max 10MB)
+        max_size = 10.megabytes
+        if uploaded_file.size > max_size
+          render json: { 
+            error: "File too large. Maximum size is #{max_size / 1.megabyte}MB." 
+          }, status: :unprocessable_entity
+          return
+        end
+
+        file_text = extract_text(uploaded_file)
+        uploaded_original_file_name = uploaded_file.original_filename
+      else
+        # Handle text content
+        if content_text.length < 50
+          render json: { 
+            error: "Text content must be at least 50 characters long" 
+          }, status: :unprocessable_entity
+          return
+        end
+        
+        file_text = content_text
+        uploaded_original_file_name = "Direct Text Input"
+      end
+
+      puts "Content length: #{file_text.length} characters" if Rails.env.development?
       
       # Generate quiz with optional parameters
       quiz_data = OpenaiService.generate_quiz_from_uploaded_file(
@@ -484,6 +692,10 @@ class DashboardController < ApplicationController
 
       note = nil
       saved_quiz = nil
+      key_concepts = nil
+      
+      # Extract key-value pairs for the key_concepts field
+      key_concepts = OpenaiService.extract_key_value_concepts(file_text)
 
       # Check if quiz_data contains an error
       if quiz_data.is_a?(Hash) && quiz_data[:error]
@@ -494,16 +706,21 @@ class DashboardController < ApplicationController
       end
 
       if quiz_data.present?
-        # 1. Create note for all users (authenticated and unauthenticated) with PDF attached
+        # 1. Create note for all users (authenticated and unauthenticated)
         note = Note.new(
           title: title || "Note from #{uploaded_original_file_name}",
           content: file_text,
-          pdf_images: extract_pdf_images(uploaded_file),
+          key_concepts: key_concepts || {},
           user: @user # Will be nil for unauthenticated users, which is fine
         )
         
-        # 2. Attach the PDF file before saving to pass validation
-        note.pdf_file.attach(uploaded_file)
+        # 2. Attach the PDF file only if we have a file upload
+        # TODO: transform note content to PDF format if notes typed or notes a .txt file format
+        if uploaded_file.present?
+          note.pdf_images = extract_pdf_images(uploaded_file)
+          note.pdf_file.attach(uploaded_file)
+        end
+        
         note.save!
         
         puts "Successfully created note: #{note.title}" if Rails.env.development?
@@ -519,25 +736,27 @@ class DashboardController < ApplicationController
           Rails.logger.error "Failed to save quiz to database"
         end
       else
-        Rails.logger.error "Failed to generate quiz data from file"
+        Rails.logger.error "Failed to generate quiz data from content"
       end
       
       render json: { 
-        message: "File uploaded and processed successfully", 
-        filename: uploaded_file.original_filename,
-        content_type: uploaded_file.content_type,
+        message: "Content processed and quiz generated successfully", 
+        source: uploaded_file.present? ? "file_upload" : "text_input",
+        filename: uploaded_original_file_name,
+        content_type: uploaded_file&.content_type || "text/plain",
         note_created: note.present?,
         quiz_generated: quiz_data.present?,
         quiz_saved: saved_quiz.present?
       }
       
     rescue => e
-      Rails.logger.error "Error processing file upload: #{e.message}"
+      Rails.logger.error "Error processing content: #{e.message}"
       render json: { 
-        error: "Failed to process uploaded file: #{e.message}" 
+        error: "Failed to process content: #{e.message}" 
       }, status: :internal_server_error
     end
   end
+
 
 
 
@@ -626,12 +845,20 @@ class DashboardController < ApplicationController
 
 
   def extract_text(file)
-    if file.content_type == "application/pdf"
+    raw_text = case file.content_type
+    when "application/pdf"
       reader = PDF::Reader.new(file.tempfile)
       reader.pages.map(&:text).join("\n")
+    when "application/vnd.openxmlformats-officedocument.wordprocessingml.document"
+      # Handle DOCX files
+      require 'docx'
+      doc = Docx::Document.open(file.tempfile)
+      doc.paragraphs.map(&:text).join("\n")
     else # .txt file
       file.read
     end
+
+    formatted_text = OpenaiService.formatted_text(raw_text)
   end
 
   def extract_pdf_images(uploaded_file)
@@ -781,6 +1008,12 @@ class DashboardController < ApplicationController
     end
     
     merged_data.values.sort_by { |data| data[:date] }
+  end
+
+
+  # Test method to verify controller loading
+  def test_method
+    render json: { message: "Controller is working" }
   end
 
 end

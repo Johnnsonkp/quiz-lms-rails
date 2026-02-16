@@ -1,29 +1,17 @@
 import 'react-calendar-heatmap/dist/styles.css';
 import './react-calendar-heatmap.css'
 
+import { DashboardHeatmapProps, QuizActivity } from '../../../types/dashboard';
 import React, { useEffect, useMemo, useState } from 'react';
 
 import CalendarHeatmap from 'react-calendar-heatmap';
-
-interface QuizActivity {
-  date: string; // ISO date string (YYYY-MM-DD)
-  count: number; // Number of quizzes completed on this date
-  attempted?: number; // Number of quizzes attempted on this date
-  questions_answered?: number; // Number of questions answered on this date
-  activity_type?: string; // Type of activity: 'quiz', 'question', 'combined'
-}
-
-interface DashboardHeatmapProps {
-  user?: {
-    id: number;
-    email: string;
-    name?: string;
-  } | null;
-  activityType?: 'quiz' | 'question' | 'combined';
-  startDate?: Date;
-  endDate?: Date;
-  onDateClick?: (value: any) => void;
-}
+import DashboardStatus from './DashboardStatus';
+import {HeatmapStats} from './HeatmapStats';
+import SliderButton from './SliderButton';
+import StudyGoalTracker from '../study-goal/StudyGoalTracker';
+// import StudyHoursForm from '../study-tracker/StudyHoursForm';
+import StudyHoursHeatmap from '../study-tracker/StudyHoursHeatmap';
+import {fetchHeatmapActivityData} from '../../../services/heatmapServices/fetchAvtivityData';
 
 const DashboardHeatmap: React.FC<DashboardHeatmapProps> = ({
   user,
@@ -42,6 +30,7 @@ const DashboardHeatmap: React.FC<DashboardHeatmapProps> = ({
     all_time_attempted?: number;
   } | null>(null);
 
+  const [activeTab, setActiveTab] = useState<'quiz' | 'study' | 'combined'>(activityType);
   const today = new Date();
   
   // Default to showing last 6 months if no dates provided
@@ -58,77 +47,53 @@ const DashboardHeatmap: React.FC<DashboardHeatmapProps> = ({
     return date;
   }, [today]);
 
-  // Fetch activity data from API
-  useEffect(() => {
+  const loadHeatmapData = async () => {
     if (!user) {
       setLoading(false);
       return;
     }
+    
+    const svg = document.querySelector('.heatmap-container svg');
+    // if (svg) {svg.setAttribute('viewBox', '10 7 450 85');}
+    if (svg) { svg.setAttribute('viewBox', '10 7 400 90');}
 
-    const fetchActivityData = async () => {
-      console.log('user in fetchActivityData', user);
-      console.log('user in activityType', activityType);
-      try {
-        setLoading(true);
-        const params = new URLSearchParams({
-          type: activityType,
-          start_date: (startDate || defaultStartDate).toISOString().split('T')[0],
-          end_date: (endDate || defaultEndDate).toISOString().split('T')[0]
-        });
+    if (quizActivities.length > 0) return;
+    
+    const params = new URLSearchParams({
+      type: activityType,
+      start_date: (startDate || defaultStartDate).toISOString().split('T')[0],
+      end_date: (endDate || defaultEndDate).toISOString().split('T')[0]
+    });
 
-        const response = await fetch(`/dashboard/study_activity?${params}`, {
-          headers: {
-            'Content-Type': 'application/json',
-            'X-CSRF-Token': document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '',
-          }
-        });
-
-        if (!response.ok) {
-          throw new Error(`HTTP error! status: ${response.status}`);
-        }
-
-        const data = await response.json();
-        console.log('Fetched activity data:', data);
-        setQuizActivities(data.activity_data || []);
-        setSummary(data.summary || null);
-        setError(null);
-      } catch (error) {
-        console.error('Error fetching activity data:', error);
-        setError('Failed to load activity data');
-        setQuizActivities([]);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchActivityData();
-  }, [user]);
-
-  // Transform the quiz activities data for the heatmap
-  const heatmapValues = useMemo(() => {
-    return quizActivities.map(activity => ({
-      date: new Date(activity.date),
-      count: activity.count,
-      attempted: activity.attempted || 0,
-      questions_answered: activity.questions_answered || 0,
-      activity_type: activity.activity_type
-    }));
-  }, [quizActivities]);
+    const data = await fetchHeatmapActivityData({params});
+    if(!data) return;
+    
+    setQuizActivities(data.activity_data || []);
+    setSummary(data.summary || null);
+    setError(null);
+    setLoading(false);
+    console.log('Fetched activity data:', data);
+  };
 
   // Modify viewBox after component mounts
   useEffect(() => {
-    const svg = document.querySelector('.heatmap-container svg');
-    if (svg) {
-      // svg.setAttribute('viewBox', '10 7 552 90');
-      svg.setAttribute('viewBox', '10 7 400 90');
-    }
-  }, [heatmapValues]); 
+    loadHeatmapData();
+  }, [activeTab, user]);
+
+
+  const heatmapValues = useMemo(() => {
+    return quizActivities.map(activity => ({
+      date: new Date(activity?.date),
+      count: activity?.count,
+      attempted: activity?.attempted || 0,
+      questions_answered: activity?.questions_answered || 0,
+      activity_type: activity?.activity_type
+    }));
+  }, [quizActivities]);
 
   // Generate tooltip content
   const getTooltipDataAttrs = (value: any) => {
-    if (!value || !value.date || !(value.date instanceof Date)) {
-      return { 'data-tip': 'No date: No activity' };
-    }
+    if (!value || !value.date || !(value.date instanceof Date)) return { 'data-tip': 'No date: No activity' };
 
     if (!value || value.count === 0) {
       return {
@@ -145,9 +110,9 @@ const DashboardHeatmap: React.FC<DashboardHeatmapProps> = ({
       if (value.attempted > value.count) {
         tooltip += `, ${value.attempted} attempted`;
       }
-    } else if (activityType === 'question') {
-      const questionText = value.count === 1 ? 'question' : 'questions';
-      tooltip = `${dateStr}: ${value.count} ${questionText} answered`;
+    } else if (activityType === 'study') {
+      const studyText = value.count === 1 ? 'study' : 'studies';
+      tooltip = `${dateStr}: ${value.count} ${studyText} completed`;
     } else {
       tooltip = `${dateStr}: ${value.count} total activities`;
       if (value.questions_answered > 0) {
@@ -160,14 +125,11 @@ const DashboardHeatmap: React.FC<DashboardHeatmapProps> = ({
 
   // Determine CSS class based on activity level
   const getClassForValue = (value: any) => {
-    if (!value || value.count === 0) {
-      return 'color-empty';
-    }
+    if (!value || value.count === 0) return 'color-empty';
     
-    // Customize these thresholds based on activity type
     let thresholds;
-    if (activityType === 'question') {
-      thresholds = [1, 5, 10, 20, 30, 45, 55, 65, 75, 90]; // Questions answered
+    if (activityType === 'study') {
+      thresholds = [1, 5, 10, 20, 30, 45, 55, 65, 75, 90]; // Studies completed
     } else {
       thresholds = [1, 2, 3, 5, 6, 7, 9, 15, 18, 21]; // Quizzes completed
     }
@@ -196,7 +158,7 @@ const DashboardHeatmap: React.FC<DashboardHeatmapProps> = ({
       const dateStr = value.date?.toISOString().slice(0, 10);
       if (activityType === 'quiz') {
         alert(`${dateStr}: ${value.count} quiz(es) completed, ${value.attempted} attempted`);
-      } else if (activityType === 'question') {
+      } else if (activityType === 'study') {
         alert(`${dateStr}: ${value.count} question(s) answered`);
       } else {
         alert(`${dateStr}: ${value.count} total activities`);
@@ -204,124 +166,86 @@ const DashboardHeatmap: React.FC<DashboardHeatmapProps> = ({
     }
   };
 
-  if (!user) {
-    return (
-      <div className="dashboard-heatmap">
-        <div className="mb-4">
-          <h3 className="text-lg font-semibold text-gray-900 mb-2">
-            Study Activity Heatmap
-          </h3>
-          <p className="text-sm text-gray-600">
-            Please log in to view your study activity.
-          </p>
-        </div>
-      </div>
-    );
-  }
-
-  if (loading) {
-    return (
-      <div className="dashboard-heatmap">
-        <div className="mb-4">
-          <h3 className="text-lg font-semibold text-gray-900 mb-2">
-            Study Activity Heatmap
-          </h3>
-          <p className="text-sm text-gray-600">Loading your activity data...</p>
-        </div>
-      </div>
-    );
-  }
-
-  if (error) {
-    return (
-      <div className="dashboard-heatmap">
-        <div className="mb-4">
-          <h3 className="text-lg font-semibold text-gray-900 mb-2">
-            Study Activity Heatmap
-          </h3>
-          <p className="text-sm text-red-600">{error}</p>
-        </div>
-      </div>
-    );
-  }
-
+  <DashboardStatus 
+    user={user} 
+    loading={loading} 
+    error={error} 
+  />
+// border-gray-300 border-1 rounded-lg
   return (
     <div className="dashboard-heatmap">
-      <div className="mb-2">
-        {/* <h3 className="text-md font-semibold text-gray-900 mb-2">
-          Study Activity Heatmap
-          {activityType === 'quiz' && ' - Quiz Completions'}
-          {activityType === 'question' && ' - Questions Answered'}
-          {activityType === 'combined' && ' - All Activities'}
-        </h3> */}
-        <div className="flex justify-between items-center">
-          {/* <p className="text-sm text-gray-600">
-            Track your study patterns over time. Darker squares indicate more activity.
-          </p> */}
-          {summary && (
-            <div className="text-sm text-gray-500">
-              <div className="flex space-y-1">
-                <div>
-                  <span className="mr-4">Period Completed: {summary.total_completed}</span>
-                  <span>Period Attempted: {summary.total_attempted}</span>
-                </div>
-                {summary.all_time_completed !== undefined && (
-                  <div className=" text-gray-400">
-                    <span className="mr-4 ml-4">All-time Completed: {summary.all_time_completed}</span>
-                    <span>All-time Attempted: {summary.all_time_attempted}</span>
-                  </div>
-                )}
-              </div>
+      <p className='text-sm mb-2'>Tracker Heatmaps</p>
+
+      <div className='flex justify-between gap-4'>
+
+      <div className="heatmap-container bg-white p-2 px-3 rounded-lg border-1 border-gray-300 flex-col flex-[0.7] relative h-[250px] shadow-sm overflow-y-hidden">
+        {/* Glass blur overlay for unauthenticated users */}
+        {!user && (
+          <div className="absolute inset-0 bg-white/40 backdrop-blur-xs rounded-lg z-10 flex items-center justify-center">
+            <div className="text-center">
+              <p className="text-gray-700 font-medium mb-2">Log in to track your metrics</p>
+              <p className="text-gray-500 text-sm">Sign in to see your learning progress</p>
             </div>
-          )}
-        </div>
-      </div>
-      
-      <div className="heatmap-container bg-white p-2 rounded-lg border-2 border-gray-200 flex">
-        <CalendarHeatmap
-          startDate={startDate || defaultStartDate}
-          endDate={endDate || defaultEndDate}
-          values={heatmapValues}
-          classForValue={getClassForValue}
-          tooltipDataAttrs={getTooltipDataAttrs}
-          showWeekdayLabels={true}
-          showMonthLabels={true}
-          onClick={handleClick}
-          gutterSize={1}
-          horizontal={true}
+          </div>
+        )}
+        
+        {/* <HeatMapSlider /> */}
+        <SliderButton 
+          activeTab={activeTab} 
+          setActiveTab={(tab) => setActiveTab(tab as 'quiz' | 'study' | 'combined')} 
+          options={['Quiz', 'Study', 'Combined']}
         />
-        {/* <CalendarHeatmap
-          startDate={startDate || defaultStartDate}
-          endDate={endDate || defaultEndDate}
-          values={heatmapValues}
-          classForValue={getClassForValue}
-          tooltipDataAttrs={getTooltipDataAttrs}
-          showWeekdayLabels={true}
-          showMonthLabels={true}
-          onClick={handleClick}
-          gutterSize={2}
-          horizontal={true}
-        /> */}
+        <HeatmapStats summary={summary} activeTab={activeTab} />
+        
+        {activeTab == 'quiz' && 
+          <div className="study-tracker space-y-6 flex justify-between w-full align-middle items-center">
+            <div className='flex-1 mr-1'>
+              <CalendarHeatmap
+                startDate={startDate || defaultStartDate}
+                endDate={endDate || defaultEndDate}
+                values={heatmapValues}
+                classForValue={getClassForValue}
+                tooltipDataAttrs={getTooltipDataAttrs}
+                showWeekdayLabels={true}
+                showMonthLabels={true}
+                showOutOfRangeDays={true}
+                onClick={handleClick}
+                gutterSize={1}
+                horizontal={true}
+              />
+            </div>
+          </div>
+        }
+        {activeTab == 'study' &&  
+        <>
+          <div className="study-tracker space-y-6 flex justify-between w-full align-middle items-center">
+            <div className='flex-1 mr-1'>
+              <StudyHoursHeatmap
+                today={today}
+                user={user}
+                startDate={startDate || defaultStartDate}
+                endDate={endDate || defaultEndDate}
+              />
+            </div>
+          </div>
+          </>
+        }
       </div>
       
-      {/* Legend */}
-      <div className="mt-3 w-[25%] flex items-center justify-between text-xs text-gray-500 h-3">
-        <div className='mr-2'>Less</div>
-        <svg className="flex mx-auto items-center space-x-1 react-calendar-heatmap">
-          <g className="flex mx-auto items-center w-3 h-3 rounded-sm border-2 border-red-500">
-            <rect width="4" height="4" x="0" y="70" className="w-4 h-4 rounded-sm border color-github-1"></rect>
-            <rect width="4" height="4" x="20" y="70" className="w-4 h-4 rounded-sm border color-github-2"></rect>
-            <rect width="4" height="4" x="40" y="70" className="w-4 h-4 rounded-sm border color-github-3"></rect>
-            <rect width="4" height="4" x="60" y="70" className="w-4 h-4 rounded-sm border color-github-4"></rect>
-            <rect width="4" height="4" x="80" y="70" className="w-4 h-4 rounded-sm border color-github-5"></rect>
-            <rect width="4" height="4" x="100" y="70" className="w-4 h-4 rounded-sm border color-github-6"></rect>
-            <rect width="4" height="4" x="120" y="70" className="w-4 h-4 rounded-sm border color-github-7"></rect>
-            <rect width="4" height="4" x="140" y="70" className="w-4 h-4 rounded-sm border color-github-8"></rect>
-            <rect width="4" height="4" x="160" y="70" className="w-4 h-4 rounded-sm border color-github-9"></rect>
-            <rect width="4" height="4" x="180" y="70" className="w-4 h-4 rounded-sm border color-github-10"></rect>
-          </g>
-        </svg>
-        <div>More</div>
+        {/* {activeTab == 'study' &&   */}
+          <div className="study-tracker flex justify-between w-full h-full  align-middle items-end flex-[0.3] relative border-gray-300 border-1 rounded-lg bg-white shadow-sm overflow-hidden">
+            {/* Glass blur overlay for unauthenticated users */}
+            {!user && (
+              <div className="absolute inset-0 bg-white/40 backdrop-blur-xs rounded-lg z-10 flex items-center justify-center">
+                <div className="text-center">
+                  <p className="text-gray-700 font-medium mb-2">Log in to track your metrics</p>
+                  <p className="text-gray-500 text-sm">Sign in to see your study goals</p>
+                </div>
+              </div>
+            )}
+            <StudyGoalTracker user={user} />
+          </div>
+        {/* } */}
       </div>
     </div>
   );

@@ -1,30 +1,11 @@
+import { EditFormData, Quiz, QuizListPageProps } from '../../types/dashboard';
 import React, { useCallback, useState } from 'react';
 
 import { EditForm } from '../components/forms/EditListItemQuiz';
 import {EditIcon} from '../components/ui/EditIcon';
+import NoteSideDrawer from '../components/ui/NoteSideDrawer';
 import {deleteSingleQuizData} from '../../api/quiz';
-
-// Types
-interface Quiz {
-  id: number;
-  title: string;
-}
-
-interface QuizListPageProps {
-  titles: string[] | null;
-  subject: string | null;
-  img: string | null;
-  getQuizData?: (subject: string, id: number) => void;
-  ids?: number[];
-  quizList?: Quiz[] | any;
-  showList?: boolean | false | undefined | any;
-}
-
-interface EditFormData {
-  id: number | null;
-  title: string;
-  subject: string;
-}
+import getNote from '../../services/noteServices/getNote';
 
 // Quiz List controllers TODO: Move to separate file
 const handleGetQuizData = (getQuizData: any, subject: string | null, title: string, quizList: Quiz[]) => {
@@ -47,12 +28,17 @@ const handleDelete = (id: number | undefined | null) => {
   }
 };
 
-
-
 // Main Component
 function QuizListPage({ titles, subject, img, getQuizData, quizList = [], showList }: QuizListPageProps) {
   const [showEditForm, setShowEditForm] = useState(false);
   const [editFormData, setEditFormData] = useState<EditFormData>({id: null, title: '', subject: ''});
+  
+  // Note drawer state
+  const [showNoteDrawer, setShowNoteDrawer] = useState(false);
+  const [selectedNote, setSelectedNote] = useState<string | null>(null);
+  const [selectedQuizTitle, setSelectedQuizTitle] = useState<string>('');
+  const [noteLoading, setNoteLoading] = useState(false);
+  const [keyConceptsData, setKeyConceptsData] = useState<any>({});
 
   // TODO: Move to separate file
   const getQuizId = useCallback((title: string): number | null => {
@@ -72,15 +58,57 @@ function QuizListPage({ titles, subject, img, getQuizData, quizList = [], showLi
     return <div>No quizzes available</div>;
   }
 
+  const openNoteOnSideDrawer = async (title: string) => {
+    if (!title) return;
+
+    setSelectedQuizTitle(title);
+    setShowNoteDrawer(true);
+    setNoteLoading(true);
+    setSelectedNote(null);
+    setKeyConceptsData(null);
+
+    const data = await getNote({title});
+    if (data?.note && data?.key_concepts) {
+      console.log("Fetched note data:", data);
+      setSelectedNote(data.note);
+      setKeyConceptsData(data.key_concepts);
+      return setNoteLoading(false);
+    }
+    else if(data?.note && !data?.key_concepts){
+      console.log("Fetched note data:", data);
+      setSelectedNote(data.note);
+      return setNoteLoading(false);
+    } else {
+      alert("hoops! unable to get quiz note.");
+    }
+    setNoteLoading(false);
+  };
+
+
+  const closeNoteDrawer = () => {
+    setShowNoteDrawer(false);
+    setSelectedNote(null);
+    setSelectedQuizTitle('');
+  };
+
   return (
-    <div className={`${showList ? '' : 'hidden'}`}>
+    <div className={`${showList ? 'border-2 border-gray-200 rounded-lg overflow-hidden' : 'hidden'}`}>
       <EditForm
         isOpen={showEditForm}
         setShowEditForm={setShowEditForm}
         formData={editFormData}
       />
       
-      <table className="min-w-full divide-y divide-gray-200 overflow-x-auto border-2 border-gray-200 rounded-lg">
+      <NoteSideDrawer
+        isOpen={showNoteDrawer}
+        onClose={closeNoteDrawer}
+        note={selectedNote}
+        quizTitle={selectedQuizTitle}
+        loading={noteLoading}
+        keyConcepts={keyConceptsData}
+      />
+      
+      <table className="min-w-full divide-y divide-gray-200 overflow-x-auto rounded-lg">
         <thead className="bg-gray-50">
           <tr>
             <th className="w-16 px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
@@ -128,7 +156,12 @@ function QuizListPage({ titles, subject, img, getQuizData, quizList = [], showLi
               </td>
               <td className="px-3 py-4 whitespace-nowrap">
                 {quizList?.find((q: Quiz) => q.title === title)?.note ? (
-                    <button className="flex items-center gap-1 border border-gray-300 rounded-md px-2 py-1 text-sm text-gray-700 hover:bg-gray-100 hover:border-blue-500 transition-colors cursor-pointer">Note</button>
+                    <button 
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        openNoteOnSideDrawer(title);
+                      }}
+                      className="flex items-center gap-1 border border-gray-300 rounded-md px-2 py-1 text-sm text-gray-700 hover:bg-gray-100 hover:border-blue-500 transition-colors cursor-pointer">Note</button>
                   ) : (
                     <button className="text-gray-400 cursor-not-allowed text-sm" disabled>No Note</button>
                   )}

@@ -3,7 +3,7 @@ declare module 'react-calendar-heatmap' {
 
   export interface CalendarHeatmapValue {
     date: Date | string;
-    count: number;
+    count: number | null;
     [key: string]: any;
   }
 
@@ -28,6 +28,7 @@ declare module 'react-calendar-heatmap' {
     onMouseLeave?: (event: React.MouseEvent<SVGElement>, value: CalendarHeatmapValue | null) => void;
     transformDayElement?: (element: React.ReactElement, value: CalendarHeatmapValue | null, index: number) => React.ReactElement;
   }
+  
 
   export default class CalendarHeatmap extends Component<CalendarHeatmapProps> {}
 }

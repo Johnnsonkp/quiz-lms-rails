@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.0].define(version: 2025_09_29_102519) do
+ActiveRecord::Schema[8.0].define(version: 2025_10_18_101218) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -49,6 +49,7 @@ ActiveRecord::Schema[8.0].define(version: 2025_09_29_102519) do
     t.json "pdf_images"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.text "key_concepts"
     t.index ["user_id"], name: "index_notes_on_user_id"
   end
 
@@ -95,6 +96,15 @@ ActiveRecord::Schema[8.0].define(version: 2025_09_29_102519) do
     t.index ["user_id"], name: "index_quizzes_on_user_id"
   end
 
+  create_table "study_hours", force: :cascade do |t|
+    t.bigint "user_id", null: false
+    t.date "date"
+    t.decimal "hours"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["user_id"], name: "index_study_hours_on_user_id"
+  end
+
   create_table "user_question_attempts", force: :cascade do |t|
     t.bigint "user_id", null: false
     t.bigint "question_id", null: false
@@ -131,6 +141,7 @@ ActiveRecord::Schema[8.0].define(version: 2025_09_29_102519) do
     t.string "provider"
     t.string "uid"
     t.string "name"
+    t.decimal "daily_study_goal_hours", precision: 4, scale: 2, default: "8.0"
     t.index ["email"], name: "index_users_on_email", unique: true
     t.index ["reset_password_token"], name: "index_users_on_reset_password_token", unique: true
     t.index ["user_id"], name: "index_users_on_user_id"
@@ -143,6 +154,7 @@ ActiveRecord::Schema[8.0].define(version: 2025_09_29_102519) do
   add_foreign_key "quiz_questions", "quizzes"
   add_foreign_key "quizzes", "notes"
   add_foreign_key "quizzes", "users"
+  add_foreign_key "study_hours", "users"
   add_foreign_key "user_question_attempts", "questions"
   add_foreign_key "user_question_attempts", "users"
   add_foreign_key "user_quiz_progresses", "quizzes"

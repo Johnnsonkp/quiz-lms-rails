@@ -50,6 +50,7 @@ export interface QuestionOptionsProps {
   showResult: boolean;
   selectedAnswer: string | null;
   onAnswerSelect: (answer: string) => void;
+  optionsBlurred?: boolean;
 }
 
 export interface SingleQuestionCardProps {
@@ -75,6 +76,7 @@ export interface SingleQuestionCardProps {
   handleNext: () => void;
   handleShowResult: () => void;
   handleReset: () => void;
+  quizTitle?: string;
   currentQuestion: {
     id: number;
     question: string;
@@ -121,4 +123,45 @@ export interface EditQuizQuestionFormProps {
   isOpen: boolean;
   onClose: () => void;
   onSuccess?: (updatedQuestion: EditableQuestion) => void;
+}
+
+export interface DashboardHeatmapProps {
+  user?: {
+    id: number;
+    email: string;
+    name?: string;
+  } | null;
+  activityType?: 'quiz' | 'study' | 'combined';
+  startDate?: Date;
+  endDate?: Date;
+  onDateClick?: (value: any) => void;
+}
+
+export interface QuizActivity {
+  date: string; 
+  count: number; 
+  attempted?: number; 
+  questions_answered?: number; 
+  activity_type?: string; 
+}
+
+export interface Quiz {
+  id: number;
+  title: string;
+}
+
+export interface QuizListPageProps {
+  titles: string[] | null;
+  subject: string | null;
+  img: string | null;
+  getQuizData?: (subject: string, id: number) => void;
+  ids?: number[];
+  quizList?: Quiz[] | any;
+  showList?: boolean | false | undefined | any;
+}
+
+export interface EditFormData {
+  id: number | null;
+  title: string;
+  subject: string;
 }

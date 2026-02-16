@@ -4,13 +4,13 @@ function HintButton({hint}: {hint: string}) {
   const [showHint, setShowHint] = useState<boolean>(false);
 
   return (
-    <div className="mb-6 mt-4">
+    <div className="">
       <button
         onClick={() => setShowHint(!showHint)}
         className={`inline-flex items-center px-4 py-2 rounded-lg font-medium text-sm transition-all duration-200 cursor-pointer ${
           showHint 
             ? 'bg-yellow-100 border-yellow-300 text-yellow-800 hover:bg-yellow-200 border-2' 
-            : 'bg-gradient-to-r from-yellow-400 to-amber-500 hover:from-yellow-500 hover:to-amber-600 text-white shadow-sm hover:shadow-sm transform hover:-translate-y-0.5'
+            : 'bg-gradient-to-r from-yellow-400 to-amber-500 hover:from-yellow-500 hover:to-amber-600 text-white shadow-sm hover:shadow-sm transform'
         }`}
       >
         <svg 
